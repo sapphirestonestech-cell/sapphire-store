@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { RingPlaceholder } from "@/components/ui/ring-placeholder";
 import { getOrderByNumber } from "@/lib/orders";
 import { formatPrice, priceIn } from "@/lib/currency";
@@ -55,6 +56,7 @@ const STATUS_COPY: Record<string, string> = {
 
 async function OrderDetail({ params }: PageProps) {
   const { number } = await params;
+  await connection();
   const order = await getOrderByNumber(number);
   if (!order) notFound();
 

@@ -467,15 +467,3 @@ export function ShopExplorer({
     </div>
   );
 }
-
-/** Small server-friendly helper used by the shop page for headings. */
-export function shopHeadingFor(params: ShopParams): string {
-  if (params.category) {
-    return params.category
-      .split("-")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-  }
-  if (params.availability === "pre_order") return "Pre-order collection";
-  return "All rings";
-}

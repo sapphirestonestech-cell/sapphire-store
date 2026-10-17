@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { Gallery } from "@/components/storefront/gallery";
 import { PurchasePanel } from "@/components/storefront/purchase-panel";
@@ -33,6 +34,7 @@ async function loadProduct(slug: string): Promise<ProductDoc | null> {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  await connection();
   const product = await loadProduct(slug);
   if (!product) return { title: "Ring not found" };
   return {
@@ -83,6 +85,7 @@ function ProductSkeleton() {
 
 async function ProductDetail({ params }: PageProps) {
   const { slug } = await params;
+  await connection();
   const product = await loadProduct(slug);
   if (!product) notFound();
 

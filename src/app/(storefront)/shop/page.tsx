@@ -3,10 +3,10 @@ import { connection } from "next/server";
 import { TAGLINE, POSITIONING_LINE } from "@/lib/tagline";
 import {
   ShopExplorer,
-  shopHeadingFor,
   type FacetOptions,
   type ShopParams,
 } from "@/components/storefront/shop-explorer";
+import { shopHeadingFor } from "@/lib/shop-heading";
 import { GridSkeleton } from "@/components/ui/skeleton";
 import { filterOptions, queryProducts } from "@/lib/products";
 import { connectDb } from "@/lib/db";

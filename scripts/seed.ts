@@ -269,7 +269,7 @@ async function main() {
           isActive: true,
         },
       },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: "after" },
     ).lean();
     if (doc) categoryIds.set(slug, String(doc._id));
   }
@@ -292,7 +292,7 @@ async function main() {
           isActive: true,
         },
       },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: "after" },
     ).lean();
     locationIds.set(loc.cityArea, String(doc._id));
   }
