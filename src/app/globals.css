@@ -1,26 +1,167 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Design tokens — single source: DESIGN.md (sections 2–4, 14).
+ * No hard-coded colours, radii or shadows in components.
+ */
+@theme {
+  /* Colours (DESIGN.md §2) */
+  --color-ivory-canvas: #fbf8f3;
+  --color-pure-white: #ffffff;
+  --color-warm-ink: #211d19;
+  --color-soft-taupe: #7a7168;
+  --color-hairline: #ece6dc;
+  --color-pale-sand: #d9d2c6;
+  --color-champagne-gold: #c9a24b;
+  --color-deep-gold: #8a6a1f;
+  --color-gold-wash: #f1e6c8;
+  --color-charcoal-band: #2b2622;
+
+  /* Status colours — restricted use: forms, order/payment status, toasts (§2.2) */
+  --color-status-success: #3f7a57;
+  --color-status-error: #b3402f;
+  --color-status-warning: #a8741a;
+
+  /* Type families (§3.1) — variables set by next/font in layout.tsx */
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+
+  /* Type scale (§3.3) */
+  --text-display: 48px;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.01em;
+  --text-heading-lg: 32px;
+  --text-heading-lg--line-height: 1.15;
+  --text-heading-lg--letter-spacing: -0.01em;
+  --text-heading: 24px;
+  --text-heading--line-height: 1.2;
+  --text-subheading: 20px;
+  --text-subheading--line-height: 1.25;
+  --text-subheading--letter-spacing: -0.02em;
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 1.4;
+  --text-body-lg--letter-spacing: -0.015em;
+  --text-body: 14px;
+  --text-body--line-height: 1.4;
+  --text-body--letter-spacing: -0.01em;
+  --text-label: 12px;
+  --text-label--line-height: 1.35;
+
+  /* Weights (§3.2) — never 700+ */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Radius (§4.3) */
+  --radius-card: 28px;
+  --radius-image: 20px;
+  --radius-chip-label: 12px;
+  --radius-pill: 9999px;
+
+  /* Shadows (§4.4) */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-float: 0 4px 24px rgba(0, 0, 0, 0.12);
+  --shadow-gold-glow: 0 4px 24px rgba(201, 162, 75, 0.34);
+
+  /* Motion (§6) */
+  --motion-fast: 150ms;
+  --motion-base: 250ms;
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Layout (§4.5) */
+@utility page-width {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-ivory-canvas);
+    color: var(--color-warm-ink);
+    font-family: var(--font-body);
+    font-weight: var(--font-weight-regular);
+    letter-spacing: -0.01em;
+  }
+
+  /* Visible keyboard focus everywhere (§11) */
+  :focus-visible {
+    outline: 2px solid var(--color-champagne-gold);
+    outline-offset: 2px;
+  }
+
+  /* Tabular figures for prices where supported (§3.3) */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Mobile type scale (§3.3) */
+@media (max-width: 640px) {
+  :root {
+    --text-display: 34px;
+    --text-heading-lg: 26px;
+    --text-heading: 22px;
+  }
+}
+
+/* Reduced motion (§6, §11) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* The single orchestrated entrance: hero constellation drift (§6) */
+@keyframes constellation-drift {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.constellation-card {
+  animation: constellation-drift 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-card {
+    animation: none;
+  }
+}
+
+/* Price crossfade when the currency switches (§7.3) */
+@keyframes price-fade {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.price-crossfade {
+  animation: price-fade var(--motion-base) ease;
 }
