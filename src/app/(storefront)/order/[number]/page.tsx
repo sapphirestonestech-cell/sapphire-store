@@ -3,9 +3,11 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { RingPlaceholder } from "@/components/ui/ring-placeholder";
+import { PayNowCard } from "@/components/storefront/pay-now-card";
 import { getOrderByNumber } from "@/lib/orders";
 import { formatPrice, priceIn } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
+import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import type { OrderDoc } from "@/lib/models/order";
 
 export const metadata = {
@@ -45,15 +47,6 @@ function money(minor: number, order: OrderDoc): string {
   return formatPrice(amount, order.currency);
 }
 
-const STATUS_COPY: Record<string, string> = {
-  pending_payment: "Awaiting payment",
-  paid: "Paid",
-  processing: "Processing",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  cancelled: "Cancelled",
-};
-
 async function OrderDetail({ params }: PageProps) {
   const { number } = await params;
   await connection();
@@ -68,7 +61,7 @@ async function OrderDetail({ params }: PageProps) {
       <div className="mx-auto max-w-3xl space-y-8">
         <header className="space-y-2">
           <span className="inline-flex items-center rounded-chip-label bg-gold-wash px-3 py-1 text-label font-medium text-deep-gold">
-            {STATUS_COPY[order.status] ?? order.status}
+            {ORDER_STATUS_LABELS[order.status] ?? order.status}
           </span>
           <h1 className="font-display text-heading-lg text-warm-ink">
             Thank you — your order is saved
@@ -85,20 +78,7 @@ async function OrderDetail({ params }: PageProps) {
         </header>
 
         {pending ? (
-          <div className="rounded-card border border-gold-wash bg-gold-wash/50 p-5">
-            <p className="text-body text-warm-ink">
-              Online payment is being connected. We&apos;ve saved your order as
-              awaiting payment — nothing is charged yet.
-            </p>
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="mt-3 inline-flex min-h-12 items-center rounded-pill bg-pale-sand px-8 text-body-lg font-medium text-soft-taupe"
-            >
-              Pay now — coming soon
-            </button>
-          </div>
+          <PayNowCard orderNumber={order.orderNumber} defaultGateway={order.paymentGateway ?? null} />
         ) : null}
 
         {/* Items */}

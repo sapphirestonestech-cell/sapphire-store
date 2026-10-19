@@ -16,6 +16,7 @@
   --color-deep-gold: #8a6a1f;
   --color-gold-wash: #f1e6c8;
   --color-charcoal-band: #2b2622;
+  --color-obsidian-black: #000000;
 
   /* Status colours — restricted use: forms, order/payment status, toasts (§2.2) */
   --color-status-success: #3f7a57;
@@ -75,10 +76,10 @@
 
 /* Layout (§4.5) */
 @utility page-width {
-  width: 100%;
-  max-width: 1200px;
+  /* Layout (DESIGN.md §4.5): 80% of the viewport, centred. */
+  width: 80%;
+  max-width: none;
   margin-inline: auto;
-  padding-inline: 16px;
 }
 
 @layer base {
@@ -86,6 +87,12 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * Canvas — warm ivory. The art-deco lattice texture was removed on the
+   * client's request (2026-10-18): it read too regularly and competed with
+   * the content. A soft irregular grain now carries across every page
+   * instead, site-wide (see PatternBackground in the root layout).
+   */
   body {
     background-color: var(--color-ivory-canvas);
     color: var(--color-warm-ink);
@@ -164,4 +171,26 @@
 
 .price-crossfade {
   animation: price-fade var(--motion-base) ease;
+}
+
+/* Toast entrance — DESIGN.md §7.19 */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-in {
+  animation: toast-in var(--motion-base) ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-in {
+    animation: none;
+  }
 }

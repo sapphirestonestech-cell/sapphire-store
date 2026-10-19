@@ -43,7 +43,17 @@ function toCheckoutInput(i: CartItem): CheckoutItemInput {
   };
 }
 
-export function CheckoutForm() {
+interface CheckoutPrefill {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+export function CheckoutForm({
+  prefill,
+}: {
+  prefill?: CheckoutPrefill | null;
+}) {
   const router = useRouter();
   const { items } = useCart();
   const { currency } = useCurrency();
@@ -52,14 +62,34 @@ export function CheckoutForm() {
   const [locationsError, setLocationsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(prefill?.name ?? "");
+  const [email, setEmail] = useState(prefill?.email ?? "");
+  const [phone, setPhone] = useState(prefill?.phone ?? "");
   const [notes, setNotes] = useState("");
   const [locationId, setLocationId] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gateway, setGateway] = useState<"paystack" | "bachs" | "">("");
+  const [gatewayOptions, setGatewayOptions] = useState<Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }>>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/payments/available")
+      .then((res) => res.json())
+      .then((data: { gateways?: Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }> }) => {
+        if (cancelled) return;
+        if (data.gateways) setGatewayOptions(data.gateways);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled && !gateway) {
+          const first = gatewayOptions.find((g) => g.enabled && g.supports);
+          if (first) setGateway(first.id);
+        }
+      });
+    return () => { cancelled = true; };
+  }, [currency, gatewayOptions.length, gateway]);
 
   useEffect(() => {
     let cancelled = false;
@@ -131,8 +161,32 @@ export function CheckoutForm() {
         setError(data.error ?? "We couldn't place your order. Try again.");
         return;
       }
+      const orderNumber = data.orderNumber;
+
+      if (gateway) {
+        try {
+          const initRes = await fetch("/api/payments/initialize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderNumber, gateway }),
+          });
+          const initData = (await initRes.json()) as {
+            paymentUrl?: string;
+            reference?: string;
+            error?: string;
+          };
+          if (initRes.ok && initData.paymentUrl) {
+            clearCart();
+            window.location.href = initData.paymentUrl;
+            return;
+          }
+        } catch {
+          // fall through to order page with Pay now button
+        }
+      }
+
       clearCart();
-      router.push(`/order/${data.orderNumber}`);
+      router.push(`/order/${orderNumber}`);
     } catch {
       setError("We couldn't place your order. Check your connection and try again.");
     } finally {
@@ -165,7 +219,9 @@ export function CheckoutForm() {
     <div className="page-width py-8 md:py-12">
       <h1 className="font-display text-heading-lg text-warm-ink">Checkout</h1>
       <p className="mt-1 text-body text-soft-taupe">
-        Guest checkout — no account needed.
+        {prefill
+          ? "Checking out with your account details — edit anything that's changed."
+          : "Guest checkout — no account needed."}
       </p>
 
       <form
@@ -366,9 +422,49 @@ export function CheckoutForm() {
             </p>
           )}
 
+          <fieldset className="rounded-card bg-pure-white p-6 shadow-card">
+            <legend className="px-1 font-display text-subheading text-warm-ink">
+              Payment
+            </legend>
+            <div className="mt-4 space-y-2">
+              {gatewayOptions
+                .filter((g) => g.enabled && g.supports)
+                .map((g) => (
+                  <label
+                    key={g.id}
+                    className={`flex cursor-pointer items-center gap-3 rounded-card border p-4 transition-colors ${
+                      gateway === g.id
+                        ? "border-champagne-gold bg-gold-wash/40"
+                        : "border-hairline bg-pure-white hover:border-soft-taupe"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="gateway"
+                      value={g.id}
+                      checked={gateway === g.id}
+                      onChange={() => setGateway(g.id)}
+                      className="size-4 accent-champagne-gold"
+                    />
+                    <span className="text-body font-medium text-warm-ink">
+                      {g.id === "paystack" ? "Paystack" : "BACHS"}
+                    </span>
+                    {g.note ? (
+                      <span className="text-body text-soft-taupe">{g.note}</span>
+                    ) : null}
+                  </label>
+                ))}
+              {gatewayOptions.filter((g) => g.enabled && g.supports).length === 0 ? (
+                <p className="text-body text-soft-taupe">
+                  No payment methods available for {currency}.
+                </p>
+              ) : null}
+            </div>
+          </fieldset>
+
           <button
             type="submit"
-            disabled={submitting || !location || items.length === 0}
+            disabled={submitting || !location || items.length === 0 || !gateway}
             className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
           >
             {submitting ? "Placing order…" : "Place order"}
@@ -381,8 +477,8 @@ export function CheckoutForm() {
           ) : null}
 
           <p className="text-body text-soft-taupe">
-            Online payment is being connected. Placing an order saves it as
-            awaiting payment so you don&apos;t lose your place.
+            You&apos;ll be redirected to a secure payment page to complete your
+            purchase.
           </p>
         </aside>
       </form>

@@ -29,7 +29,7 @@ Items marked **[Confirm]** are proposed choices I made to fill gaps. They have n
 4. **Soft and a little cute.** Generous rounding, pill controls and gentle shadows give the store its friendly, giftable character. Cuteness comes from shape, not from decoration.
 5. **Clarity before charm.** Price, availability, arrival date, delivery fee and currency must always be easy to read. Beauty never hides information that affects a purchase.
 6. **Mobile first.** Most customers will shop on phones. Design the phone layout first and enlarge from there.
-7. **Spend boldness in one place per page.** One memorable moment per page (for example the hero ring constellation). Everything else stays disciplined.
+7. **Spend boldness in one place per page.** One memorable moment per page (for example the hero imagery). Everything else stays disciplined.
 
 ---
 
@@ -95,10 +95,10 @@ Final font choice is open (section 13).
 
 | Role | Family | Size | Line height | Tracking | Token |
 |------|--------|------|-------------|----------|-------|
-| display | Serif | 48px (mobile 34px) | 1.1 | -0.01em | `--text-display` |
-| heading-lg | Serif | 32px (mobile 26px) | 1.15 | -0.01em | `--text-heading-lg` |
-| heading | Serif | 24px (mobile 22px) | 1.2 | 0 | `--text-heading` |
-| subheading | Sans | 20px | 1.25 | -0.02em | `--text-subheading` |
+| display | Serif | 44px (mobile 32px) | 1.1 | -0.01em | `--text-display` |
+| heading-lg | Serif | 28px (mobile 23px) | 1.15 | -0.01em | `--text-heading-lg` |
+| heading | Serif | 22px (mobile 20px) | 1.2 | 0 | `--text-heading` |
+| subheading | Sans | 18px | 1.25 | -0.02em | `--text-subheading` |
 | body-lg | Sans | 16px | 1.4 | -0.015em | `--text-body-lg` |
 | body | Sans | 14px | 1.4 | -0.01em | `--text-body` |
 | label | Sans | 12px | 1.35 | 0 | `--text-label` |
@@ -106,6 +106,7 @@ Final font choice is open (section 13).
 Rules:
 
 - **16px is the minimum for primary body content.** 14px is allowed for secondary information. **12px is the absolute floor** (badges, small labels). Nothing smaller.
+- **Heading trim (2026-10-17, client instruction):** the large end of the scale came down (display 48→44, heading-lg 32→28, heading 24→22, subheading 20→18; mobile proportionally) to calm the platform. Body, body-lg and label are unchanged and stay at the documented floors.
 - Line length stays under 80 characters. Serif body text, if used, gets slightly more line height than sans.
 - Use sentence case everywhere. Avoid all-caps labels and tracked-out eyebrow text above headings.
 - Do not accent a single word in a headline with italic or a different color.
@@ -168,7 +169,7 @@ Use the dual-layer `card` shadow on every elevated card. Never use a single hard
 
 ### 4.5 Layout
 
-- **Page max-width:** 1200px, centered.
+- **Page width:** 80% of the viewport, centered (client instruction, 2026-10-17; supersedes the earlier 1200px max-width).
 - **Section gap:** 64px on mobile, 80px on desktop.
 - **Card padding:** 0 on image cards (the image bleeds to the inner radius frame). Text blocks beneath the image use 12px to 16px.
 - **Element gap:** 12px.
@@ -186,13 +187,15 @@ Use the dual-layer `card` shadow on every elevated card. Never use a single hard
 
 Cards are separated from the canvas by the white-on-ivory shift and the shadow. **Do not add visible borders to elevated cards.**
 
+**Canvas texture (client instruction, 2026-10-19; supersedes the faint 2026-10-18 grain, which superseded the dot lattice of 2026-10-17):** the ivory canvas carries an **irregular grain** — an SVG `feTurbulence` fractal-noise field tinted warm ink, rendered once as a full-canvas overlay in the **root layout** (`PatternBackground`), so every page shares one continuous surface: storefront, account/auth and the admin panel alike. It replaced the even fainter grain that was storefront-only. It is tuned to be **clearly noticeable but still a background**: the warm-ink alpha field is steepened with `feComponentTransfer` (rather than simply raising opacity), so it reads as texture at the same average tint instead of muddying the ivory. It must never read as a repeating grid — that is why the regular lattice of 2026-10-17 was rejected. Placement rule unchanged: canvas only — at the page edges and in the gaps between elevated white surfaces — never on or behind cards, content surfaces or the dark bands. Do not raise its strength further or reuse it on surfaces.
+
 ---
 
 ## 5. Imagery
 
 - **Product photography is the main source of color.** Rings, stones and metal supply the variety; the UI stays neutral.
 - **Required gallery:** up to **four images per ring**, each with an optional label (for example front, side, on left hand, on right hand, close-up). The cover image is the first one.
-- **Card crop:** 4:5 aspect ratio on product cards for consistency across the grid **[Confirm]**. The gallery on the product detail page may show images at their natural ratio within a fixed frame.
+- **Card crop:** 4:5 aspect ratio on product cards for consistency across the grid **[Confirm]**. The product detail gallery uses a fixed **1:1** frame (§7.10), so mixed-ratio images letterbox inside it rather than resizing the layout.
 - **Framed look:** the card radius (28px) is always larger than the inner image radius (20px), leaving a thin white frame. Never crop an image to the card's exact outer shape.
 - **Background guidance for photos:** clean, neutral or soft warm backgrounds that let gold and gems read clearly. Consistent lighting across a catalog matters more than any single beautiful shot.
 - **Icons:** minimal outlined strokes in Warm Ink at idle, Deep Gold or Champagne Gold when active. Category icons use a single color (gold or ink), never multiple brand colors.
@@ -204,7 +207,7 @@ Cards are separated from the canvas by the white-on-ivory shift and the shadow. 
 
 ## 6. Motion
 
-- **One orchestrated moment:** the hero ring constellation may drift in once on page load. Nothing else animates on its own.
+- **One orchestrated moment:** the hero copy and imagery may drift in once on page load. Nothing else animates on its own.
 - **Motion that answers an action is welcome:** adding to cart (small confirmation), opening the filter drawer, expanding the delivery estimator, switching currency (prices crossfade briefly), image gallery swipes.
 - Keep transitions between 150ms and 250ms with gentle easing.
 - Avoid scroll-triggered fade-and-slide on every section and avoid hover animations on every card. A subtle image zoom on desktop hover is enough.
@@ -225,7 +228,7 @@ Full-width Charcoal Band, 40px to 48px high, ivory text at 14px, centered. Defau
 
 **Role:** Primary navigation. Replaces the reference's left sidebar rail on the storefront.
 
-White surface, sticky on scroll with `float` shadow once the page moves. Left: store wordmark (placeholder until brand name is confirmed). Center on desktop: category links (generated from admin categories). Right: search, **currency switcher**, account, cart with item count. On mobile: wordmark, search icon, currency switcher, cart, and a menu button that opens the category sheet.
+White surface, sticky on scroll with `float` shadow once the page moves. Left: store wordmark (placeholder until brand name is confirmed). Center on desktop: **three nav items** (nav rework, approved plan 2026-10-19; supersedes the "four links" rule of 2026-10-17) — a **Categories dropdown button** opening a menu with "All rings" plus every admin category, then "Track order" and "Pre-order", all at `label` size with `pill` hover. The category list beyond that lives on the shop page's category pills. Right: search, **currency switcher**, account, cart with item count. On mobile: wordmark, search icon, currency switcher, cart, and a menu button that opens the category sheet (`body` size), which lists every category followed by Track order and Pre-order.
 
 ### 7.3 Currency switcher
 
@@ -282,13 +285,13 @@ White pill, 9999px radius, 1px Hairline border, `soft` shadow. Left: 16px outlin
 
 ### 7.9 Category section header
 
-Left-aligned serif heading (24px to 32px) in Warm Ink, followed by a 16px chevron, with 24px bottom margin before the grid. No background, no border.
+Left-aligned serif heading (24px to 32px) in Warm Ink with an optional quiet meta line beside it (result count or section note, `body` in Soft Taupe), and a "See all" link in Deep Gold with a 16px chevron at the right edge (approved plan 2026-10-19; the chevron moved from after the heading to the link). 24px bottom margin before the grid. No background, no border.
 
 ### 7.10 Product detail gallery
 
 **Role:** Show a ring from up to four angles.
 
-A large main image (20px inner radius inside a 28px card frame) with thumbnails beneath it on mobile and beside it on desktop. Thumbnails are 56px to 64px squares with 12px radius and 2px gaps; the selected thumbnail has a Champagne Gold 2px outline. Swipe on mobile, click to zoom on desktop. Each image's label (for example "Worn on right hand") shows as a small caption chip on the image. Handles one to four images gracefully; no empty placeholder slots on the storefront.
+A large **square (1:1) main image** (20px inner radius inside a 28px card frame; the fixed square frame is the implemented crop — approved plan 2026-10-19) with thumbnails in a rail beneath it on mobile and beside it on desktop. Thumbnails are 56px to 64px squares with 12px radius and 2px gaps; the selected thumbnail has a Champagne Gold 2px outline. Swipe on mobile, click to zoom on desktop. Each image's label (for example "Worn on right hand") shows as a small caption chip on the image. Handles one to four images gracefully; no empty placeholder slots on the storefront.
 
 ### 7.11 Price block
 
@@ -308,11 +311,13 @@ Fees update instantly when the currency switches. Result text is 14px to 16px Wa
 
 ### 7.13 Size selector
 
-Row of pill chips (44px tap target). Selected: Warm Ink fill with ivory text. Unavailable: Pale Sand text with a diagonal strike and an accessible "unavailable" label. A "Size guide" quiet link may sit beside the label only if a guide exists.
+**Native dropdown**, 48px tall, full width of its half of the row: pill shape (9999px radius), white fill, 1px Hairline border, `body` label above it, and a Soft Taupe chevron on the right (the native arrow is hidden). Unavailable sizes appear as disabled options suffixed "(unavailable)". Size and quantity sit side by side as equal halves, stacking to one column on phones.
+
+*(Amended 2026-10-19, client instruction: this replaced the previous "row of pill chips" rule, which took too much vertical space and wrapped awkwardly on the product page.)*
 
 ### 7.14 Filters
 
-Desktop: a left-aligned filter row or panel using pills and checkboxes. Mobile: a slide-up sheet (28px top radius) with a sticky "Show results" primary button. Filter groups: category, type (engagement, female, male), material, color, shape, size, availability, price range. Active filters appear as removable chips above the grid.
+Desktop: a left-aligned filter row or panel using pills and checkboxes. Mobile: a slide-up sheet (28px top radius) with a sticky "Show results" primary button. Filter groups: category, type (engagement, female, male), material, color, shape, size, availability, price range. The price-range group is a **dual-thumb slider** over the catalog's price span (the range logic runs in the base currency; the readout and applied chip show the active currency), used in the shop's filter sidebar and the homepage Budget group. Active filters appear as removable chips above the grid.
 
 ### 7.15 Cart
 
@@ -360,9 +365,13 @@ White 28px-radius card at the bottom with a 14px body, an underlined inline link
 
 ### 8.1 Homepage hero
 
-A centered composition on the ivory canvas: the **tagline as the serif display headline** ("Luxurious rings at an affordable price"), a short supporting line, and a Champagne Gold primary button ("Shop rings"). Around and above the headline, a **floating constellation** of three to five ring product cards at slightly different sizes and gentle overlaps, using the hero card style and the one allowed entrance drift. On phones the constellation reduces to two or three cards above the headline.
+A **centered constellation** on the ivory canvas, contained in the page width (client instruction, 2026-10-19; restores the original constellation and supersedes the editorial split of 2026-10-17).
 
-Below the hero: a single centered row of category pills, then bands for New arrivals, a Pre-order highlight band (cards with arrival-date badges), and category tiles. Sections are separated by 64px to 80px of space.
+**Center — copy.** The **tagline as the serif display headline** ("Luxurious rings at an affordable price"), centered, with a short supporting line in soft taupe beneath it, then a centered call-to-action row: the Champagne Gold primary button ("Shop rings") beside the Deep Gold text link ("See the pre-order collection").
+
+**Around the copy — imagery.** Up to four featured-ring cards float around the headline (desktop: absolutely positioned at the corners of the hero box, each rotated a couple of degrees; mobile: two quiet cards in a row above the headline). The cards are `card` surfaces with `card` shadows; they are aria-hidden decoration — every ring is reachable through the grids below. The cards drift in once on load (the one orchestrated entrance, §6). The constellation is the page's one bold moment; keep everything else quiet.
+
+Below the hero: a single centered row of category pills, then the Browse band with its sidebar and product grid. Sections are separated by 64px to 80px of space.
 
 ### 8.2 Product listing
 
@@ -370,7 +379,7 @@ Page header with category name and a short line. Filter and sort controls, then 
 
 ### 8.3 Product detail
 
-Mobile: gallery, name, price block with currency toggle, availability badge (with arrival date for pre-orders), size selector, delivery estimator, sticky bottom bar with price and the primary action, then specifications and description. Desktop: gallery on the left, purchase panel on the right, specifications below, related rings after.
+Mobile: square gallery with thumb rail, name, then a **price + availability-badge row** (price block and badge share one line; approved plan 2026-10-19), description directly under the price (client instruction 2026-10-19), size selector (dropdown) and quantity stepper side by side as equal halves, capped at the available stock (in-stock: size stock; pre-order: product cap), delivery estimator, sticky bottom bar with price and the primary action ("Add to cart" for both in-stock and pre-order), then specifications as a **plain two-column definition list, no card** (client instruction 2026-10-19). Desktop: gallery on the left (thumb rail beside the main image), purchase panel on the right, specifications below, related rings after.
 
 ### 8.4 Cart and checkout
 
@@ -438,10 +447,10 @@ The admin shares the same tokens and components so it feels like one product, bu
 | App download banner | Tagline announcement bar | The tagline must appear across the platform |
 | Category icons in native brand colors | Single-color icons (gold or ink) | Preserves the one-accent rule |
 | 1:1 product crops | 4:5 product card crops **[Confirm]** | Matches the product requirements for a consistent ratio; better suits rings on hands |
-| "No colored backgrounds, no gradients, no decorative shapes" | Kept, with two exceptions: Gold Wash for badges and selected states, and a rare gold sparkle glyph | Needed for the "cute" and "gold" requirements without clutter |
+| "No colored backgrounds, no gradients, no decorative shapes" | Kept, with three exceptions: Gold Wash for badges and selected states, a rare gold sparkle glyph, and the irregular canvas grain (§4.6) | Needed for the "cute" and "gold" requirements without clutter |
 | No semantic colors | Three restricted status colors | Needed for payment, order and form feedback |
 | Pills at both 20px and 9999px | All pills 9999px; 20px reserved for inner image radius and text areas | Resolves the inconsistency |
-| Hero wordmark above floating cards | Tagline headline with floating ring cards | The tagline is the brand promise and must be prominent |
+| Hero wordmark above floating cards | Tagline headline with an editorial image pair | The tagline is the brand promise and must be prominent |
 | Odd spacing values (10, 11, 38) | Clean 4-to-80 scale | Consistency |
 | Product category content (fashion, beauty, home) | Admin-created ring categories | Categories are managed by the store owner |
 | Earth-tone lifestyle imagery guidance | Neutral or soft warm backdrops that let gold and gems read clearly | Rings are small and reflective |
@@ -495,10 +504,10 @@ Framework-agnostic. The technology stack is still undecided.
   --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* Typography: scale */
-  --text-display: 48px;
-  --text-heading-lg: 32px;
-  --text-heading: 24px;
-  --text-subheading: 20px;
+  --text-display: 44px;
+  --text-heading-lg: 28px;
+  --text-heading: 22px;
+  --text-subheading: 18px;
   --text-body-lg: 16px;
   --text-body: 14px;
   --text-label: 12px;
@@ -523,7 +532,7 @@ Framework-agnostic. The technology stack is still undecided.
   --spacing-80: 80px;
 
   /* Layout */
-  --page-max-width: 1200px;
+  --page-width: 80%;
   --section-gap: 64px;
   --element-gap: 12px;
   --tap-target: 44px;
@@ -591,7 +600,7 @@ Framework-agnostic. The technology stack is still undecided.
 - Do not put gold text at small sizes on light surfaces.
 - Do not add visible borders to elevated cards.
 - Do not use sharp corners on cards, buttons or inputs.
-- Do not use gradients, illustrations or decorative shapes beyond the rare gold sparkle.
+- Do not use gradients, illustrations or decorative shapes beyond the rare gold sparkle and the canvas grain (§4.6).
 - Do not show star ratings or review counts in version 1.
 - Do not rely on color alone to convey availability or status.
 - Do not reuse the other brand's name, logo, wordmark, copy or fonts.

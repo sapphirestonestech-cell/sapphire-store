@@ -8,7 +8,7 @@ import {
 } from "@/components/storefront/shop-explorer";
 import { shopHeadingFor } from "@/lib/shop-heading";
 import { GridSkeleton } from "@/components/ui/skeleton";
-import { filterOptions, queryProducts } from "@/lib/products";
+import { filterOptions, priceBounds, queryProducts } from "@/lib/products";
 import { connectDb } from "@/lib/db";
 import { CategoryModel } from "@/lib/models/category";
 
@@ -25,7 +25,7 @@ function first(v: string | string[] | undefined): string | undefined {
 
 async function loadShopData(params: ShopParams) {
   await connection();
-  const [initial, facets, categories] = await Promise.all([
+  const [initial, facets, categories, bounds] = await Promise.all([
     queryProducts(params, { limit: 24 }),
     filterOptions(),
     (async () => {
@@ -39,8 +39,9 @@ async function loadShopData(params: ShopParams) {
         return [];
       }
     })(),
+    priceBounds().catch(() => null),
   ]);
-  return { initial, facets, categories };
+  return { initial, facets, categories, bounds };
 }
 
 export default function ShopPage({
@@ -107,6 +108,7 @@ async function ShopSlot({ searchParams }: { searchParams: SearchParams }) {
       initialTotal={data.initial.total}
       params={params}
       facets={data.facets as FacetOptions}
+      priceBounds={data.bounds}
       heading={
         params.q
           ? `Results for “${params.q}”`

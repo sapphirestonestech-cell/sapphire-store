@@ -6,7 +6,7 @@ import { TAGLINE } from "@/lib/tagline";
  */
 export function AnnouncementBar({ extra }: { extra?: string }) {
   return (
-    <div className="bg-charcoal-band text-ivory-canvas">
+    <div className="bg-obsidian-black text-ivory-canvas">
       <div className="page-width flex min-h-10 items-center justify-center gap-2 py-2 text-center">
         <svg
           aria-hidden="true"

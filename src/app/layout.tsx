@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { CurrencyProvider } from "@/components/currency-provider";
+import { PatternBackground } from "@/components/pattern-background";
 import { TAGLINE } from "@/lib/tagline";
 
 const cormorant = Cormorant_Garamond({
@@ -32,7 +33,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       className={`${cormorant.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="relative flex min-h-full flex-col">
+        <PatternBackground />
         <CurrencyProvider>{children}</CurrencyProvider>
       </body>
     </html>

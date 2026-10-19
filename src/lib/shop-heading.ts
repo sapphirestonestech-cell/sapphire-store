@@ -12,5 +12,6 @@ export function shopHeadingFor(params: ShopParams): string {
       .join(" ");
   }
   if (params.availability === "pre_order") return "Pre-order collection";
+  if (params.availability === "in_stock") return "In stock";
   return "All rings";
 }

@@ -5,13 +5,15 @@
  * - Creates/updates the admin user from SEED_ADMIN_EMAIL + SEED_ADMIN_PASSWORD
  * - Creates the default categories (DECISIONS.md)
  * - Records the opening exchange rate (1600 NGN / USD)
- * - Inserts fixture rings using `placeholder:` images (no stock photos)
+ * - Inserts fixture rings referencing the seeded stock photos in
+ *   `public/seed/rings` (Pexels; see SEED_PHOTOS in src/lib/seed-images.ts)
  *
  * Idempotent: safe to run more than once. Pass --fresh to wipe catalog data first.
  */
 import { config } from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import { seedImageUrls } from "../src/lib/seed-images";
 
 // Load Next.js-style env files, later files do not override earlier ones.
 config({ path: [".env.local", ".env"], quiet: true });
@@ -306,11 +308,7 @@ async function main() {
     const arrival = p.arrivalInDays
       ? new Date(Date.now() + p.arrivalInDays * 24 * 60 * 60 * 1000)
       : undefined;
-    const images = [
-      { url: `placeholder:${slug}-cover`, label: "Cover", position: 1 },
-      { url: `placeholder:${slug}-left`, label: "Left hand", position: 2 },
-      { url: `placeholder:${slug}-right`, label: "Right hand", position: 3 },
-    ];
+    const images = seedImageUrls(slug);
     const sizes = p.sizes.map((sizeLabel, i) => ({
       sizeLabel,
       stockQuantity: p.availability === "pre_order" ? 0 : 1 + ((i + 1) % 3),

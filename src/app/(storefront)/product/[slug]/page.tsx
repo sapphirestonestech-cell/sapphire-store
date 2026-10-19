@@ -116,14 +116,14 @@ async function ProductDetail({ params }: PageProps) {
 
   return (
     <div className="page-width pb-32 pt-8 md:pb-24 md:pt-12">
-      <div className="grid gap-10 md:grid-cols-2 md:gap-12 lg:gap-16">
+      <div className="grid gap-10 md:grid-cols-2 md:gap-12 lg:gap-8">
         {/* Gallery */}
         <div className="md:sticky md:top-28 md:self-start">
           <Gallery images={summary.images} productName={product.name} />
         </div>
 
         {/* Purchase panel */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="space-y-3">
             <h1 className="font-display text-heading-lg text-warm-ink md:text-heading-lg">
               {product.name}
@@ -135,8 +135,8 @@ async function ProductDetail({ params }: PageProps) {
             ) : null}
           </div>
 
-          {/* Price block — DESIGN.md §7.11 */}
-          <div className="flex flex-wrap items-baseline gap-3">
+          {/* Price block — DESIGN.md §7.11, with the availability badge beside it */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <Price
               amount={product.basePrice}
               className="text-heading font-semibold"
@@ -147,20 +147,26 @@ async function ProductDetail({ params }: PageProps) {
                 className="text-body text-soft-taupe line-through"
               />
             ) : null}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
             <AvailabilityBadge
               availability={summary.availability}
               arrivalDate={summary.preorderArrivalDate}
               soldOut={soldOut}
             />
-            {isPreorder && arrivalLong ? (
-              <p className="text-body text-deep-gold">
-                Arriving {arrivalLong} — shipping time is added after arrival.
-              </p>
-            ) : null}
           </div>
+
+          {isPreorder && arrivalLong ? (
+            <p className="text-body text-deep-gold">
+              Arriving {arrivalLong} — shipping time is added after arrival.
+            </p>
+          ) : null}
+
+          {/* Description sits directly under the price (client instruction,
+              2026-10-19) so the story reads before the buying controls. */}
+          {product.description ? (
+            <p className="max-w-prose whitespace-pre-line text-body-lg text-soft-taupe">
+              {product.description}
+            </p>
+          ) : null}
 
           <div id="buy" className="scroll-mt-28">
             <PurchasePanel
@@ -175,6 +181,7 @@ async function ProductDetail({ params }: PageProps) {
               freeDelivery={summary.freeDelivery}
               sizes={summary.sizes}
               imageUrl={summary.coverImage?.url ?? null}
+              preorderMaxQty={summary.preorderMaxQty}
               freeDeliveryLabels={freeDeliveryLabels}
             />
           </div>
@@ -186,12 +193,14 @@ async function ProductDetail({ params }: PageProps) {
             arrivalDate={summary.preorderArrivalDate}
           />
 
-          {/* Specifications — §5.3 */}
+          {/* Specifications — §5.3. Plain two-column list, no card (client
+              instruction, 2026-10-19): the white card read as one more heavy
+              block between the buying controls and the page content. */}
           <section aria-labelledby="specs-heading" className="pt-2">
             <h2 id="specs-heading" className="mb-3 text-subheading font-semibold">
               Details
             </h2>
-            <dl className="divide-y divide-hairline rounded-card bg-pure-white px-5 shadow-card">
+            <dl className="grid grid-cols-1 gap-x-10 sm:grid-cols-2">
               {[
                 ["Type", product.type],
                 ["Category", categoryNames.join(", ") || "—"],
@@ -203,27 +212,16 @@ async function ProductDetail({ params }: PageProps) {
                 ["Material", product.material],
                 ["Color", product.color],
               ].map(([term, value]) => (
-                <div key={term} className="flex justify-between gap-4 py-3.5">
+                <div
+                  key={term}
+                  className="flex justify-between gap-4 border-b border-hairline py-2.5 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"
+                >
                   <dt className="text-body text-soft-taupe">{term}</dt>
                   <dd className="text-body font-medium capitalize">{value}</dd>
                 </div>
               ))}
             </dl>
           </section>
-
-          {product.description ? (
-            <section aria-labelledby="description-heading" className="pt-2">
-              <h2
-                id="description-heading"
-                className="mb-3 text-subheading font-semibold"
-              >
-                About this ring
-              </h2>
-              <p className="max-w-prose whitespace-pre-line text-body-lg text-soft-taupe">
-                {product.description}
-              </p>
-            </section>
-          ) : null}
 
           <div className="rounded-card bg-gold-wash/60 p-5">
             <p className="text-body text-warm-ink">{TAGLINE}</p>
@@ -258,7 +256,7 @@ async function ProductDetail({ params }: PageProps) {
             href="#buy"
             className="inline-flex min-h-12 shrink-0 items-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow"
           >
-            {isPreorder ? "Pre-order" : "Add to cart"}
+            Add to cart
           </a>
         </div>
       </div>

@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="sienna-pav-eternity right">
+  <title>sienna-pav-eternity — right</title>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="36%" r="85%">
+      <stop offset="0" stop-color="#fdfbf7"/>
+      <stop offset="1" stop-color="#ebe3d6"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F1DDA2"/>
+      <stop offset="0.45" stop-color="#C9A24B"/>
+      <stop offset="1" stop-color="#8A6A1F"/>
+    </linearGradient>
+    <linearGradient id="metalDark" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#C9A24B"/>
+      <stop offset="1" stop-color="#8A6A1F"/>
+    </linearGradient>
+    <linearGradient id="gem" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#eaf1f6"/>
+      <stop offset="1" stop-color="#c9d7e2"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ecdcc9"/>
+      <stop offset="0.5" stop-color="#f3e7d8"/>
+      <stop offset="1" stop-color="#e0cdb5"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#211d19" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#211d19" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="720" rx="240" ry="52" fill="url(#shadow)"/>
+  <rect x="-66" y="-370" width="132" height="740" rx="66" fill="url(#skin)"/>
+  <g transform="translate(400 520) rotate(13)" stroke-linejoin="round" stroke-linecap="round">
+    
+    <circle cx="0" cy="0" r="150" fill="none" stroke="url(#metal)" stroke-width="30"/>
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#ffffff" stroke-width="4.8" stroke-linecap="round" stroke-dasharray="26 400" stroke-dashoffset="18" opacity="0.5"/>
+    <circle cx="0" cy="-150" r="12" fill="url(#metal)"/>
+    <circle cx="0" cy="-150" r="9" fill="url(#gem)"/>
+    <path d="M-9 -150 H9 M0 -159 V-141" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-3.06" cy="-153.06" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="42.25988352621445" cy="-143.9239460421746" r="12" fill="url(#metal)"/>
+    <circle cx="42.25988352621445" cy="-143.9239460421746" r="9" fill="url(#gem)"/>
+    <path d="M33.25988352621445 -143.9239460421746 H51.25988352621445 M42.25988352621445 -152.9239460421746 V-134.9239460421746" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="39.19988352621445" cy="-146.9839460421746" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="81.09612261833963" cy="-126.18802992467718" r="12" fill="url(#metal)"/>
+    <circle cx="81.09612261833963" cy="-126.18802992467718" r="9" fill="url(#gem)"/>
+    <path d="M72.09612261833963 -126.18802992467718 H90.09612261833963 M81.09612261833963 -135.18802992467718 V-117.18802992467718" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="78.03612261833963" cy="-129.24802992467718" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="113.36243615313874" cy="-98.22911009179276" r="12" fill="url(#metal)"/>
+    <circle cx="113.36243615313874" cy="-98.22911009179276" r="9" fill="url(#gem)"/>
+    <path d="M104.36243615313874 -98.22911009179276 H122.36243615313874 M113.36243615313874 -107.22911009179276 V-89.22911009179276" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="110.30243615313874" cy="-101.28911009179276" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="136.44479930317775" cy="-62.31225195028296" r="12" fill="url(#metal)"/>
+    <circle cx="136.44479930317775" cy="-62.31225195028296" r="9" fill="url(#gem)"/>
+    <path d="M127.44479930317775 -62.31225195028296 H145.44479930317775 M136.44479930317775 -71.31225195028296 V-53.31225195028296" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="133.38479930317774" cy="-65.37225195028296" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="148.4732162821399" cy="-21.3472257409928" r="12" fill="url(#metal)"/>
+    <circle cx="148.4732162821399" cy="-21.3472257409928" r="9" fill="url(#gem)"/>
+    <path d="M139.4732162821399 -21.3472257409928 H157.4732162821399 M148.4732162821399 -30.3472257409928 V-12.347225740992801" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="145.4132162821399" cy="-24.4072257409928" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="148.47321628213993" cy="21.34722574099275" r="12" fill="url(#metal)"/>
+    <circle cx="148.47321628213993" cy="21.34722574099275" r="9" fill="url(#gem)"/>
+    <path d="M139.47321628213993 21.34722574099275 H157.47321628213993 M148.47321628213993 12.347225740992751 V30.34722574099275" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="145.41321628213993" cy="18.287225740992753" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="136.44479930317777" cy="62.31225195028295" r="12" fill="url(#metal)"/>
+    <circle cx="136.44479930317777" cy="62.31225195028295" r="9" fill="url(#gem)"/>
+    <path d="M127.44479930317777 62.31225195028295 H145.44479930317777 M136.44479930317777 53.31225195028295 V71.31225195028296" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="133.38479930317777" cy="59.25225195028295" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="113.36243615313876" cy="98.22911009179275" r="12" fill="url(#metal)"/>
+    <circle cx="113.36243615313876" cy="98.22911009179275" r="9" fill="url(#gem)"/>
+    <path d="M104.36243615313876 98.22911009179275 H122.36243615313876 M113.36243615313876 89.22911009179275 V107.22911009179275" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="110.30243615313876" cy="95.16911009179275" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="81.09612261833962" cy="126.1880299246772" r="12" fill="url(#metal)"/>
+    <circle cx="81.09612261833962" cy="126.1880299246772" r="9" fill="url(#gem)"/>
+    <path d="M72.09612261833962 126.1880299246772 H90.09612261833962 M81.09612261833962 117.1880299246772 V135.1880299246772" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="78.03612261833962" cy="123.1280299246772" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="42.25988352621451" cy="143.92394604217458" r="12" fill="url(#metal)"/>
+    <circle cx="42.25988352621451" cy="143.92394604217458" r="9" fill="url(#gem)"/>
+    <path d="M33.25988352621451 143.92394604217458 H51.25988352621451 M42.25988352621451 134.92394604217458 V152.92394604217458" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="39.199883526214506" cy="140.86394604217458" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="1.8369701987210297e-14" cy="150" r="12" fill="url(#metal)"/>
+    <circle cx="1.8369701987210297e-14" cy="150" r="9" fill="url(#gem)"/>
+    <path d="M-8.999999999999982 150 H9.000000000000018 M1.8369701987210297e-14 141 V159" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-3.059999999999982" cy="146.94" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-42.25988352621441" cy="143.92394604217463" r="12" fill="url(#metal)"/>
+    <circle cx="-42.25988352621441" cy="143.92394604217463" r="9" fill="url(#gem)"/>
+    <path d="M-51.25988352621441 143.92394604217463 H-33.25988352621441 M-42.25988352621441 134.92394604217463 V152.92394604217463" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-45.31988352621441" cy="140.86394604217463" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-81.09612261833963" cy="126.18802992467718" r="12" fill="url(#metal)"/>
+    <circle cx="-81.09612261833963" cy="126.18802992467718" r="9" fill="url(#gem)"/>
+    <path d="M-90.09612261833963 126.18802992467718 H-72.09612261833963 M-81.09612261833963 117.18802992467718 V135.18802992467718" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-84.15612261833964" cy="123.12802992467718" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-113.36243615313873" cy="98.22911009179278" r="12" fill="url(#metal)"/>
+    <circle cx="-113.36243615313873" cy="98.22911009179278" r="9" fill="url(#gem)"/>
+    <path d="M-122.36243615313873 98.22911009179278 H-104.36243615313873 M-113.36243615313873 89.22911009179278 V107.22911009179278" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-116.42243615313873" cy="95.16911009179277" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-136.4447993031777" cy="62.31225195028308" r="12" fill="url(#metal)"/>
+    <circle cx="-136.4447993031777" cy="62.31225195028308" r="9" fill="url(#gem)"/>
+    <path d="M-145.4447993031777 62.31225195028308 H-127.44479930317769 M-136.4447993031777 53.31225195028308 V71.31225195028307" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-139.5047993031777" cy="59.252251950283075" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-148.4732162821399" cy="21.347225740992783" r="12" fill="url(#metal)"/>
+    <circle cx="-148.4732162821399" cy="21.347225740992783" r="9" fill="url(#gem)"/>
+    <path d="M-157.4732162821399 21.347225740992783 H-139.4732162821399 M-148.4732162821399 12.347225740992783 V30.347225740992783" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-151.5332162821399" cy="18.287225740992785" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-148.47321628213993" cy="-21.34722574099273" r="12" fill="url(#metal)"/>
+    <circle cx="-148.47321628213993" cy="-21.34722574099273" r="9" fill="url(#gem)"/>
+    <path d="M-157.47321628213993 -21.34722574099273 H-139.47321628213993 M-148.47321628213993 -30.34722574099273 V-12.34722574099273" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-151.53321628213993" cy="-24.40722574099273" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-136.44479930317775" cy="-62.31225195028302" r="12" fill="url(#metal)"/>
+    <circle cx="-136.44479930317775" cy="-62.31225195028302" r="9" fill="url(#gem)"/>
+    <path d="M-145.44479930317775 -62.31225195028302 H-127.44479930317775 M-136.44479930317775 -71.31225195028301 V-53.31225195028302" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-139.50479930317775" cy="-65.37225195028302" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-113.36243615313873" cy="-98.2291100917928" r="12" fill="url(#metal)"/>
+    <circle cx="-113.36243615313873" cy="-98.2291100917928" r="9" fill="url(#gem)"/>
+    <path d="M-122.36243615313873 -98.2291100917928 H-104.36243615313873 M-113.36243615313873 -107.2291100917928 V-89.2291100917928" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-116.42243615313873" cy="-101.28911009179281" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-81.09612261833973" cy="-126.18802992467711" r="12" fill="url(#metal)"/>
+    <circle cx="-81.09612261833973" cy="-126.18802992467711" r="9" fill="url(#gem)"/>
+    <path d="M-90.09612261833973 -126.18802992467711 H-72.09612261833973 M-81.09612261833973 -135.1880299246771 V-117.18802992467711" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-84.15612261833974" cy="-129.2480299246771" r="1.8" fill="#ffffff" opacity="0.85"/>
+    <circle cx="-42.259883526214466" cy="-143.9239460421746" r="12" fill="url(#metal)"/>
+    <circle cx="-42.259883526214466" cy="-143.9239460421746" r="9" fill="url(#gem)"/>
+    <path d="M-51.259883526214466 -143.9239460421746 H-33.259883526214466 M-42.259883526214466 -152.9239460421746 V-134.9239460421746" stroke="#c7d6e2" stroke-width="1.4" opacity="0.65"/>
+    <circle cx="-45.31988352621447" cy="-146.9839460421746" r="1.8" fill="#ffffff" opacity="0.85"/>
+  </g>
+</svg>

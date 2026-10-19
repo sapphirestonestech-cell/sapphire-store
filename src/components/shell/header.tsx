@@ -2,13 +2,27 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { signOut } from "next-auth/react";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import { CartLink } from "@/components/cart-provider";
 
 export interface NavCategory {
   slug: string;
   name: string;
+}
+
+export interface HeaderUser {
+  name?: string | null;
+  /** Admin access: HMAC admin session, or an AdminUser with this email. */
+  isAdmin?: boolean;
+  /** Signed in as a storefront customer (Auth.js session). */
+  isCustomer?: boolean;
 }
 
 function SearchField() {
@@ -124,11 +138,14 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
             </div>
             <nav>
               <ul className="space-y-1">
+                <li className="px-4 pb-1 text-label font-medium text-soft-taupe">
+                  Categories
+                </li>
                 <li>
                   <Link
                     href="/shop"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center rounded-pill px-4 text-body-lg hover:bg-gold-wash"
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
                   >
                     All rings
                   </Link>
@@ -138,12 +155,30 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
                     <Link
                       href={`/shop?category=${cat.slug}`}
                       onClick={() => setOpen(false)}
-                      className="flex min-h-11 items-center rounded-pill px-4 text-body-lg hover:bg-gold-wash"
+                      className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
                     >
                       {cat.name}
                     </Link>
                   </li>
                 ))}
+                <li className="mt-3 border-t border-hairline pt-3">
+                  <Link
+                    href="/track"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                  >
+                    Track order
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop?availability=pre_order"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                  >
+                    Pre-order
+                  </Link>
+                </li>
               </ul>
             </nav>
             <div className="mt-6 border-t border-hairline pt-6">
@@ -156,12 +191,305 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
   );
 }
 
+function SignInLink() {
+  return (
+    <Link
+      href="/sign-in"
+      aria-label="Sign in"
+      className="flex size-11 items-center justify-center rounded-pill text-warm-ink hover:bg-gold-wash"
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 20 20"
+        className="size-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <circle cx="10" cy="7" r="3" />
+        <path d="M4 17c0-3 2.7-5 6-5s6 2 6 5" strokeLinecap="round" />
+      </svg>
+    </Link>
+  );
+}
+
+function MenuAccountIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="size-4.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <circle cx="10" cy="7" r="3" />
+      <path d="M4 17c0-3 2.7-5 6-5s6 2 6 5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MenuDashboardIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="size-4.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.5" />
+      <rect x="11" y="3.5" width="5.5" height="5.5" rx="1.5" />
+      <rect x="3.5" y="11" width="5.5" height="5.5" rx="1.5" />
+      <rect x="11" y="11" width="5.5" height="5.5" rx="1.5" />
+    </svg>
+  );
+}
+
+function MenuSignOutIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      className="size-4.5 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path d="M8 3H5a1 1 0 00-1 1v12a1 1 0 001 1h3" strokeLinecap="round" />
+      <path d="M13 13l3-3-3-3M16 10H8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const MENU_ITEM_CLASS =
+  "flex min-h-10 w-full items-center gap-2.5 rounded-image px-3 text-left text-body text-warm-ink hover:bg-gold-wash";
+
+/**
+ * Account menu — DESIGN.md §7.2 account entry. Name + chevron opens a
+ * dropdown with "View my account" (customers), "View admin dashboard"
+ * (admins only) and "Log out". Replaces the old lone logout icon so signing
+ * out is never a one-click accident. Escape and outside clicks close it.
+ */
+function AccountMenu({ user }: { user: HeaderUser | null }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  if (!user) return <SignInLink />;
+
+  const account = user;
+  const firstName = account.name?.split(" ")[0] ?? "Account";
+
+  async function onLogout() {
+    // Clear the admin HMAC cookie too — it is httpOnly, so the browser
+    // cannot drop it from here; the route does it server-side.
+    if (account.isAdmin) {
+      try {
+        await fetch("/api/admin/logout", { method: "POST" });
+      } catch {
+        // Best-effort: still sign out of the customer session below.
+      }
+    }
+    if (account.isCustomer) {
+      await signOut({ callbackUrl: "/" });
+    } else {
+      router.push("/");
+      router.refresh();
+    }
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-3 text-label text-warm-ink hover:bg-gold-wash"
+      >
+        <span className="max-w-24 truncate">{firstName}</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className={`size-3.5 transition-transform duration-fast ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M5 7.5l5 5 5-5" />
+        </svg>
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          aria-label="Account"
+          className="absolute right-0 top-full z-50 mt-1 min-w-56 overflow-hidden rounded-card border border-hairline bg-pure-white p-1.5 shadow-float"
+        >
+          {account.isCustomer ? (
+            <Link
+              href="/account"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className={MENU_ITEM_CLASS}
+            >
+              <MenuAccountIcon />
+              View my account
+            </Link>
+          ) : null}
+          {account.isAdmin ? (
+            <Link
+              href="/admin"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className={MENU_ITEM_CLASS}
+            >
+              <MenuDashboardIcon />
+              View admin dashboard
+            </Link>
+          ) : null}
+          <div className="my-1.5 border-t border-hairline" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              void onLogout();
+            }}
+            className={MENU_ITEM_CLASS}
+          >
+            <MenuSignOutIcon />
+            Log out
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * Categories dropdown — DESIGN.md §7.2 nav (client instruction, 2026-10-18:
+ * the desktop nav carries exactly three items: Categories, Track order,
+ * Pre-order). Escape and outside clicks close it, like AccountMenu.
+ */
+function CategoriesMenu({ categories }: { categories: NavCategory[] }) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex min-h-11 items-center gap-1 rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
+      >
+        Categories
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className={`size-3.5 transition-transform duration-fast ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M5 7.5l5 5 5-5" />
+        </svg>
+      </button>
+      {open ? (
+        <div
+          role="menu"
+          aria-label="Categories"
+          className="absolute left-0 top-full z-50 mt-1 max-h-72 min-w-52 overflow-y-auto rounded-card border border-hairline bg-pure-white p-1.5 shadow-float"
+        >
+          <Link
+            href="/shop"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className={MENU_ITEM_CLASS}
+          >
+            All rings
+          </Link>
+          {categories.length > 0 ? (
+            <div className="my-1.5 border-t border-hairline" />
+          ) : null}
+          {categories.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/shop?category=${cat.slug}`}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className={MENU_ITEM_CLASS}
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /**
  * Header — DESIGN.md §7.2. White surface, sticky with a float shadow
- * once the page moves. Wordmark left, category links centre on desktop,
- * search / currency switcher / cart right.
+ * once the page moves. Wordmark left, three nav items centre on desktop,
+ * search / account / currency switcher / cart right.
  */
-export function Header({ categories }: { categories: NavCategory[] }) {
+export function Header({
+  categories,
+  user,
+}: {
+  categories: NavCategory[];
+  user: HeaderUser | null;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const params = useSearchParams();
   const q = params.get("q") ?? "";
@@ -187,26 +515,27 @@ export function Header({ categories }: { categories: NavCategory[] }) {
           Sapphire
         </Link>
 
-        <nav aria-label="Categories" className="hidden flex-1 justify-center lg:flex">
+        <nav aria-label="Main" className="hidden flex-1 justify-center lg:flex">
           <ul className="flex items-center gap-1">
             <li>
+              <CategoriesMenu categories={categories} />
+            </li>
+            <li>
               <Link
-                href="/shop"
-                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-body text-warm-ink hover:bg-gold-wash"
+                href="/track"
+                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
               >
-                All rings
+                Track order
               </Link>
             </li>
-            {categories.slice(0, 6).map((cat) => (
-              <li key={cat.slug}>
-                <Link
-                  href={`/shop?category=${cat.slug}`}
-                  className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-body text-warm-ink hover:bg-gold-wash"
-                >
-                  {cat.name}
-                </Link>
-              </li>
-            ))}
+            <li>
+              <Link
+                href="/shop?availability=pre_order"
+                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
+              >
+                Pre-order
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -216,9 +545,9 @@ export function Header({ categories }: { categories: NavCategory[] }) {
           </div>
           <CurrencySwitcher className="hidden sm:inline-flex" />
           <CartLink />
-          <MobileMenu categories={categories} />
-          <MobileMenu categories={categories} />
-        </div>
+          <AccountMenu user={user} />
+        <MobileMenu categories={categories} />
+      </div>
       </div>
       {q ? <span className="sr-only">Search query: {q}</span> : null}
     </header>

@@ -67,6 +67,8 @@ export interface OrderDoc extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   orderNumber: string;
   status: OrderStatus;
+  /** Signed-in customer who placed the order (null for guests). */
+  customerId?: string;
   customer: OrderCustomer;
   location: OrderLocationSnapshot;
   /** Currency the customer saw and paid in. */
@@ -82,6 +84,18 @@ export interface OrderDoc extends mongoose.Document {
   totalMinor: number;
   amountDueNowMinor: number;
   amountDueLaterMinor: number;
+  /** Gateway last used to initialize payment (paystack|bachs). */
+  paymentGateway?: "paystack" | "bachs";
+  /** Unique gateway reference for this order's last payment attempt. */
+  paymentReference?: string;
+  /** BACHS checkout session id for the last attempt (poll verification). */
+  paymentCheckoutId?: string;
+  /** paymentStatus: initiated | paid | failed | refunded. */
+  paymentStatus?: string;
+  /** Amount sent to the gateway, in the order's display currency minor units. */
+  paymentAmountMinor?: number;
+  /** When the payment was verified as paid. */
+  paidAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -122,6 +136,7 @@ const OrderShipmentSchema = new Schema<OrderShipment>(
 const OrderSchema = new Schema<OrderDoc>(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
+    customerId: { type: String, index: true },
     status: {
       type: String,
       enum: [
@@ -158,6 +173,12 @@ const OrderSchema = new Schema<OrderDoc>(
     totalMinor: { type: Number, required: true, min: 0 },
     amountDueNowMinor: { type: Number, required: true, min: 0 },
     amountDueLaterMinor: { type: Number, required: true, min: 0 },
+    paymentGateway: { type: String, enum: ["paystack", "bachs"] },
+    paymentReference: { type: String, index: true },
+    paymentCheckoutId: { type: String },
+    paymentStatus: { type: String },
+    paymentAmountMinor: { type: Number, min: 0 },
+    paidAt: Date,
   },
   { timestamps: true },
 );

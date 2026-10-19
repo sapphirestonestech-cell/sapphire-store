@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { connectDb } from "@/lib/db";
+import { HARD_LINE_CAP } from "@/lib/cart";
 import { ProductModel } from "@/lib/models/product";
 import { DeliveryLocationModel } from "@/lib/models/settings";
 import { getSettings } from "@/lib/settings";
@@ -31,6 +32,8 @@ export interface PlaceOrderInput {
   customer: unknown;
   locationId: unknown;
   currency: unknown;
+  /** Signed-in customer id (server-derived; never taken from the client). */
+  customerId?: string;
 }
 
 const MAX_LINE_QUANTITY = 10;
@@ -57,7 +60,7 @@ function parseItems(raw: unknown): RawOrderItem[] {
     items.push({
       productId,
       sizeLabel,
-      quantity: Math.min(Math.max(1, Math.round(quantity)), MAX_LINE_QUANTITY),
+      quantity: Math.min(Math.max(1, Math.round(quantity)), HARD_LINE_CAP),
     });
   }
   return items;
@@ -137,6 +140,16 @@ export async function placeOrder(input: PlaceOrderInput): Promise<OrderDoc> {
         `Only ${size.stockQuantity} of ${product.name} (size ${line.sizeLabel}) left.`,
       );
     }
+    if (product.availability === "pre_order") {
+      // ProductReq: pre-order quantity is capped by the admin's optional
+      // per-order maximum; without one the standard line cap applies.
+      const preorderCap = product.preorderMaxQty ?? MAX_LINE_QUANTITY;
+      if (line.quantity > preorderCap) {
+        throw new OrderError(
+          `You can pre-order up to ${preorderCap} of ${product.name}.`,
+        );
+      }
+    }
     const cover = [...product.images].sort((a, b) => a.position - b.position)[0];
     const isDeposit =
       product.availability === "pre_order" && product.paymentMode === "deposit";
@@ -175,6 +188,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<OrderDoc> {
 
   const base = {
     status: "pending_payment" as const,
+    customerId: input.customerId && OBJECT_ID_RE.test(input.customerId) ? input.customerId : undefined,
     customer,
     location: {
       locationId: location._id.toString(),
@@ -242,5 +256,29 @@ export async function getOrderByNumber(orderNumber: string): Promise<OrderDoc | 
     return doc ? (doc as unknown as OrderDoc) : null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Orders belonging to a signed-in customer: matched by the stamped
+ * customerId, or by the account email (covers orders placed as a guest
+ * with the same address before signing up).
+ */
+export async function getOrdersForCustomer(
+  customerId: string,
+  email: string,
+): Promise<OrderDoc[]> {
+  if (!OBJECT_ID_RE.test(customerId)) return [];
+  try {
+    await connectDb();
+    const docs = await OrderModel.find({
+      $or: [{ customerId }, { "customer.email": email.toLowerCase() }],
+    })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    return docs as unknown as OrderDoc[];
+  } catch {
+    return [];
   }
 }

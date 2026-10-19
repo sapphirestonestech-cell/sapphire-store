@@ -18,7 +18,7 @@ function ConstellationCard({
       style={{ animationDelay: `${delayMs}ms` }}
     >
       <Link href={`/product/${product.slug}`} tabIndex={-1} aria-hidden="true">
-        <div className="aspect-[4/5] overflow-hidden rounded-image">
+        <div className="aspect-[4/5.5] overflow-hidden rounded-image">
           {product.coverImage &&
           !product.coverImage.url.startsWith("placeholder:") ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -37,9 +37,7 @@ function ConstellationCard({
 }
 
 /**
- * Homepage hero — DESIGN.md §8.1. The tagline is the serif display
- * headline; the floating constellation of ring cards is the page's one
- * bold moment, drifting in once on load.
+ * Homepage hero — former version with floating constellation cards.
  */
 export function Hero({ featured }: { featured: ProductSummary[] }) {
   const cards = featured.slice(0, 4);
@@ -64,7 +62,7 @@ export function Hero({ featured }: { featured: ProductSummary[] }) {
               style={{ animationDelay: `${(i + 1) * 120}ms` }}
             >
               <Link href={`/product/${p.slug}`} tabIndex={-1} aria-hidden="true">
-                <div className="aspect-[4/5] overflow-hidden rounded-image">
+                <div className="aspect-[4/5.5] overflow-hidden rounded-image">
                   {p.coverImage &&
                   !p.coverImage.url.startsWith("placeholder:") ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -106,12 +104,20 @@ export function Hero({ featured }: { featured: ProductSummary[] }) {
           Get affordable yet luxurious rings — ready to ship or available to
           pre-order, with clear prices in dollars or naira.
         </p>
-        <Link
-          href="/shop"
-          className="mt-8 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow transition-transform duration-fast hover:scale-[1.03]"
-        >
-          Shop rings
-        </Link>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+          <Link
+            href="/shop"
+            className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow transition-transform duration-fast hover:scale-[1.03]"
+          >
+            Shop rings
+          </Link>
+          <Link
+            href="/shop?availability=pre_order"
+            className="text-body-lg font-medium text-deep-gold underline-offset-4 hover:underline"
+          >
+            See the pre-order collection
+          </Link>
+        </div>
       </div>
     </section>
   );

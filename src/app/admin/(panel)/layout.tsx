@@ -19,7 +19,7 @@ export default async function AdminLayout({
   if (!session) redirect("/admin/login");
 
   return (
-    <div className="flex min-h-screen bg-ivory-canvas">
+    <div className="flex min-h-screen">
       <Sidebar />
       <main className="min-w-0 flex-1 px-4 py-8 md:px-10 md:py-10">
         <div className="mx-auto max-w-5xl">{children}</div>

@@ -4,6 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { PriceRange } from "@/components/storefront/price-range";
+import { useCurrency } from "@/components/currency-provider";
+import { formatPrice, priceIn } from "@/lib/currency";
 import type { ProductSummary } from "@/lib/products";
 
 export type ShopParams = {
@@ -54,6 +57,11 @@ export interface FacetOptions {
   sizes: string[];
 }
 
+export interface PriceBounds {
+  min: number;
+  max: number;
+}
+
 function SelectControl({
   label,
   value,
@@ -89,12 +97,20 @@ function SelectControl({
 function FilterPanel({
   params,
   facets,
+  priceBounds,
   onChange,
 }: {
   params: ShopParams;
   facets: FacetOptions;
+  priceBounds: PriceBounds | null;
   onChange: (patch: Partial<ShopParams>) => void;
 }) {
+  const parse = (v?: string): number | undefined => {
+    if (v === undefined) return undefined;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : undefined;
+  };
+
   return (
     <div className="space-y-5">
       <SelectControl
@@ -139,6 +155,20 @@ function FilterPanel({
         onChange={(v) => onChange({ size: v })}
         anyLabel="Any size"
       />
+      {priceBounds ? (
+        <PriceRange
+          minBound={priceBounds.min}
+          maxBound={priceBounds.max}
+          valueMin={parse(params.min)}
+          valueMax={parse(params.max)}
+          onChange={(min, max) =>
+            onChange({
+              min: min !== undefined ? String(min) : undefined,
+              max: max !== undefined ? String(max) : undefined,
+            })
+          }
+        />
+      ) : null}
     </div>
   );
 }
@@ -151,8 +181,6 @@ const ACTIVE_FILTER_LABELS: Record<string, string> = {
   shape: "Shape",
   size: "Size",
   availability: "Availability",
-  min: "Min price",
-  max: "Max price",
   sort: "Sort",
   q: "Search",
 };
@@ -166,6 +194,7 @@ export function ShopExplorer({
   initialTotal,
   params,
   facets,
+  priceBounds,
   heading,
   tagline,
 }: {
@@ -173,11 +202,13 @@ export function ShopExplorer({
   initialTotal: number;
   params: ShopParams;
   facets: FacetOptions;
+  priceBounds: PriceBounds | null;
   heading: string;
   tagline: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { currency, usdToNgn, baseCurrency } = useCurrency();
   const [products, setProducts] = useState(initialProducts);
   const [total, setTotal] = useState(initialTotal);
   const [loading, setLoading] = useState(false);
@@ -255,10 +286,28 @@ export function ShopExplorer({
     Object.entries(params) as [keyof ShopParams, string | undefined][]
   ).filter(
     ([k, v]) =>
-      k !== "sort" && k !== "q" && typeof v === "string" && v.length > 0,
+      k !== "sort" &&
+      k !== "q" &&
+      k !== "min" &&
+      k !== "max" &&
+      typeof v === "string" &&
+      v.length > 0,
   ) as [keyof ShopParams, string][];
 
   const hasFilters = activeChips.length > 0;
+
+  // Budget is one chip covering both ends of the range bar.
+  const priceActive = Boolean(params.min) || Boolean(params.max);
+  const fmtBudget = (base: number) =>
+    formatPrice(priceIn(base, baseCurrency, currency, usdToNgn), currency);
+  const budgetLo =
+    params.min && Number.isFinite(Number(params.min))
+      ? Number(params.min)
+      : (priceBounds?.min ?? 0);
+  const budgetHi =
+    params.max && Number.isFinite(Number(params.max))
+      ? Number(params.max)
+      : (priceBounds?.max ?? 0);
 
   return (
     <div className="page-width pb-24 pt-10 md:pt-14">
@@ -309,13 +358,25 @@ export function ShopExplorer({
           <FilterPanel
             params={params}
             facets={facets}
+            priceBounds={priceBounds}
             onChange={(patch) => applyParams({ ...params, ...patch })}
           />
         </aside>
 
         <div className="min-w-0 flex-1">
-          {hasFilters ? (
+          {hasFilters || priceActive ? (
             <div className="mb-5 flex flex-wrap gap-2">
+              {priceActive ? (
+                <button
+                  type="button"
+                  onClick={() => applyParams({ ...params, min: undefined, max: undefined })}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-hairline bg-pure-white px-3 py-1 text-label font-medium text-warm-ink"
+                >
+                  Budget: {fmtBudget(budgetLo)} – {fmtBudget(budgetHi)}
+                  <span aria-hidden="true">×</span>
+                  <span className="sr-only">Remove budget filter</span>
+                </button>
+              ) : null}
               {activeChips.map(([key, value]) => (
                 <button
                   key={key}
@@ -449,6 +510,7 @@ export function ShopExplorer({
               <FilterPanel
                 params={params}
                 facets={facets}
+                priceBounds={priceBounds}
                 onChange={(patch) => applyParams({ ...params, ...patch })}
               />
             </div>

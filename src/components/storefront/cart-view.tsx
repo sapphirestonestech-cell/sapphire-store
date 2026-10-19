@@ -5,6 +5,7 @@ import { Price } from "@/components/price";
 import { RingPlaceholder } from "@/components/ui/ring-placeholder";
 import { useCart } from "@/components/cart-provider";
 import {
+  HARD_LINE_CAP,
   MAX_QUANTITY_PER_LINE,
   clearCart,
   removeItem,
@@ -16,7 +17,12 @@ import { formatArrivalLong } from "@/lib/format";
 const PLACEHOLDER_PREFIX = "placeholder:";
 
 function Stepper({ item }: { item: CartItem }) {
-  const atMax = item.quantity >= MAX_QUANTITY_PER_LINE;
+  // In-stock lines stop at the default cap in the cart (the product panel
+  // and the server both enforce the real stock limit); pre-order lines may
+  // reach the admin's larger per-order maximum.
+  const max =
+    item.availability === "pre_order" ? HARD_LINE_CAP : MAX_QUANTITY_PER_LINE;
+  const atMax = item.quantity >= max;
   return (
     <div className="inline-flex items-center rounded-pill border border-hairline">
       <button

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { placeOrder, OrderError } from "@/lib/orders";
 
 /**
  * POST /api/orders — ProductReq.md §10, §14.2. Recomputes the order from
  * the database (never trusts the client's prices), freezes it, and returns
- * the order number. Payment is verified separately (later phase).
+ * the order number. The signed-in customer id is taken from the session,
+ * never from the request body. Payment is verified separately (later phase).
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -14,6 +16,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  const session = await auth();
+  const customerId = session?.user?.customerId;
+
   const payload = (body ?? {}) as Record<string, unknown>;
   try {
     const order = await placeOrder({
@@ -21,6 +26,7 @@ export async function POST(request: Request) {
       customer: payload.customer,
       locationId: payload.locationId,
       currency: payload.currency,
+      customerId,
     });
     return NextResponse.json(
       { orderNumber: order.orderNumber },

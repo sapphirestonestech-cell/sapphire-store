@@ -35,7 +35,7 @@ export function ProductCard({
       className="group block rounded-card bg-pure-white shadow-card transition-shadow duration-fast hover:shadow-float"
     >
       <div className="relative m-2 overflow-hidden rounded-image">
-        <div className="aspect-[4/5]">
+        <div className="aspect-[4/5.5]">
           {cover && !isPlaceholder(cover.url) ? (
             // eslint-disable-next-line @next/next/no-img-element -- Cloudinary CDN URLs are optimized at upload time in Phase 1
             <img

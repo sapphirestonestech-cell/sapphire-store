@@ -24,7 +24,10 @@ export interface CartItem {
 }
 
 export const CART_STORAGE_KEY = "sapphire_cart";
+/** Default line cap when no product-specific limit applies (e.g. pre-order without an admin maximum). */
 export const MAX_QUANTITY_PER_LINE = 10;
+/** Absolute per-line ceiling the cart will ever store; product limits are enforced by the panel and at checkout. */
+export const HARD_LINE_CAP = 99;
 
 const EMPTY: CartItem[] = [];
 
@@ -50,7 +53,7 @@ function parse(raw: string): CartItem[] {
     if (!Array.isArray(parsed)) return EMPTY;
     return parsed.filter(isItem).map((i) => ({
       ...i,
-      quantity: Math.min(Math.max(1, Math.round(i.quantity)), MAX_QUANTITY_PER_LINE),
+      quantity: Math.min(Math.max(1, Math.round(i.quantity)), HARD_LINE_CAP),
       freeDelivery: i.freeDelivery ?? { allLocations: false, locationIds: [] },
       paymentMode: i.paymentMode ?? "full",
       depositPercent: i.depositPercent ?? 0,
@@ -121,11 +124,11 @@ export function addItem(item: CartItem): void {
       ...item,
       quantity: Math.min(
         next[idx].quantity + item.quantity,
-        MAX_QUANTITY_PER_LINE,
+        HARD_LINE_CAP,
       ),
     };
   } else {
-    next.push({ ...item, quantity: Math.min(item.quantity, MAX_QUANTITY_PER_LINE) });
+    next.push({ ...item, quantity: Math.min(item.quantity, HARD_LINE_CAP) });
   }
   write(next);
 }
@@ -143,7 +146,7 @@ export function setQuantity(
   write(
     snapshot.map((i) =>
       sameLine(i, { productId, sizeLabel })
-        ? { ...i, quantity: Math.min(Math.round(quantity), MAX_QUANTITY_PER_LINE) }
+        ? { ...i, quantity: Math.min(Math.round(quantity), HARD_LINE_CAP) }
         : i,
     ),
   );

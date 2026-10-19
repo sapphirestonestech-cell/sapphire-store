@@ -14,6 +14,7 @@ const FOOTER_LINKS: { heading: string; links: { label: string; href: string }[] 
     {
       heading: "Help",
       links: [
+        { label: "Track order", href: "/track" },
         { label: "Shipping and delivery", href: "/shipping" },
         { label: "Pre-order policy", href: "/preorder-policy" },
         { label: "Returns and refunds", href: "/returns" },
@@ -43,7 +44,7 @@ async function copyrightYear(): Promise<number> {
 export async function Footer() {
   const year = await copyrightYear();
   return (
-    <footer className="mt-auto bg-charcoal-band text-ivory-canvas">
+    <footer className="mt-auto bg-obsidian-black text-ivory-canvas">
       <div className="page-width grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-3">
           <p className="font-display text-heading-lg">Sapphire</p>

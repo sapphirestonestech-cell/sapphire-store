@@ -2,22 +2,37 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Hero } from "@/components/storefront/hero";
-import { CategoryPills, WhyUs } from "@/components/storefront/category-pills";
+import { WhyUs } from "@/components/storefront/category-pills";
+import {
+  BrowseChips,
+  BrowseSidebar,
+  type BrowseFilters,
+} from "@/components/storefront/browse-sidebar";
+import { BudgetFilter } from "@/components/storefront/budget-filter";
 import {
   ProductGrid,
   SectionHeader,
 } from "@/components/storefront/product-section";
 import { GridSkeleton } from "@/components/ui/skeleton";
-import { RingPlaceholder } from "@/components/ui/ring-placeholder";
-import { AvailabilityBadge } from "@/components/ui/availability-badge";
-import { Price } from "@/components/price";
 import { connectDb } from "@/lib/db";
 import { CategoryModel } from "@/lib/models/category";
-import { queryProducts, type ProductSummary } from "@/lib/products";
+import {
+  priceBounds,
+  queryProducts,
+  type ProductSummary,
+} from "@/lib/products";
+import { shopHeadingFor } from "@/lib/shop-heading";
+import type { ShopParams } from "@/components/storefront/shop-explorer";
 
 export const metadata = {
   title: "Luxurious rings at an affordable price",
 };
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+function first(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
 
 async function loadCategories() {
   try {
@@ -43,29 +58,6 @@ async function loadFeatured(): Promise<ProductSummary[]> {
   }
 }
 
-async function loadNewArrivals(): Promise<ProductSummary[]> {
-  try {
-    await connection();
-    const { products } = await queryProducts({}, { limit: 8, });
-    return products;
-  } catch {
-    return [];
-  }
-}
-
-async function loadPreOrders(): Promise<ProductSummary[]> {
-  try {
-    await connection();
-    const { products } = await queryProducts(
-      { availability: "pre_order", sort: "newest" },
-      { limit: 4 },
-    );
-    return products;
-  } catch {
-    return [];
-  }
-}
-
 function EmptyCatalogNotice() {
   return (
     <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
@@ -83,73 +75,61 @@ function EmptyCatalogNotice() {
   );
 }
 
-async function PreorderBand() {
-  const items = await loadPreOrders();
-  if (items.length === 0) return null;
+/** Filtered-to-empty state — DESIGN.md §7.23. */
+function FilterEmpty() {
   return (
-    <section aria-labelledby="preorder-heading" className="page-width">
-      <SectionHeader
-        title="Coming soon"
-        href="/shop?availability=pre_order"
-        linkLabel="Pre-order collection"
-      />
-      <h2 id="preorder-heading" className="sr-only">
-        Pre-order highlight
-      </h2>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-        {items.map((p) => (
-          <Link
-            key={p.id}
-            href={`/product/${p.slug}`}
-            className="group rounded-card bg-pure-white p-2 shadow-card transition-shadow duration-fast hover:shadow-float"
-          >
-            <div className="aspect-[4/5] overflow-hidden rounded-image">
-              {p.coverImage && !p.coverImage.url.startsWith("placeholder:") ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={p.coverImage.url}
-                  alt={p.name}
-                  loading="lazy"
-                  className="size-full object-cover transition-transform duration-base group-hover:scale-[1.03]"
-                />
-              ) : (
-                <RingPlaceholder label={p.name} />
-              )}
-            </div>
-            <div className="space-y-1.5 px-2 pb-2 pt-3">
-              <h3 className="text-body font-medium">{p.name}</h3>
-              <p className="text-body-lg font-semibold">
-                <Price amount={p.basePrice} />
-              </p>
-              <AvailabilityBadge
-                availability="pre_order"
-                arrivalDate={p.preorderArrivalDate}
-              />
-            </div>
-          </Link>
-        ))}
-      </div>
-    </section>
+    <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        className="mx-auto mb-4 size-4 text-champagne-gold"
+        fill="currentColor"
+      >
+        <path d="M8 0l1.8 6.2L16 8l-6.2 1.8L8 16l-1.8-6.2L0 8l6.2-1.8L8 0z" />
+      </svg>
+      <p className="mx-auto max-w-sm text-body-lg text-soft-taupe">
+        No rings match these filters. Clear filters to see all rings.
+      </p>
+      <Link
+        href="/"
+        className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+      >
+        Clear filters
+      </Link>
+    </div>
   );
 }
 
-async function NewArrivalsSection() {
-  const items = await loadNewArrivals();
-  if (items.length === 0) return <EmptyCatalogNotice />;
+function BrowseError() {
   return (
-    <section aria-labelledby="new-arrivals-heading" className="page-width">
-      <SectionHeader title="New arrivals" href="/shop?sort=newest" />
-      <h2 id="new-arrivals-heading" className="sr-only">
-        New arrivals
-      </h2>
-      <ProductGrid products={items} />
-    </section>
+    <div
+      role="alert"
+      className="rounded-card bg-pure-white p-10 text-center shadow-card"
+    >
+      <p className="text-body-lg text-soft-taupe">
+        We couldn&apos;t load the collection right now. Refresh the page to try
+        again.
+      </p>
+    </div>
   );
 }
 
-export default function HomePage() {
+function seeAllHref(params: ShopParams): string {
+  const sp = new URLSearchParams();
+  if (params.availability) sp.set("availability", params.availability);
+  if (params.category) sp.set("category", params.category);
+  if (params.min) sp.set("min", params.min);
+  if (params.max) sp.set("max", params.max);
+  const qs = sp.toString();
+  return qs ? `/shop?${qs}` : "/shop";
+}
+
+export default function HomePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const featuredPromise = loadFeatured();
-  const categoriesPromise = loadCategories();
 
   return (
     <>
@@ -160,19 +140,18 @@ export default function HomePage() {
           </div>
         }
       >
-        <HeroSlot featuredPromise={featuredPromise} categoriesPromise={categoriesPromise} />
+        <HeroSlot featuredPromise={featuredPromise} />
       </Suspense>
 
-      <Suspense fallback={<GridSkeleton count={4} />}>
-        <NewArrivalsSection />
-      </Suspense>
-
-      <Suspense fallback={null}>
-        <PreorderBand />
-      </Suspense>
-
-      <Suspense fallback={null}>
-        <CategoryTilesSection categoriesPromise={categoriesPromise} />
+      <Suspense
+        fallback={
+          <div className="page-width pb-16 md:pb-20">
+            <div className="mb-6 h-8 w-48 animate-pulse rounded bg-pale-sand/60" />
+            <GridSkeleton count={6} />
+          </div>
+        }
+      >
+        <BrowseSlot searchParams={searchParams} />
       </Suspense>
 
       <WhyUs />
@@ -183,65 +162,134 @@ export default function HomePage() {
 
 async function HeroSlot({
   featuredPromise,
-  categoriesPromise,
 }: {
   featuredPromise: Promise<ProductSummary[]>;
-  categoriesPromise: Promise<{ slug: string; name: string }[]>;
 }) {
-  const [featured, categories] = await Promise.all([
-    featuredPromise,
-    categoriesPromise,
-  ]);
-  return (
-    <>
-      <Hero featured={featured} />
-      <div className="page-width pb-16 md:pb-20">
-        <CategoryPills categories={categories} />
-      </div>
-    </>
-  );
+  const featured = await featuredPromise;
+  return <Hero featured={featured} />;
 }
 
-async function CategoryTilesSection({
-  categoriesPromise,
+async function lookupCategoryName(slug: string): Promise<string | null> {
+  try {
+    await connectDb();
+    const cat = await CategoryModel.findOne({ slug }).lean();
+    return cat?.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function BrowseSlot({
+  searchParams,
 }: {
-  categoriesPromise: Promise<{ slug: string; name: string }[]>;
+  searchParams: SearchParams;
 }) {
-  const categories = await categoriesPromise;
-  if (categories.length === 0) return null;
+  const sp = await searchParams;
+  const params: ShopParams = {
+    category: first(sp.category),
+    availability: first(sp.availability),
+    min: first(sp.min),
+    max: first(sp.max),
+  };
+  const filters: BrowseFilters = {
+    availability: params.availability,
+    category: params.category,
+    min: params.min,
+    max: params.max,
+  };
+  const hasFilters = Boolean(
+    filters.availability || filters.category || filters.min || filters.max,
+  );
+
+  let result: { products: ProductSummary[]; total: number } | null = null;
+  let categories: { slug: string; name: string }[] = [];
+  let bounds: { min: number; max: number } | null = null;
+  let failed = false;
+  try {
+    await connection();
+    const [res, cats, b] = await Promise.all([
+      queryProducts(params, { limit: 24 }),
+      loadCategories(),
+      priceBounds().catch(() => null),
+    ]);
+    result = res;
+    categories = cats;
+    bounds = b;
+  } catch {
+    failed = true;
+  }
+
+  if (failed || !result) {
+    return (
+      <div className="page-width pb-16 md:pb-20">
+        <BrowseError />
+      </div>
+    );
+  }
+
+  let heading = shopHeadingFor(params);
+  if (params.category) {
+    heading = (await lookupCategoryName(params.category)) ?? heading;
+  }
+
   return (
-    <section aria-labelledby="categories-heading" className="page-width">
+    <section
+      aria-labelledby="browse-heading"
+      className="page-width pb-16 md:pb-20"
+    >
       <SectionHeader
-        title="Shop by category"
-        href="/shop"
-        linkLabel="All rings"
+        title={heading}
+        meta={`${result.total} ${result.total === 1 ? "ring" : "rings"}`}
+        href={seeAllHref(params)}
       />
-      <h2 id="categories-heading" className="sr-only">
-        Shop by category
+      <h2 id="browse-heading" className="sr-only">
+        {heading}
       </h2>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-        {categories.map((cat) => (
-          <Link
-            key={cat.slug}
-            href={`/shop?category=${cat.slug}`}
-            className="group flex min-h-32 flex-col justify-end rounded-card bg-pure-white p-6 shadow-card transition-shadow duration-fast hover:shadow-float"
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 16 16"
-              className="mb-3 size-5 text-champagne-gold"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-            >
-              <circle cx="8" cy="9.5" r="4.5" />
-              <path d="M8 2l2 2.5L8 7 6 4.5 8 2z" />
-            </svg>
-            <span className="font-display text-heading text-warm-ink">
-              {cat.name}
-            </span>
-          </Link>
-        ))}
+
+      <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
+        {/* Mobile: quick chips and budget above the grid */}
+        <div className="space-y-4 lg:hidden">
+          <BrowseChips categories={categories} active={filters} />
+          {bounds ? (
+            <div className="rounded-card bg-pure-white/90 p-4 shadow-card">
+              <BudgetFilter
+                minBound={bounds.min}
+                maxBound={bounds.max}
+                valueMin={filters.min ? Number(filters.min) : undefined}
+                valueMax={filters.max ? Number(filters.max) : undefined}
+                availability={filters.availability}
+                category={filters.category}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        {/* Desktop: grouped sidebar */}
+        <div className="hidden lg:block">
+          <BrowseSidebar
+            categories={categories}
+            active={filters}
+            priceBounds={bounds}
+          />
+        </div>
+
+        {/* Grid */}
+        <div className="min-w-0">
+          {result.total === 0 ? (
+            hasFilters ? (
+              <FilterEmpty />
+            ) : (
+              <EmptyCatalogNotice />
+            )
+          ) : (
+            <ProductGrid
+              products={result.products}
+              priorityCount={4}
+                gridClassName="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4"
+
+            />
+          )}
+        </div>
       </div>
     </section>
   );

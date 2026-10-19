@@ -77,6 +77,8 @@ export interface ProductSummary {
   preorderArrivalDate: string | null;
   paymentMode: "full" | "deposit";
   depositPercent: number | null;
+  /** Admin-set per-order cap for pre-order rings (null when unlimited/absent). */
+  preorderMaxQty: number | null;
   freeDelivery: { allLocations: boolean; locationIds: string[] };
   type: string;
   shape: string;
@@ -111,6 +113,10 @@ export function toSummary(doc: ProductDoc): ProductSummary {
     depositPercent:
       doc.availability === "pre_order" && doc.paymentMode === "deposit"
         ? (doc.depositPercent ?? null)
+        : null,
+    preorderMaxQty:
+      doc.availability === "pre_order" && typeof doc.preorderMaxQty === "number"
+        ? doc.preorderMaxQty
         : null,
     freeDelivery: {
       allLocations: doc.freeDelivery?.allLocations ?? false,
@@ -158,6 +164,17 @@ export async function categorySlugMap(): Promise<Map<string, string>> {
   await connectDb();
   const cats = await CategoryModel.find({ isActive: true }).lean();
   return new Map(cats.map((c) => [c.slug, String(c._id)]));
+}
+
+/** Cheapest and most expensive published prices, in base currency — bounds for the budget range bar. */
+export async function priceBounds(): Promise<{ min: number; max: number } | null> {
+  await connectDb();
+  const [agg] = await ProductModel.aggregate<{ min: number; max: number }>([
+    { $match: { status: "published" } },
+    { $group: { _id: null, min: { $min: "$basePrice" }, max: { $max: "$basePrice" } } },
+  ]).allowDiskUse(true);
+  if (!agg || !Number.isFinite(agg.min) || !Number.isFinite(agg.max)) return null;
+  return { min: Math.floor(agg.min), max: Math.ceil(agg.max) };
 }
 
 /** Distinct filter option values, derived from the catalog (free-text spec fields). */

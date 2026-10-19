@@ -7,20 +7,28 @@ export function SectionHeader({
   title,
   href,
   linkLabel = "See all",
+  meta,
 }: {
   title: string;
   href?: string;
   linkLabel?: string;
+  /** Quiet secondary text beside the heading (e.g. result count). */
+  meta?: string;
 }) {
   return (
     <div className="mb-6 flex items-baseline justify-between gap-4">
-      <h2 className="font-display text-heading-lg text-warm-ink md:text-heading-lg">
-        {title}
-      </h2>
+      <div className="flex min-w-0 items-baseline gap-3">
+        <h2 className="font-display text-heading-lg text-warm-ink md:text-heading-lg">
+          {title}
+        </h2>
+        {meta ? (
+          <span className="text-body text-soft-taupe">{meta}</span>
+        ) : null}
+      </div>
       {href ? (
         <Link
           href={href}
-          className="inline-flex min-h-11 items-center gap-1 text-body font-medium text-deep-gold hover:underline"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-body font-medium text-deep-gold hover:underline"
         >
           {linkLabel}
           <svg
@@ -42,12 +50,20 @@ export function SectionHeader({
 export function ProductGrid({
   products,
   priorityCount = 0,
+  gridClassName,
 }: {
   products: ProductSummary[];
   priorityCount?: number;
+  /** Override the default 2/3/4-column grid (e.g. narrower beside a sidebar). */
+  gridClassName?: string;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
+    <div
+      className={
+        gridClassName ??
+        "grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4"
+      }
+    >
       {products.map((p, i) => (
         <ProductCard key={p.id} product={p} priority={i < priorityCount} />
       ))}

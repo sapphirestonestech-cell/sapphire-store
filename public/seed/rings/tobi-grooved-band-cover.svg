@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" width="800" height="1000" role="img" aria-label="tobi-grooved-band cover">
+  <title>tobi-grooved-band — cover</title>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="36%" r="85%">
+      <stop offset="0" stop-color="#fdfbf7"/>
+      <stop offset="1" stop-color="#ebe3d6"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F1DDA2"/>
+      <stop offset="0.45" stop-color="#C9A24B"/>
+      <stop offset="1" stop-color="#8A6A1F"/>
+    </linearGradient>
+    <linearGradient id="metalDark" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#C9A24B"/>
+      <stop offset="1" stop-color="#8A6A1F"/>
+    </linearGradient>
+    <linearGradient id="gem" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#eaf1f6"/>
+      <stop offset="1" stop-color="#c9d7e2"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ecdcc9"/>
+      <stop offset="0.5" stop-color="#f3e7d8"/>
+      <stop offset="1" stop-color="#e0cdb5"/>
+    </linearGradient>
+    <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#211d19" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#211d19" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <ellipse cx="400" cy="720" rx="240" ry="52" fill="url(#shadow)"/>
+  
+  <g transform="translate(400 520)" stroke-linejoin="round" stroke-linecap="round">
+    
+    <circle cx="0" cy="0" r="150" fill="none" stroke="url(#metal)" stroke-width="46"/>
+    <circle cx="0" cy="0" r="150" fill="none" stroke="#ffffff" stroke-width="7.36" stroke-linecap="round" stroke-dasharray="26 400" stroke-dashoffset="18" opacity="0.5"/>
+        <circle cx="0" cy="0" r="150" fill="none" stroke="url(#metalDark)" stroke-width="8" opacity="0.85"/>
+  </g>
+</svg>
