@@ -8,7 +8,7 @@ Unanswered questions and what each one blocks. Move answered items to `DECISIONS
 
 | # | Question | Blocks |
 |---|----------|--------|
-| 1 | **Hosting:** Vercel + MongoDB Atlas, a VPS/container, or something else? | Deployment of Phase 1; environment variables and CI. (Local dev is unaffected.) |
+| ~~1~~ | ~~**Hosting:** Vercel + MongoDB Atlas, a VPS/container, or something else?~~ | **Resolved 2026-10-20:** Helicarrier (see DECISIONS.md). Smoke deploy live at `https://sapphire-store.on.helicarrier.xyz`. |
 
 Resolved since first drafted (see DECISIONS.md): admin auth approach (#2), seed
 content (#3), tagline wording (#4) and placeholder wordmark (#5) were answered in
@@ -18,7 +18,7 @@ the Phase 1 plan approval. Nothing else blocks Phase 1.
 
 | # | Question | Blocks |
 |---|----------|--------|
-| 1 | **Hosting** still undecided (carried from Phase 1). | Deployment; environment variables (`MONGODB_URI`, Cloudinary, gateway keys) and CI. |
+| ~~1~~ | ~~**Hosting** still undecided (carried from Phase 1).~~ | **Resolved 2026-10-20:** Helicarrier (DECISIONS.md). Env vars and the DB reference are configured on the service; the BACHS webhook endpoint (#21) can now be registered against the live URL. |
 | 6 | **BACHS gateway:** documentation link, supported currencies, fees, integration method, sandbox/live credentials? | BACHS payment integration (ProductReq.md §23.1, risk §19). |
 | 7 | **Paystack:** account and API keys (test and live)? | Paystack integration. |
 | 13 | **IP geolocation provider** for default-currency detection (§7.3). | Default currency on first visit (USD until the visitor switches). |
@@ -39,17 +39,32 @@ accounts), deferring the payment gateways, and the admin gateway toggle UI
 | 17 | **Brand name, logo, gold hex, typefaces, image ratio, status colors, sparkle motif, gateway logos, photography, dark mode** — the ten items in DESIGN.md §13. | Final visual sign-off before launch. |
 | 18 | **Google OAuth credentials** — client must create the OAuth client ID in Google Cloud Console (guide given 2026-10-18) and add `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` to `.env.local`. | Google sign-in going live. Email/password auth works without it; the button stays hidden until keys exist. |
 | 19 | **Size guide scope** — ProductReq.md §22 lists "Ring size guide" as a *future enhancement*, and DESIGN.md §7.13 only permits a Size guide link when a guide exists. Do we build the `/know-my-size` page + product-page link now, or defer? | The Size guide link on the product page and the `/know-my-size` page (both planned, currently held). |
-| 21 | **BACHS webhook endpoint** — `BACHS_WEBHOOK_SECRET` is empty in `.env.local` and no endpoint is registered with BACHS (and the local tunnel URL is ephemeral), so no webhook ever reaches the app; fulfilment currently rides on the return-page poller. | Production webhook delivery. Client must create the endpoint in the BACHS Developer Portal once the public URL exists (hosting still undecided, #1) and paste the signing secret. |
+| 21 | **BACHS webhook endpoint** — `BACHS_WEBHOOK_SECRET` is empty in `.env.local` and on the Helicarrier service, and no endpoint is registered with BACHS, so no webhook ever reaches the app; fulfilment currently rides on the return-page poller. Hosting is resolved (2026-10-20): the stable URL is `https://sapphire-store.on.helicarrier.xyz/api/payments/webhook`. | Client must create the endpoint in the BACHS Developer Portal pointing at that URL and paste the signing secret into the service env. |
 
 ## Non-blocking (noted for later)
 
-- **BACHS dev return needs a live public URL.** BACHS rejects localhost in
-  `success_url`, so local BACHS testing requires `APP_URL` to be a live public
-  origin (currently a cloudflared **quick tunnel**). The quick-tunnel URL is
-  **ephemeral**: when it is revoked or the process restarts, update `APP_URL` in
-  `.env.local` and restart `npm run dev`, or BACHS returns will dead-end.
-  Paystack does not need the tunnel (it returns straight to localhost). A stable
-  host (see #1) removes this fragility.
+- **BACHS dev return now has a stable URL.** Hosting resolved 2026-10-20:
+  set `APP_URL=https://sapphire-store.on.helicarrier.xyz` on the service (done)
+  for BACHS `success_url`. Local development against BACHS can either point at
+  the live URL or keep using a cloudflared quick tunnel (ephemeral — update
+  `.env.local` and restart when it changes). Paystack returns to
+  `APP_URL`/`checkout/return` too, so it follows the same setting.
+
+- **Deploys are manual.** The service has `autoDeploy: true`, but a push to
+  `origin/main` did not trigger a deployment (2026-10-20); deploys were issued
+  with the MCP `deploy_service` tool. Confirm whether push-to-deploy works
+  before relying on it, or disable the flag to avoid confusion.
+- **Release (pre-deploy) command cannot seed this app.** Helicarrier's
+  standalone runtime image contains no `scripts/`, no `tsx` and no source, so
+  `npm run seed` fails there (`tsx: not found`). The production seed was run
+  once through the MCP `db_query` tool instead
+  (`scripts/seed.prod-query.js`, mirrors `scripts/seed.ts` and is
+  idempotent). The service's release command is currently **empty** — re-run
+  the query after any database reset instead of restoring `npm run seed`.
+- **Stray file `--full-page`** (481 KB) is committed in the repo root (added in
+  `82e4d1c "deployment readiness"`) — an accidental screenshot capture (looks
+  like `playwright screenshot --full-page` output with the filename dropped).
+  Confirm it can be deleted.
 
 - **Storefront caching:** DB-reading storefront routes render at request time
   (`await connection()`), so no page is statically cached. Decide whether to move
@@ -97,3 +112,10 @@ accounts), deferring the payment gateways, and the admin gateway toggle UI
 - **Remove your own admin account:** the last admin and self-removal are blocked,
   but an admin cannot delete or deactivate their own account by any route yet.
   Confirm whether self-service account closure is required.
+- **Competing `html { zoom }` rules:** `globals.css` sets `zoom: 0.95` in
+  `@layer base` (the "Global 5% scale-down") **and** an unlayered
+  `zoom: 0.97; font-size: 97.087%` further down, so the effective zoom is
+  **0.97** everywhere (unlayered wins). Chrome fills the screen under root zoom,
+  so nothing looks broken — but the documented 5% reduction is actually 3%.
+  Confirm the intended value; one rule should be removed. (Found during the
+  2026-10-20 mobile pass; left untouched.)

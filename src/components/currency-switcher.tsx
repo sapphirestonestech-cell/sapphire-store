@@ -25,15 +25,18 @@ export function CurrencySwitcher({ className = "" }: { className?: string }) {
             type="button"
             onClick={() => setCurrency(c)}
             aria-pressed={active}
-            className={[
-              "inline-flex h-8 items-center gap-1 rounded-pill px-2.5 text-label font-medium transition-colors duration-fast",
+              className={[
+                "inline-flex h-8 items-center gap-1 rounded-pill px-2 sm:px-2.5 text-label font-medium transition-colors duration-fast",
               active
                 ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
                 : "text-muted hover:text-primary",
             ].join(" ")}
           >
             <span aria-hidden="true">{currencySymbol(c)}</span>
-            <span>{c}</span>
+            {/* Below sm the pill shows symbols only so the header cluster
+                fits small phones; the code stays for screen readers and
+                reappears at sm+ (ProductReq.md §7.3: symbol or code). */}
+            <span className="sr-only sm:not-sr-only">{c}</span>
             <span className="sr-only">{active ? "(selected)" : ""}</span>
           </button>
         );

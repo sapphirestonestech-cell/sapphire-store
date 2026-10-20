@@ -246,9 +246,12 @@ async function BrowseSlot({
         {heading}
       </h2>
 
-      <div className="grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
+      {/* minmax(0,1fr) + min-w-0 on both grid items: without them the
+          implicit mobile track grows to the chips row's min-content and the
+          page scrolls sideways (measured 665px document width at 390px). */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-8">
         {/* Mobile: quick chips and budget above the grid */}
-        <div className="space-y-4 lg:hidden">
+        <div className="min-w-0 space-y-4 lg:hidden">
           <BrowseChips categories={categories} active={filters} />
           {bounds ? (
             <div className="rounded-md bg-card/90 p-4 shadow-card">

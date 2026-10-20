@@ -263,3 +263,27 @@ rework, recorded here retroactively (the code carried them first).
 | — | How is the migration sequenced? | **Phased, app working at every step** (client instruction). Phase A: DESIGN.md. Phase B: tokens + theme provider/toggle. Phase C: admin shell and pages. Phase D: storefront. Pause for review after each. |
 | — | How do unmigrated components keep working mid-migration? | **Legacy token aliases.** Old names (`ivory-canvas`, `champagne-gold`, `font-display`, `radius-card`, …) stay in `@theme` but resolve to the new palette, so nothing breaks before its component is migrated. |
 | — | Where does the theme choice live? | **`localStorage` key `sapphire_theme`**, applied to `<html data-theme>` by an inline pre-paint guard (no flash) and kept in sync by `ThemeProvider`. No key = follow the OS. |
+
+## 2026-10-20 — Hosting: Helicarrier (smoke deployment)
+
+Resolves AGENTS.md §4 #2 (backend/database/hosting) and OPEN_QUESTIONS.md
+Phase 1/Phase 2 "Hosting".
+
+| # | Question | Decision |
+|---|----------|----------|
+| 2 | Which hosting platform? | **Helicarrier** (client instruction: "deploy via the Helicarrier MCP"). Project `sapphire`, service `sapphire-store`, plan `heli-s2`, region-neutral, Next.js builder (standalone output), git-linked to `github.com/sapphirestonestech-cell/sapphire-store` branch `main`. |
+| — | Which database? | **Helicarrier managed MongoDB 7** (`sapphire-db`), private-network only (no external access). `MONGODB_URI` injected into the service via a Helicarrier reference, never pasted. |
+| — | Which URL? | Free subdomain for the smoke deploy: **`https://sapphire-store.on.helicarrier.xyz`** (`APP_URL` set to match). Custom domain later, once the client owns a domain. |
+| — | How is the production database seeded? | **One-shot, via the Helicarrier `db_query` MCP tool** (`scripts/seed.prod-query.js` mirrors `scripts/seed.ts`). The release-command approach (`npm run seed`) cannot work on Helicarrier: the standalone runtime image has no `scripts/`, no `tsx` and no source. Re-running the query is idempotent. |
+| — | When do deploys happen? | **Manually, via `deploy_service`** on the MCP for now (auto-deploy is enabled on the service but a push did not trigger one; revisit before relying on it). |
+
+## 2026-10-20 — Mobile width pass
+
+Client instruction: "true full width, navbar 100%, highly responsive, keep the
+existing design concept — desktop unchanged."
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | `DESIGN.md` says `page-width` = 80% centred, flagged **[Confirm]**. AGENTS.md wants mobile-first full screen width. Which? | **Full width below `md` with a 16px gutter; `width: 80%` restored at `≥768px`.** Desktop stays exactly as before (verified 1152px = 80% of 1440). |
+| — | Currency switcher vs the Tailwind-v4 `hidden`/`inline-flex` sort bug: should the switcher hide on phones? | **No — the currency switcher stays visible at all widths.** ProductReq.md requires the switcher "always reachable from the header" and AGENTS.md a "visible switch between USD and NGN at all times". Below `sm` it compacts to symbols-only (`$`/`₦`) with `sr-only` full labels for a11y. |
+| — | What about the theme toggle (same sort bug, no such requirement)? | **Hidden below `sm`** via `max-sm:hidden` (Tailwind v4 emits `.hidden` before `.inline-flex`, so `hidden sm:inline-flex` never works). Reusable pattern for any future visibility toggle: use `max-*:hidden`, not `hidden sm:*`. |

@@ -124,10 +124,22 @@
 
 /* Layout (§4.5) */
 @utility page-width {
-  /* Layout (DESIGN.md §4.5): 80% of the viewport, centred. */
-  width: 80%;
+  /* Mobile-first: full width with a 16px gutter (client instruction,
+     2026-10-20: "mobile view — full screen width"). */
+  width: 100%;
   max-width: none;
   margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* Desktop (md+): 80% of the viewport, centred (DESIGN.md §4.5,
+   DECISIONS.md) — unchanged from the approved desktop look. Unlayered so
+   it deterministically wins over the @utility above at md and up. */
+@media (min-width: 768px) {
+  .page-width {
+    width: 80%;
+    padding-inline: 0;
+  }
 }
 
 /*

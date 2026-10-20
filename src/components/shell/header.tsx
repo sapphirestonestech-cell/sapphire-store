@@ -40,7 +40,7 @@ function SearchField() {
     <form
       onSubmit={onSubmit}
       role="search"
-      className="relative hidden flex-1 items-center md:flex"
+      className="relative flex flex-1 items-center"
     >
       <label htmlFor="header-search" className="sr-only">
         Search rings
@@ -342,7 +342,7 @@ function AccountMenu({ user }: { user: HeaderUser | null }) {
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
-          className={`size-3.5 transition-transform duration-fast ${open ? "rotate-180" : ""}`}
+          className={`size-3.5 max-sm:hidden transition-transform duration-fast ${open ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -513,7 +513,7 @@ export function Header({
         scrolled ? "shadow-float" : ""
       }`}
     >
-      <div className="page-width flex h-16 items-center gap-3 md:h-20 md:gap-6">
+      <div className="page-width flex h-16 items-center gap-2 sm:gap-3 md:h-20 md:gap-6">
         <Link
           href="/"
           className="font-sans text-heading-lg font-medium tracking-tight text-primary"
@@ -545,12 +545,20 @@ export function Header({
           </ul>
         </nav>
 
-        <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+        <div className="ml-auto flex items-center gap-1 sm:gap-1.5 md:gap-2">
           <div className="hidden flex-1 md:flex md:max-w-xs md:px-2">
             <SearchField />
           </div>
-          <CurrencySwitcher className="hidden sm:inline-flex" />
-          <ThemeToggle className="hidden sm:inline-flex" />
+          {/* Currency stays reachable at every width (ProductReq.md:
+              "Currency switcher always reachable from the header"); its
+              component compacts to symbols below sm. The theme toggle is
+              decorative below sm (OS preference still applies) and would
+              push this cluster past the viewport. `max-sm:hidden` rather
+              than `hidden sm:inline-flex`: Tailwind v4 sorts `.hidden`
+              before `.inline-flex`, so a base `hidden` loses to the
+              component's own base `inline-flex`. */}
+          <CurrencySwitcher />
+          <ThemeToggle className="max-sm:hidden" />
           <CartLink />
           <AccountMenu user={user} />
         <MobileMenu categories={categories} />

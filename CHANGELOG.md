@@ -847,3 +847,96 @@ app working at every step.
   globals.css edit to reach the compiled chunk (the known Turbopack staleness);
   computed `zoom` is `0.95` on `/` and `/admin/login`.
 - `npm run typecheck` clean; eslint clean on both touched components.
+
+## 2026-10-20 — Production smoke deployment (Helicarrier)
+
+### Fixed
+
+- **Storefront prerender failure under Cache Components** —
+  `src/app/(storefront)/layout.tsx` awaited `SignedInSlot()` (→ `auth()` →
+  `cookies()`) at layout level outside a Suspense boundary, so every storefront
+  route failed prerendering ("uncached or runtime data during prerendering").
+  Extracted `StorefrontShell`, added `resolveSignedIn()` + `SignedInGate`, and
+  wrapped the tree in `<Suspense fallback={<SignedInProvider signedIn={false}>…}>`
+  (same pattern as `HeaderSlot`). Commit `fa21827`. Verified: local build green
+  (all storefront routes ◐ Partial Prerender), `npm test` 66/66, container build
+  65/65 pages.
+
+### Added
+
+- **Helicarrier deployment** — project `sapphire`, service `sapphire-store`
+  (Next.js builder, plan `heli-s2`, branch `main`), managed MongoDB 7
+  (`sapphire-db`, private network only, `MONGODB_URI` injected by reference),
+  16 env vars imported from `.env.local`, free subdomain
+  `https://sapphire-store.on.helicarrier.xyz` (= `APP_URL`).
+  Deployment `7aab4d79` live 2026-10-20T17:11:39Z.
+- **Production seed via MCP `db_query`** — `scripts/seed.prod-query.js`
+  (mirrors `scripts/seed.ts`, idempotent): 4 categories, 6 delivery locations,
+  4 settings, opening exchange rate (1,600 NGN/USD), 8 fixture rings with
+  Pexels photos, admin user. The release-command route (`npm run seed`) was
+  abandoned: Helicarrier's standalone runtime image ships no `scripts/`, no
+  `tsx` and no source (diagnostic release command confirmed; the service's
+  release command is now empty). A stray `__probe` settings doc from
+  connectivity testing was removed.
+
+### Verified
+
+- Live smoke test: `/`, `/shop`, `/terms`, `/track`, `/admin/login` → 200;
+  `/api/products` returns the 8 rings; `/api/currency/context` → USD base,
+  rate 1600; `/api/delivery/locations` → 6 locations; homepage renders
+  "Aurelia Solitaire"; `/product/aurelia-solitaire` → 200; seed photo → 200.
+- Admin login with the seeded credentials → `{"ok":true}`, `/admin` → 200.
+- Known gaps (recorded in OPEN_QUESTIONS.md): push-to-deploy didn't fire
+  (deploys are manual via MCP), no release/seed step in the pipeline,
+  `BACHS_WEBHOOK_SECRET` unset, Google OAuth redirect only registered for
+  `localhost:3000`, placeholder delivery fees/seed photos still in use.
+
+## 2026-10-20 — Mobile width & header responsive fixes
+
+### Fixed
+
+- **Mobile container not full width** — `page-width` was `width: 80%` with no
+  padding at every breakpoint, so every header/section sat ~39px inset on a
+  390px phone. Now `width: 100%; padding-inline: 16px` below `md`, with the
+  original `width: 80%` restored unconditionally at `min-width: 768px`
+  (desktop pixel-identical — verified 1152px = 80% of 1440).
+- **Horizontal page scroll on the homepage** (document 665px wide at a 390px
+  viewport) — the browse grid (`grid gap-6 lg:grid-cols-[15rem_minmax(0,1fr)]`)
+  sized its implicit column to the `space-y-4 lg:hidden` sidebar's min-content
+  (622px) and propagated it to the document. The implicit track is now
+  `grid-cols-[minmax(0,1fr)]` (the explicit lg track is unchanged) and the
+  sidebar item carries `min-w-0`.
+- **Currency switcher + theme toggle never hid on small screens** —
+  Tailwind v4 emits `.hidden` before `.inline-flex` in the utilities layer
+  (empirically confirmed), so `hidden sm:inline-flex` resolved to a visible
+  flex item at every width and pushed the header cluster to 322px, overflowing
+  the 390px viewport. The theme toggle now uses `max-sm:hidden`; the currency
+  switcher is intentionally left visible at all widths (see DECISIONS.md).
+- **Mobile-menu sheet search invisible** — the SearchField form itself carried
+  `hidden md:flex`, which also applied inside the open sheet. The form is now
+  always `flex`; desktop visibility is controlled by the header wrapper.
+- **Header crowding** — gaps tightened below `sm` (`gap-1`, then
+  `sm:gap-1.5`, `md:gap-2`; header row `gap-2`), the account chevron is
+  `max-sm:hidden`, and the currency switcher shows compact symbols-only
+  (`sr-only sm:not-sr-only` on the code, `px-2 sm:px-2.5`).
+
+### Verified
+
+- Real-browser sweep (agent-browser, Chrome): `/` at 320/360/390×844 →
+  `document.scrollWidth == innerWidth` (zero overflow); all of `/shop`,
+  `/product/amara-trilogy`, `/cart`, `/track`, `/checkout`, `/search`,
+  `/terms`, `/admin/login` clean at 390. Header div spans 0..390 with a 16px
+  content gutter; currency pill (60px, symbols-only) visible; theme toggle
+  hidden below `sm`; sheet search field visible.
+- Desktop 1440×900 unchanged: `.page-width` = 1152px (exactly 80%, centered),
+  zoom 0.97, search/nav/theme full controls, full three-item currency pill.
+- `npm run build` green (PPR shape unchanged), `npm test` 66/66,
+  `npm run typecheck` clean, lint 0 errors (1 pre-existing warning in
+  untouched `checkout-form.tsx`).
+
+### Flagged (not changed)
+
+- `html` carries two competing zoom rules — `@layer base` `zoom: 0.95` and an
+  unlayered `zoom: 0.97; font-size: 97.087%` — so the effective zoom is 0.97
+  everywhere; Chrome fills the screen under root zoom so there is no gap.
+  Left as-is pending a decision (see OPEN_QUESTIONS.md).
