@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { connectDb } from "@/lib/db";
 import { AdminUserModel } from "@/lib/models/settings";
@@ -11,7 +11,11 @@ import { setSessionCookie } from "@/lib/session";
  * signed-in email matches an AdminUser record. Any other email is refused
  * and sent back to the login page with an explanation.
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
+  // Redirects must use the public origin, not request.url — behind a proxy
+  // the latter resolves to the container's internal host (e.g. 0.0.0.0:8080).
+  const base =
+    process.env.APP_URL || process.env.AUTH_URL || "http://localhost:3000";
   let isAdmin = false;
   try {
     const session = await auth();
@@ -35,8 +39,8 @@ export async function GET(request: NextRequest) {
   }
   if (!isAdmin) {
     return NextResponse.redirect(
-      new URL("/admin/login?error=not-admin", request.url),
+      new URL("/admin/login?error=not-admin", base),
     );
   }
-  return NextResponse.redirect(new URL("/admin", request.url));
+  return NextResponse.redirect(new URL("/admin", base));
 }
