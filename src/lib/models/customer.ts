@@ -67,8 +67,7 @@ export const AddressModel: Model<AddressDoc> =
  * Password-reset token. Only the SHA-256 hash of the token is stored, so a
  * database leak cannot be used to reset passwords. Single-use; expires after
  * one hour.
- */
-export interface PasswordResetTokenDoc extends mongoose.Document {
+ */export interface PasswordResetTokenDoc extends mongoose.Document {
   customerId: mongoose.Types.ObjectId;
   tokenHash: string;
   expiresAt: Date;

@@ -8,9 +8,9 @@ export const instant = false;
 function CardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-card bg-pure-white p-8 shadow-card">
-        <p className="font-display text-heading-lg">Sapphire</p>
-        <p className="mt-1 text-body text-soft-taupe">{TAGLINE}</p>
+      <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
+        <p className="font-sans text-heading-lg">Sapphire</p>
+        <p className="mt-1 text-body text-muted">{TAGLINE}</p>
         {children}
       </div>
     </div>
@@ -29,7 +29,7 @@ async function ResetSlot({
       <h1 className="mb-2 mt-8 text-subheading font-semibold">
         Choose a new password
       </h1>
-      <p className="mb-6 text-body text-soft-taupe">
+      <p className="mb-6 text-body text-muted">
         Your new password replaces the old one immediately.
       </p>
       <ResetPasswordForm token={token} />
@@ -46,7 +46,7 @@ export default async function ResetPasswordPage({
     <Suspense
       fallback={
         <CardShell>
-          <div className="mt-8 h-48 animate-pulse rounded-card bg-gold-wash" />
+          <div className="mt-8 h-48 animate-pulse rounded-md bg-accent-wash" />
         </CardShell>
       }
     >

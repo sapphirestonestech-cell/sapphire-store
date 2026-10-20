@@ -71,15 +71,15 @@ export function DeliveryEstimator({
       <h2 id="delivery-estimator-heading" className="text-body font-semibold">
         Delivery
       </h2>
-      <div className="rounded-card bg-pure-white p-5 shadow-card">
-        <label htmlFor="delivery-location" className="text-body text-soft-taupe">
+      <div className="rounded-md bg-card p-5 shadow-card">
+        <label htmlFor="delivery-location" className="text-body text-muted">
           Where should we deliver?
         </label>
         <select
           id="delivery-location"
           value={locationId}
           onChange={(e) => choose(e.target.value)}
-          className="mt-2 h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+          className="mt-2 h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
         >
           <option value="">
             {locations.length === 0
@@ -94,21 +94,21 @@ export function DeliveryEstimator({
         </select>
 
         {loading ? (
-          <p aria-live="polite" className="mt-3 text-body text-soft-taupe">
+          <p aria-live="polite" className="mt-3 text-body text-muted">
             Checking delivery…
           </p>
         ) : null}
 
         {error ? (
-          <p role="alert" className="mt-3 text-body text-status-error">
+          <p role="alert" className="mt-3 text-body text-danger">
             {error}
           </p>
         ) : null}
 
         {result?.kind === "not_served" ? (
-          <p className="mt-3 text-body text-warm-ink">
+          <p className="mt-3 text-body text-primary">
             {result.message}{" "}
-            <Link href="/contact" className="text-deep-gold underline underline-offset-4">
+            <Link href="/contact" className="text-accent-strong underline underline-offset-4">
               Contact us
             </Link>
             .
@@ -116,7 +116,7 @@ export function DeliveryEstimator({
         ) : null}
 
         {result && result.kind !== "not_served" ? (
-          <p aria-live="polite" className="mt-3 text-body text-warm-ink">
+          <p aria-live="polite" className="mt-3 text-body text-primary">
             {result.kind === "preorder" ? (
               <>
                 {result.arrivalLabel ? (
@@ -144,7 +144,7 @@ export function DeliveryEstimator({
         ) : null}
 
         {locations.length === 0 ? (
-          <p className="mt-3 text-body text-soft-taupe">
+          <p className="mt-3 text-body text-muted">
             Delivery locations are being set up. Check back soon.
           </p>
         ) : null}

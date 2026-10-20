@@ -197,3 +197,69 @@ rework, recorded here retroactively (the code carried them first).
 | — | Overall vertical rhythm in the right column? | **16px between blocks** (`space-y-4`, down from 24px), and the purchase status line no longer reserves a blank line when it has nothing to say. |
 | — | Dead `size-selector.tsx`? | **Left in place pending an explicit delete decision** (it is imported nowhere and superseded by the panel's dropdown). |
 
+## 2026-10-19 — Headings: Playfair Display replaces Cormorant Garamond
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Which font for the order page title (and headings generally)? | **Playfair Display**, swapped site-wide through the single `--font-display` token (client instruction, "choose a better font for the order title"). Cormorant Garamond was rejected because its thin, high-contrast strokes read as wispy at the sizes actually used — notably a 28px confirmation heading. Playfair Display was already named as an acceptable alternative in DESIGN.md §3.1, so this resolves open question 4 rather than introducing a new face. |
+| — | Why site-wide rather than only the order title? | **Because headings are governed by one token.** Patching just the order page would have made headings visually inconsistent across storefront/admin for no benefit; the client chose the site-wide swap over an order-page-only Inter fallback. |
+| — | Does the serif change affect the `₦` glyph? | **No.** All prices render in Inter (sans) — no `font-display` element contains a currency amount, so DESIGN.md §3.1's Naira-glyph rule still holds. |
+
+
+## 2026-10-19 — Admin commerce: orders, payments and dashboard
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Where should the missing admin commerce pages come from — ProductReq.md or the code as built? | **Build against the current system.** The PRD is behind the implementation (products, payments, currency), so the UI follows the existing models and flows rather than reintroducing older specs. |
+| — | Do payments get their own `Payment` / `WebhookEvent` collections? | **No.** Payment fields stay on the `Order` (`paymentGateway`, `paymentReference`, `paymentAmountMinor`, `paymentStatus`, `paidAt`). A separate payment record can be added later if webhook auditing is required. |
+| — | Where do the gateway enable/disable controls live? | **Admin → Settings**, in their own "Payment gateways" card, calling `GET/PUT /api/admin/payments/gateways`. Paystack and BACHS toggle independently. |
+| — | How does an order become Paid? | **Only gateway verification** (`verifyOrderPayment`). "Paid" is never offered as a manual status transition. Verification requires the gateway amount and currency to match the order. |
+| — | What happens when verification reports a different amount or currency? | **Flag it.** `paymentStatus` becomes `mismatch`, the order stays `pending_payment`, and the admin sees the flag instead of silently fulfilling. |
+| — | Refund workflow? | **Manual in v1.** The admin refunds in the gateway dashboard, then marks the order Refunded (order status and payment status both `refunded`), with an optional note in the timeline. |
+| — | Can an order be cancelled after shipping? | **No.** Cancellation is allowed from `pending_payment`, `paid` or `processing`; shipped/delivered orders can only be refunded. |
+| — | Does cancelling or refunding return stock? | **Not yet.** Stock is decremented at fulfilment, so there is nothing to return — recorded as an open question rather than silently changing inventory. |
+| — | How is "total sales" defined on the dashboard? | **Gateway-confirmed payments** (`paymentStatus: paid`) excluding cancelled and refunded orders. Deposits count as the amount actually collected. USD and NGN totals are converted per order using each order's frozen rate and rounded once at the end. |
+| — | How is the sales chart bucketed? | **Daily (30 days), weekly (12 weeks), monthly (12 months)**, selected by `?range=` and rendered as a hand-built bar chart — no new chart dependency. |
+| — | What counts as low stock? | **2 rings or fewer in total** across sizes for published in-stock products. The fixed threshold is listed in OPEN_QUESTIONS.md pending the client's value/setting. |
+
+
+## 2026-10-20 — Admin accounts and the storefront profile menu
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | How is a new admin added? | **An existing admin sets the email and password** in Admin → Admins, then shares them. No invite email, so the flow does not depend on SMTP being configured. |
+| — | What can additional admins do? | **Everything.** Every admin is a full admin (products, categories, delivery, orders, payments, settings, gateways and other admins). The `staff` role stays in the schema but is unused until limited access is requested. |
+| — | Can admins be removed? | **Yes**, with two server-enforced guards: you cannot remove your own account, and the last remaining admin cannot be removed. |
+| — | Should a signed cookie alone grant admin access? | **No.** Every admin request revalidates the session against `AdminUser`. Removing an admin logs them out immediately; a cookie for a deleted admin is cleared and treated as signed out. |
+| — | What are the storefront profile menu options? | **View user account, View back office, Log out** (client instruction). "View back office" renders only for an admin session; "View user account" links to `/account`. |
+| — | Does "View back office" need a customer account too? | **No.** It is shown for an admin session on its own (HMAC cookie) or when a signed-in customer's email matches an admin, matching how the header already resolves `isAdmin`. |
+| — | Admin login credentials? | **`sapphirestonestech@gmail.com` / `sapphirestore`** (client instruction). The placeholder `admin@sapphire.test` row was renamed in place. The password is weak and should be changed before any real deployment. |
+
+
+## 2026-10-20 — Full-width back office, analytics and rich-text editor
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Should the back office stay narrow or go full width? | **Full width.** The client asked for a "sophisticated" back office; the `max-w-5xl` cap was removed and the panel is now a responsive multi-column grid with a 64px rail. |
+| — | Which charting library should we use? | **None.** Charts are hand-built SVG/HTML (`src/components/admin/charts.tsx`) so no new dependency is added and every chart can carry an accessible `sr-only` data table. |
+| — | How do charts stay accessible and on-brand? | **Label + icon/count on every slice and bar** (colour is never the only signal), and only design tokens are used for fills. |
+| — | Where do analytics appear? | **Full dashboard** plus **compact metric strips** on Orders and Payments, per the client's instruction. |
+| — | How do charts behave on small screens? | **Charts stack**, while metric cards stay dense (more per row). |
+| — | Which rich-text editor? | **Our own contenteditable editor**, not CKEditor or TipTap. A third-party editor's output would be stripped by the strict server sanitizer, and the client asked to keep it dependency-free. |
+| — | Which tags may formatted descriptions contain? | The existing allowlist plus **`<u>` and `<blockquote>`** (the new toolbar controls). `<script>`, event handlers, inline `style` and `javascript:` hrefs remain stripped. |
+| — | Why add `connection()` to the admin layout? | The panel reads cookies and live data, so it must render at request time. `connection()` makes that explicit and removes the "unstable value `Date.now()` while prerendering" warning from the session's timestamp check. |
+
+
+## 2026-10-20 — Design system replacement (flat, dark+light, finance-derived)
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | The pasted finance-dashboard spec contradicts Sapphire's DESIGN.md on fundamentals (radius, shadows, accent, canvas, type). How to reconcile? | **Replace the design system.** The finance spec's *structure and tokens* become the new primary system. The old gold/ivory/serif content moves to a superseded appendix. |
+| — | Scope of the replacement? | **Full platform** — storefront and back office both move to the new system (phased: DESIGN.md → tokens+theme → admin → storefront). |
+| — | The spec says "no brand accent; only data/status colours." Sapphire's brief says "luxurious gold." Which wins? | **Keep gold as the sole brand accent** in both themes. This is a deliberate deviation from the pasted spec, recorded in DESIGN.md §12: Sapphire keeps one accent colour (gold) for brand/primary actions; the data colours (red/orange/green/blue/yellow) are for data and status only. |
+| — | Light and dark mode? | **Both.** Theme follows the OS by default; a manual toggle overrides and is remembered (localStorage + `data-theme` on `<html>`). |
+| — | Radius, elevation, type family? | **10px cards, 6px controls, 999px pills; flat (no card shadows — tone separation only); Inter only** (Playfair dropped from headings). |
+| — | How should DESIGN.md be rewritten? | The finance-derived system becomes the primary spec; the old gold/ivory/serif system is kept in an appendix marked **Superseded (2026-10-20)**; the change is recorded in §12/§13. |
+| — | How is the migration sequenced? | **Phased, app working at every step** (client instruction). Phase A: DESIGN.md. Phase B: tokens + theme provider/toggle. Phase C: admin shell and pages. Phase D: storefront. Pause for review after each. |
+| — | How do unmigrated components keep working mid-migration? | **Legacy token aliases.** Old names (`ivory-canvas`, `champagne-gold`, `font-display`, `radius-card`, …) stay in `@theme` but resolve to the new palette, so nothing breaks before its component is migrated. |
+| — | Where does the theme choice live? | **`localStorage` key `sapphire_theme`**, applied to `<html data-theme>` by an inline pre-paint guard (no flash) and kept in sync by `ThemeProvider`. No key = follow the OS. |

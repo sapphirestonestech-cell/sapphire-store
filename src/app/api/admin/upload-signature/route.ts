@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 
 /**
  * GET /api/admin/upload-signature — signed Cloudinary upload params.
@@ -8,10 +8,8 @@ import { getSession } from "@/lib/session";
  * allowed (file validation is also enforced on the product schema).
  */
 export async function GET() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to upload images." }, { status: 401 });
-  }
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;

@@ -8,7 +8,7 @@ export function GoogleSignInButton({ callbackUrl = "/account" }: { callbackUrl?:
     <button
       type="button"
       onClick={() => signIn("google", { callbackUrl })}
-      className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-pill border border-hairline bg-pure-white px-8 text-body-lg font-medium text-warm-ink transition-colors duration-fast hover:bg-gold-wash"
+      className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-pill border border-border-subtle bg-card px-8 text-body-lg font-medium text-primary transition-colors duration-fast hover:bg-accent-wash"
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5">
         <path

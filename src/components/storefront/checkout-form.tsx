@@ -8,6 +8,7 @@ import { useCart } from "@/components/cart-provider";
 import { useCurrency } from "@/components/currency-provider";
 import { clearCart, type CartItem } from "@/lib/cart";
 import { computeOrderTotals, fromMinor, type CheckoutItemInput } from "@/lib/checkout";
+import { SaveForLaterButton } from "@/components/storefront/save-for-later-button";
 
 interface LocationOption {
   id: string;
@@ -197,16 +198,16 @@ export function CheckoutForm({
   if (!loading && items.length === 0) {
     return (
       <div className="page-width py-16">
-        <div className="mx-auto max-w-md rounded-card bg-pure-white p-6 text-center shadow-card">
-          <h1 className="font-display text-heading-lg text-warm-ink">
+        <div className="mx-auto max-w-md rounded-md bg-card p-6 text-center shadow-card">
+          <h1 className="font-sans text-heading-lg text-primary">
             Nothing to check out
           </h1>
-          <p className="mt-2 text-body text-soft-taupe">
+          <p className="mt-2 text-body text-muted">
             Your cart is empty right now.
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Browse rings
           </Link>
@@ -217,8 +218,8 @@ export function CheckoutForm({
 
   return (
     <div className="page-width py-8 md:py-12">
-      <h1 className="font-display text-heading-lg text-warm-ink">Checkout</h1>
-      <p className="mt-1 text-body text-soft-taupe">
+      <h1 className="font-sans text-heading-lg text-primary">Checkout</h1>
+      <p className="mt-1 text-body text-muted">
         {prefill
           ? "Checking out with your account details — edit anything that's changed."
           : "Guest checkout — no account needed."}
@@ -230,8 +231,8 @@ export function CheckoutForm({
       >
         {/* Left — contact + delivery */}
         <div className="space-y-6">
-          <fieldset className="rounded-card bg-pure-white p-6 shadow-card">
-            <legend className="px-1 font-display text-subheading text-warm-ink">
+          <fieldset className="rounded-md bg-card p-6 shadow-card">
+            <legend className="px-1 font-sans text-subheading text-primary">
               Your details
             </legend>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -242,7 +243,7 @@ export function CheckoutForm({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   autoComplete="name"
-                  className="mt-1.5 h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+                  className="mt-1.5 h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
                 />
               </label>
               <label className="block">
@@ -253,7 +254,7 @@ export function CheckoutForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="mt-1.5 h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+                  className="mt-1.5 h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
                 />
               </label>
               <label className="block">
@@ -264,25 +265,25 @@ export function CheckoutForm({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   autoComplete="tel"
-                  className="mt-1.5 h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+                  className="mt-1.5 h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
                 />
               </label>
               <label className="block sm:col-span-2">
                 <span className="text-body font-medium">
-                  Delivery notes <span className="text-soft-taupe">(optional)</span>
+                  Delivery notes <span className="text-muted">(optional)</span>
                 </span>
                 <textarea
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1.5 w-full rounded-card border border-hairline bg-pure-white p-4 text-body text-warm-ink"
+                  className="mt-1.5 w-full rounded-md border border-border-subtle bg-card p-4 text-body text-primary"
                 />
               </label>
             </div>
           </fieldset>
 
-          <fieldset className="rounded-card bg-pure-white p-6 shadow-card">
-            <legend className="px-1 font-display text-subheading text-warm-ink">
+          <fieldset className="rounded-md bg-card p-6 shadow-card">
+            <legend className="px-1 font-sans text-subheading text-primary">
               Delivery
             </legend>
             <label className="mt-4 block">
@@ -291,7 +292,7 @@ export function CheckoutForm({
                 required
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="mt-1.5 h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+                className="mt-1.5 h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
               >
                 <option value="">
                   {loading
@@ -308,7 +309,7 @@ export function CheckoutForm({
               </select>
             </label>
             {locationsError ? (
-              <p className="mt-2 text-body text-status-error">
+              <p className="mt-2 text-body text-danger">
                 {locationsError}
               </p>
             ) : null}
@@ -318,13 +319,13 @@ export function CheckoutForm({
                 {totals.shipments.map((s) => (
                   <li
                     key={s.kind}
-                    className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-t-0 first:pt-0"
+                    className="flex items-start justify-between gap-4 border-t border-border-subtle pt-3 first:border-t-0 first:pt-0"
                   >
                     <div>
                       <p className="text-body font-medium">
                         {s.kind === "in_stock" ? "In-stock rings" : "Pre-order rings"}
                       </p>
-                      <p className="text-body text-soft-taupe">
+                      <p className="text-body text-muted">
                         {s.kind === "pre_order" && s.arrivalDate
                           ? `Arrives first ${new Date(s.arrivalDate).toLocaleDateString(
                               "en-US",
@@ -345,7 +346,7 @@ export function CheckoutForm({
                 ))}
               </ul>
             ) : (
-              <p className="mt-3 text-body text-soft-taupe">
+              <p className="mt-3 text-body text-muted">
                 {location
                   ? "Delivery fee is included below."
                   : "Choose your location to see delivery time and fees."}
@@ -355,18 +356,24 @@ export function CheckoutForm({
         </div>
 
         {/* Right — summary */}
-        <aside className="space-y-4 rounded-card bg-pure-white p-6 shadow-card lg:sticky lg:top-28">
-          <h2 className="font-display text-subheading text-warm-ink">Order summary</h2>
+        <aside className="space-y-4 rounded-md bg-card p-6 shadow-card lg:sticky lg:top-28">
+          <h2 className="font-sans text-subheading text-primary">Order summary</h2>
           <ul className="space-y-2 text-body">
             {items.map((i) => (
               <li
                 key={`${i.productId}:${i.sizeLabel}`}
                 className="flex items-start justify-between gap-4"
               >
-                <span className="min-w-0 text-soft-taupe">
+                <span className="min-w-0 text-muted">
                   {i.name}{" "}
-                  <span className="text-warm-ink">· Size {i.sizeLabel}</span> ×{" "}
+                  <span className="text-primary">· Size {i.sizeLabel}</span> ×{" "}
                   {i.quantity}
+                  <span className="mt-1 block">
+                    <SaveForLaterButton
+                      productId={i.productId}
+                      sizeLabel={i.sizeLabel}
+                    />
+                  </span>
                 </span>
                 <span className="shrink-0 font-medium">
                   <Price amount={i.unitPriceBase * i.quantity} />
@@ -376,15 +383,15 @@ export function CheckoutForm({
           </ul>
 
           {totals ? (
-            <dl className="space-y-2 border-t border-hairline pt-4 text-body">
+            <dl className="space-y-2 border-t border-border-subtle pt-4 text-body">
               <div className="flex justify-between">
-                <dt className="text-soft-taupe">Subtotal</dt>
+                <dt className="text-muted">Subtotal</dt>
                 <dd className="font-medium">
                   <Price amount={fromMinor(totals.subtotalMinor)} />
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-soft-taupe">Delivery</dt>
+                <dt className="text-muted">Delivery</dt>
                 <dd className="font-medium">
                   {totals.deliveryTotalMinor === 0 ? (
                     "Free"
@@ -393,7 +400,7 @@ export function CheckoutForm({
                   )}
                 </dd>
               </div>
-              <div className="flex justify-between border-t border-hairline pt-2 text-body-lg">
+              <div className="flex justify-between border-t border-border-subtle pt-2 text-body-lg">
                 <dt className="font-medium">Total</dt>
                 <dd className="font-semibold">
                   <Price amount={fromMinor(totals.totalMinor)} />
@@ -401,13 +408,13 @@ export function CheckoutForm({
               </div>
               {totals.amountDueLaterMinor > 0 ? (
                 <>
-                  <div className="flex justify-between pt-1 text-deep-gold">
+                  <div className="flex justify-between pt-1 text-accent-strong">
                     <dt>Due now</dt>
                     <dd className="font-semibold">
                       <Price amount={fromMinor(totals.amountDueNowMinor)} />
                     </dd>
                   </div>
-                  <div className="flex justify-between text-soft-taupe">
+                  <div className="flex justify-between text-muted">
                     <dt>Due before shipping</dt>
                     <dd className="font-medium">
                       <Price amount={fromMinor(totals.amountDueLaterMinor)} />
@@ -417,13 +424,13 @@ export function CheckoutForm({
               ) : null}
             </dl>
           ) : (
-            <p className="border-t border-hairline pt-4 text-body text-soft-taupe">
+            <p className="border-t border-border-subtle pt-4 text-body text-muted">
               Total shown once you choose a location.
             </p>
           )}
 
-          <fieldset className="rounded-card bg-pure-white p-6 shadow-card">
-            <legend className="px-1 font-display text-subheading text-warm-ink">
+          <fieldset className="rounded-md bg-card p-6 shadow-card">
+            <legend className="px-1 font-sans text-subheading text-primary">
               Payment
             </legend>
             <div className="mt-4 space-y-2">
@@ -432,10 +439,10 @@ export function CheckoutForm({
                 .map((g) => (
                   <label
                     key={g.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-card border p-4 transition-colors ${
+                    className={`flex cursor-pointer items-center gap-3 rounded-md border p-4 transition-colors ${
                       gateway === g.id
-                        ? "border-champagne-gold bg-gold-wash/40"
-                        : "border-hairline bg-pure-white hover:border-soft-taupe"
+                        ? "border-accent bg-accent-wash/40"
+                        : "border-border-subtle bg-card hover:border-muted"
                     }`}
                   >
                     <input
@@ -444,18 +451,18 @@ export function CheckoutForm({
                       value={g.id}
                       checked={gateway === g.id}
                       onChange={() => setGateway(g.id)}
-                      className="size-4 accent-champagne-gold"
+                      className="size-4 accent-accent"
                     />
-                    <span className="text-body font-medium text-warm-ink">
+                    <span className="text-body font-medium text-primary">
                       {g.id === "paystack" ? "Paystack" : "BACHS"}
                     </span>
                     {g.note ? (
-                      <span className="text-body text-soft-taupe">{g.note}</span>
+                      <span className="text-body text-muted">{g.note}</span>
                     ) : null}
                   </label>
                 ))}
               {gatewayOptions.filter((g) => g.enabled && g.supports).length === 0 ? (
-                <p className="text-body text-soft-taupe">
+                <p className="text-body text-muted">
                   No payment methods available for {currency}.
                 </p>
               ) : null}
@@ -465,18 +472,18 @@ export function CheckoutForm({
           <button
             type="submit"
             disabled={submitting || !location || items.length === 0 || !gateway}
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
           >
             {submitting ? "Placing order…" : "Place order"}
           </button>
 
           {error ? (
-            <p role="alert" className="text-body text-status-error">
+            <p role="alert" className="text-body text-danger">
               {error}
             </p>
           ) : null}
 
-          <p className="text-body text-soft-taupe">
+          <p className="text-body text-muted">
             You&apos;ll be redirected to a secure payment page to complete your
             purchase.
           </p>

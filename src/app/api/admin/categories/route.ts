@@ -2,21 +2,13 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { CategoryModel } from "@/lib/models/category";
 import { ProductModel } from "@/lib/models/product";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 import { slugify } from "@/lib/slug";
-
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
 
 /** POST /api/admin/categories — create a category (§6.4). */
 export async function POST(request: Request) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   let body: { name?: string; description?: string };
   try {
@@ -70,8 +62,8 @@ export async function DELETE() {
 }
 
 export async function GET() {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
   try {
     await connectDb();
     const cats = await CategoryModel.find().sort({ displayOrder: 1 }).lean();

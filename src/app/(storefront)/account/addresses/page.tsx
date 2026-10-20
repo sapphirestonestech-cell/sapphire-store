@@ -32,7 +32,7 @@ export default async function AccountAddressesPage() {
     return (
       <section>
         <h2 className="text-subheading font-semibold">Addresses</h2>
-        <p className="mt-2 text-body text-soft-taupe">
+        <p className="mt-2 text-body text-muted">
           Sign in to manage your saved addresses.
         </p>
       </section>
@@ -49,7 +49,7 @@ export default async function AccountAddressesPage() {
       <h2 id="addresses-heading" className="text-subheading font-semibold">
         Addresses
       </h2>
-      <p className="mt-1 mb-6 text-body text-soft-taupe">
+      <p className="mt-1 mb-6 text-body text-muted">
         Save the places you deliver to most. Delivery fees are set per location.
       </p>
       <AddressesManager

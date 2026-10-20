@@ -17,7 +17,7 @@ export function SignOutButton({ className }: { className?: string }) {
           router.refresh();
         });
       }}
-      className={`inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-5 text-body text-warm-ink hover:bg-gold-wash disabled:opacity-60 ${className ?? ""}`}
+      className={`inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-5 text-body text-primary hover:bg-accent-wash disabled:opacity-60 ${className ?? ""}`}
     >
       {loading ? "Signing out…" : "Sign out"}
     </button>

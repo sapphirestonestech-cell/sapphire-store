@@ -2,20 +2,12 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { ProductModel } from "@/lib/models/product";
 import { CategoryModel } from "@/lib/models/category";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 import {
   PayloadError,
   validateProductPayload,
   type ProductPayload,
 } from "@/lib/admin/product-payload";
-
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
 
 async function ensureCategories(ids: string[]): Promise<string[]> {
   const found = await CategoryModel.find({ _id: { $in: ids } }).lean();
@@ -41,8 +33,8 @@ async function uniqueSlug(base: string, excludeId?: string): Promise<string> {
 
 /** POST /api/admin/products — create a ring (§6.3). */
 export async function POST(request: Request) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   let payload: ProductPayload;
   try {

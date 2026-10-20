@@ -16,7 +16,16 @@ export type OrderStatus =
   | "processing"
   | "shipped"
   | "delivered"
-  | "cancelled";
+  | "cancelled"
+  | "refunded";
+
+/** Append-only audit trail for the admin order timeline (§6.7). */
+export interface OrderStatusEntry {
+  status: OrderStatus;
+  at: Date;
+  note?: string;
+  by?: string;
+}
 
 export interface OrderCustomer {
   name: string;
@@ -79,6 +88,10 @@ export interface OrderDoc extends mongoose.Document {
   exchangeRate: number;
   items: OrderItem[];
   shipments: OrderShipment[];
+  /** Status changes made by the admin (and payment verification). */
+  statusHistory: OrderStatusEntry[];
+  /** Internal notes for the store owner — never shown to the customer. */
+  adminNotes?: string;
   subtotalMinor: number;
   deliveryTotalMinor: number;
   totalMinor: number;
@@ -120,6 +133,28 @@ const OrderItemSchema = new Schema<OrderItem>(
   { _id: false },
 );
 
+const OrderStatusEntrySchema = new Schema<OrderStatusEntry>(
+  {
+    status: {
+      type: String,
+      enum: [
+        "pending_payment",
+        "paid",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "refunded",
+      ],
+      required: true,
+    },
+    at: { type: Date, default: Date.now },
+    note: String,
+    by: String,
+  },
+  { _id: false },
+);
+
 const OrderShipmentSchema = new Schema<OrderShipment>(
   {
     kind: { type: String, enum: ["in_stock", "pre_order"], required: true },
@@ -146,6 +181,7 @@ const OrderSchema = new Schema<OrderDoc>(
         "shipped",
         "delivered",
         "cancelled",
+        "refunded",
       ],
       default: "pending_payment",
     },
@@ -168,6 +204,8 @@ const OrderSchema = new Schema<OrderDoc>(
     exchangeRate: { type: Number, required: true, min: 0 },
     items: { type: [OrderItemSchema], default: [] },
     shipments: { type: [OrderShipmentSchema], default: [] },
+    statusHistory: { type: [OrderStatusEntrySchema], default: [] },
+    adminNotes: String,
     subtotalMinor: { type: Number, required: true, min: 0 },
     deliveryTotalMinor: { type: Number, required: true, min: 0 },
     totalMinor: { type: Number, required: true, min: 0 },

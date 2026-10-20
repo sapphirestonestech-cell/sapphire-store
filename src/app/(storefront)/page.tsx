@@ -60,14 +60,14 @@ async function loadFeatured(): Promise<ProductSummary[]> {
 
 function EmptyCatalogNotice() {
   return (
-    <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
-      <p className="mx-auto max-w-sm text-body-lg text-soft-taupe">
+    <div className="rounded-md bg-card p-10 text-center shadow-card">
+      <p className="mx-auto max-w-sm text-body-lg text-muted">
         The collection is being prepared. Add rings from the admin dashboard to
         see them here.
       </p>
       <Link
         href="/admin"
-        className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+        className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
       >
         Open admin
       </Link>
@@ -78,21 +78,21 @@ function EmptyCatalogNotice() {
 /** Filtered-to-empty state — DESIGN.md §7.23. */
 function FilterEmpty() {
   return (
-    <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+    <div className="rounded-md bg-card p-10 text-center shadow-card">
       <svg
         aria-hidden="true"
         viewBox="0 0 16 16"
-        className="mx-auto mb-4 size-4 text-champagne-gold"
+        className="mx-auto mb-4 size-4 text-accent"
         fill="currentColor"
       >
         <path d="M8 0l1.8 6.2L16 8l-6.2 1.8L8 16l-1.8-6.2L0 8l6.2-1.8L8 0z" />
       </svg>
-      <p className="mx-auto max-w-sm text-body-lg text-soft-taupe">
+      <p className="mx-auto max-w-sm text-body-lg text-muted">
         No rings match these filters. Clear filters to see all rings.
       </p>
       <Link
         href="/"
-        className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+        className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
       >
         Clear filters
       </Link>
@@ -104,9 +104,9 @@ function BrowseError() {
   return (
     <div
       role="alert"
-      className="rounded-card bg-pure-white p-10 text-center shadow-card"
+      className="rounded-md bg-card p-10 text-center shadow-card"
     >
-      <p className="text-body-lg text-soft-taupe">
+      <p className="text-body-lg text-muted">
         We couldn&apos;t load the collection right now. Refresh the page to try
         again.
       </p>
@@ -136,7 +136,7 @@ export default function HomePage({
       <Suspense
         fallback={
           <div className="page-width py-20">
-            <div className="mx-auto h-12 w-2/3 animate-pulse rounded bg-pale-sand/60" />
+            <div className="mx-auto h-12 w-2/3 animate-pulse rounded bg-border-default/60" />
           </div>
         }
       >
@@ -146,7 +146,7 @@ export default function HomePage({
       <Suspense
         fallback={
           <div className="page-width pb-16 md:pb-20">
-            <div className="mb-6 h-8 w-48 animate-pulse rounded bg-pale-sand/60" />
+            <div className="mb-6 h-8 w-48 animate-pulse rounded bg-border-default/60" />
             <GridSkeleton count={6} />
           </div>
         }
@@ -251,7 +251,7 @@ async function BrowseSlot({
         <div className="space-y-4 lg:hidden">
           <BrowseChips categories={categories} active={filters} />
           {bounds ? (
-            <div className="rounded-card bg-pure-white/90 p-4 shadow-card">
+            <div className="rounded-md bg-card/90 p-4 shadow-card">
               <BudgetFilter
                 minBound={bounds.min}
                 maxBound={bounds.max}

@@ -20,10 +20,10 @@ async function AccountHeader() {
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-heading-lg text-warm-ink">
+        <h1 className="font-sans text-heading-lg text-primary">
           {customer?.name ?? "My account"}
         </h1>
-        <p className="mt-1 text-body text-soft-taupe">{customer?.email}</p>
+        <p className="mt-1 text-body text-muted">{customer?.email}</p>
       </div>
     </div>
   );
@@ -38,7 +38,7 @@ export default function AccountLayout({
     <div className="page-width py-8 md:py-12">
       <AccountGuard>
         <Suspense
-          fallback={<div className="h-24 animate-pulse rounded-card bg-gold-wash" />}
+          fallback={<div className="h-24 animate-pulse rounded-md bg-accent-wash" />}
         >
           <AccountHeader />
         </Suspense>

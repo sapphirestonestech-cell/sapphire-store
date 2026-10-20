@@ -77,11 +77,11 @@ function SelectControl({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-label font-medium text-soft-taupe">{label}</label>
+      <label className="text-label font-medium text-muted">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+        className="h-11 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
       >
         <option value="">{anyLabel}</option>
         {options.map((o) => (
@@ -313,17 +313,17 @@ export function ShopExplorer({
     <div className="page-width pb-24 pt-10 md:pt-14">
       {/* Page header — the tagline appears on listing pages too (§1.2) */}
       <div className="mb-8 max-w-xl">
-        <h1 className="font-display text-heading-lg text-warm-ink md:text-display">
+        <h1 className="font-sans text-heading-lg text-primary md:text-display">
           {heading}
         </h1>
-        <p className="mt-3 text-body-lg text-soft-taupe">{tagline}</p>
+        <p className="mt-3 text-body-lg text-muted">{tagline}</p>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-hairline bg-pure-white px-5 text-body font-medium text-warm-ink shadow-soft lg:hidden"
+          className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border-subtle bg-card px-5 text-body font-medium text-primary shadow-soft lg:hidden"
         >
           <svg
             aria-hidden="true"
@@ -337,12 +337,12 @@ export function ShopExplorer({
           </svg>
           Filters
         </button>
-        <label className="ml-auto inline-flex items-center gap-2 text-body text-soft-taupe">
+        <label className="ml-auto inline-flex items-center gap-2 text-body text-muted">
           <span className="hidden sm:inline">Sort</span>
           <select
             value={params.sort ?? "newest"}
             onChange={(e) => applyParams({ ...params, sort: e.target.value })}
-            className="h-11 rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+            className="h-11 rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -370,7 +370,7 @@ export function ShopExplorer({
                 <button
                   type="button"
                   onClick={() => applyParams({ ...params, min: undefined, max: undefined })}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-hairline bg-pure-white px-3 py-1 text-label font-medium text-warm-ink"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-border-subtle bg-card px-3 py-1 text-label font-medium text-primary"
                 >
                   Budget: {fmtBudget(budgetLo)} – {fmtBudget(budgetHi)}
                   <span aria-hidden="true">×</span>
@@ -382,7 +382,7 @@ export function ShopExplorer({
                   key={key}
                   type="button"
                   onClick={() => applyParams({ ...params, [key]: undefined })}
-                  className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-hairline bg-pure-white px-3 py-1 text-label font-medium text-warm-ink"
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-pill border border-border-subtle bg-card px-3 py-1 text-label font-medium text-primary"
                 >
                   {ACTIVE_FILTER_LABELS[key]}: {value}
                   <span aria-hidden="true">×</span>
@@ -392,7 +392,7 @@ export function ShopExplorer({
               <button
                 type="button"
                 onClick={() => applyParams({ sort: params.sort })}
-                className="inline-flex min-h-9 items-center rounded-pill px-3 py-1 text-label font-medium text-deep-gold underline underline-offset-4"
+                className="inline-flex min-h-9 items-center rounded-pill px-3 py-1 text-label font-medium text-accent-strong underline underline-offset-4"
               >
                 Clear filters
               </button>
@@ -402,13 +402,13 @@ export function ShopExplorer({
           {error ? (
             <div
               role="alert"
-              className="mb-5 rounded-card border border-status-error/40 bg-pure-white p-6 shadow-card"
+              className="mb-5 rounded-md border border-danger/40 bg-card p-6 shadow-card"
             >
-              <p className="text-body text-status-error">{error}</p>
+              <p className="text-body text-danger">{error}</p>
               <button
                 type="button"
                 onClick={() => applyParams({ sort: params.sort })}
-                className="mt-3 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-5 text-body font-medium"
+                className="mt-3 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-5 text-body font-medium"
               >
                 Clear filters
               </button>
@@ -422,22 +422,22 @@ export function ShopExplorer({
               ))}
             </div>
           ) : products.length === 0 && !loading ? (
-            <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+            <div className="rounded-md bg-card p-10 text-center shadow-card">
               <svg
                 aria-hidden="true"
                 viewBox="0 0 16 16"
-                className="mx-auto mb-4 size-5 text-champagne-gold"
+                className="mx-auto mb-4 size-5 text-accent"
                 fill="currentColor"
               >
                 <path d="M8 0l1.8 6.2L16 8l-6.2 1.8L8 16l-1.8-6.2L0 8l6.2-1.8L8 0z" />
               </svg>
-              <p className="mx-auto max-w-sm text-body-lg text-soft-taupe">
+              <p className="mx-auto max-w-sm text-body-lg text-muted">
                 No rings match these filters. Clear filters to see all rings.
               </p>
               <button
                 type="button"
                 onClick={() => applyParams({ sort: params.sort })}
-                className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+                className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
               >
                 Clear filters
               </button>
@@ -464,7 +464,7 @@ export function ShopExplorer({
                     type="button"
                     onClick={loadMore}
                     disabled={loading}
-                    className="inline-flex min-h-12 items-center rounded-pill border border-hairline bg-pure-white px-8 text-body-lg font-medium text-warm-ink shadow-soft disabled:bg-pale-sand disabled:text-soft-taupe"
+                    className="inline-flex min-h-12 items-center rounded-pill border border-border-subtle bg-card px-8 text-body-lg font-medium text-primary shadow-soft disabled:bg-border-default disabled:text-muted"
                   >
                     {loading ? "Loading…" : "Load more"}
                   </button>
@@ -481,11 +481,11 @@ export function ShopExplorer({
           <button
             type="button"
             aria-label="Close filters"
-            className="absolute inset-0 bg-warm-ink/30"
+            className="absolute inset-0 bg-primary/30"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-card bg-pure-white shadow-float">
-            <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-card bg-card shadow-float">
+            <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
               <h2 className="text-subheading font-semibold">Filters</h2>
               <button
                 type="button"
@@ -514,11 +514,11 @@ export function ShopExplorer({
                 onChange={(patch) => applyParams({ ...params, ...patch })}
               />
             </div>
-            <div className="border-t border-hairline p-4">
+            <div className="border-t border-border-subtle p-4">
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow"
               >
                 Show results
               </button>

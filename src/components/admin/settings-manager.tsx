@@ -64,9 +64,9 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
 
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-6">
-      <section className="rounded-card bg-pure-white p-6 shadow-card">
-        <h2 className="font-display text-subheading">Currency &amp; exchange</h2>
-        <p className="mt-1 text-body text-soft-taupe">
+      <section className="rounded-md bg-card p-6 shadow-card">
+        <h2 className="font-sans text-subheading">Currency &amp; exchange</h2>
+        <p className="mt-1 text-body text-muted">
           Enter prices once in your base currency. The other currency is
           calculated from this rate.
         </p>
@@ -77,7 +77,7 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
             <select
               value={baseCurrency}
               onChange={(e) => setBaseCurrency(e.target.value as "USD" | "NGN")}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             >
               <option value="USD">USD — US Dollar</option>
               <option value="NGN">NGN — Nigerian Naira</option>
@@ -93,7 +93,7 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
               required
               value={usdToNgn}
               onChange={(e) => setUsdToNgn(e.target.value)}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             />
           </label>
 
@@ -106,7 +106,7 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
               required
               value={usdDecimals}
               onChange={(e) => setUsdDecimals(e.target.value)}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             />
           </label>
 
@@ -118,14 +118,14 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
               required
               value={ngnNearest}
               onChange={(e) => setNgnNearest(e.target.value)}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             />
           </label>
         </div>
       </section>
 
-      <section className="rounded-card bg-pure-white p-6 shadow-card">
-        <h2 className="font-display text-subheading">Store</h2>
+      <section className="rounded-md bg-card p-6 shadow-card">
+        <h2 className="font-sans text-subheading">Store</h2>
         <div className="mt-4 space-y-4">
           <label className="block space-y-1.5">
             <span className="text-body font-medium">Store name</span>
@@ -133,7 +133,7 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
               required
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             />
           </label>
           <label className="block space-y-1.5">
@@ -141,7 +141,7 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
             <input
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
             />
           </label>
         </div>
@@ -151,17 +151,17 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
         <button
           type="submit"
           disabled={busy}
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {busy ? "Saving…" : "Save settings"}
         </button>
-        <span aria-live="polite" className="text-body text-status-success">
+        <span aria-live="polite" className="text-body text-success">
           {saved ? "Saved." : ""}
         </span>
       </div>
 
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}

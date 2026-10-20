@@ -119,9 +119,9 @@ export function AddressesManager({
   return (
     <div className="space-y-6">
       {addresses.length === 0 && !editing ? (
-        <div className="rounded-card bg-pure-white p-8 text-center shadow-card">
-          <p className="text-body-lg text-warm-ink">No saved addresses</p>
-          <p className="mt-2 text-body text-soft-taupe">
+        <div className="rounded-md bg-card p-8 text-center shadow-card">
+          <p className="text-body-lg text-primary">No saved addresses</p>
+          <p className="mt-2 text-body text-muted">
             Add the place you deliver to most and it&apos;s ready at checkout.
           </p>
         </div>
@@ -130,25 +130,25 @@ export function AddressesManager({
           {addresses.map((a) => (
             <li
               key={a.id}
-              className="flex flex-col rounded-card bg-pure-white p-5 shadow-card"
+              className="flex flex-col rounded-md bg-card p-5 shadow-card"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="text-body-lg font-medium">{a.label}</p>
                 {a.isDefault ? (
-                  <span className="rounded-chip-label bg-gold-wash px-2 py-0.5 text-label font-medium text-deep-gold">
+                  <span className="rounded-sm bg-accent-wash px-2 py-0.5 text-label font-medium text-accent-strong">
                     Default
                   </span>
                 ) : null}
               </div>
-              <p className="mt-2 text-body text-soft-taupe">
+              <p className="mt-2 text-body text-muted">
                 {a.line1}
                 {a.line2 ? `, ${a.line2}` : ""}
               </p>
-              <p className="text-body text-soft-taupe">{locationLabel(a.locationId)}</p>
+              <p className="text-body text-muted">{locationLabel(a.locationId)}</p>
               {a.phone ? (
-                <p className="mt-1 text-body text-soft-taupe">{a.phone}</p>
+                <p className="mt-1 text-body text-muted">{a.phone}</p>
               ) : null}
-              <div className="mt-4 flex gap-2 border-t border-hairline pt-4">
+              <div className="mt-4 flex gap-2 border-t border-border-subtle pt-4">
                 <button
                   type="button"
                   disabled={busy}
@@ -164,7 +164,7 @@ export function AddressesManager({
                     });
                     setError(null);
                   }}
-                  className="inline-flex min-h-11 items-center rounded-pill border border-hairline px-4 text-body hover:bg-gold-wash disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-4 text-body hover:bg-accent-wash disabled:opacity-60"
                 >
                   Edit
                 </button>
@@ -172,7 +172,7 @@ export function AddressesManager({
                   type="button"
                   disabled={busy}
                   onClick={() => remove(a.id)}
-                  className="inline-flex min-h-11 items-center rounded-pill border border-hairline px-4 text-body text-status-error hover:bg-gold-wash disabled:opacity-60"
+                  className="inline-flex min-h-11 items-center rounded-pill border border-border-subtle px-4 text-body text-danger hover:bg-accent-wash disabled:opacity-60"
                 >
                   Delete
                 </button>
@@ -185,7 +185,7 @@ export function AddressesManager({
       {editing ? (
         <form
           onSubmit={save}
-          className="max-w-lg space-y-5 rounded-card bg-pure-white p-6 shadow-card"
+          className="max-w-lg space-y-5 rounded-md bg-card p-6 shadow-card"
         >
           <h3 className="text-subheading font-semibold">
             {editing.id ? "Edit address" : "New address"}
@@ -201,7 +201,7 @@ export function AddressesManager({
               value={editing.label}
               onChange={(e) => setEditing({ ...editing, label: e.target.value })}
               placeholder="Home"
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
             />
           </div>
           <div className="space-y-1.5">
@@ -214,18 +214,18 @@ export function AddressesManager({
               minLength={3}
               value={editing.line1}
               onChange={(e) => setEditing({ ...editing, line1: e.target.value })}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
             />
           </div>
           <div className="space-y-1.5">
             <label htmlFor="addr-line2" className="text-body font-medium">
-              Apt, suite, landmark <span className="text-soft-taupe">(optional)</span>
+              Apt, suite, landmark <span className="text-muted">(optional)</span>
             </label>
             <input
               id="addr-line2"
               value={editing.line2}
               onChange={(e) => setEditing({ ...editing, line2: e.target.value })}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
             />
           </div>
           <div className="space-y-1.5">
@@ -237,7 +237,7 @@ export function AddressesManager({
               required
               value={editing.locationId}
               onChange={(e) => setEditing({ ...editing, locationId: e.target.value })}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
             >
               <option value="">
                 {locations.length === 0 ? "No locations available" : "Choose a location"}
@@ -251,14 +251,14 @@ export function AddressesManager({
           </div>
           <div className="space-y-1.5">
             <label htmlFor="addr-phone" className="text-body font-medium">
-              Phone <span className="text-soft-taupe">(optional)</span>
+              Phone <span className="text-muted">(optional)</span>
             </label>
             <input
               id="addr-phone"
               type="tel"
               value={editing.phone}
               onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
-              className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
             />
           </div>
           <label className="flex min-h-11 items-center gap-3 text-body">
@@ -266,13 +266,13 @@ export function AddressesManager({
               type="checkbox"
               checked={editing.isDefault}
               onChange={(e) => setEditing({ ...editing, isDefault: e.target.checked })}
-              className="size-5 accent-champagne-gold"
+              className="size-5 accent-accent"
             />
             Set as my default address
           </label>
 
           {error ? (
-            <p role="alert" className="text-body text-status-error">
+            <p role="alert" className="text-body text-danger">
               {error}
             </p>
           ) : null}
@@ -281,7 +281,7 @@ export function AddressesManager({
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+              className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
             >
               {busy ? "Saving…" : "Save address"}
             </button>
@@ -292,7 +292,7 @@ export function AddressesManager({
                 setEditing(null);
                 setError(null);
               }}
-              className="inline-flex min-h-12 items-center rounded-pill border border-hairline px-6 text-body text-warm-ink hover:bg-gold-wash disabled:opacity-60"
+              className="inline-flex min-h-12 items-center rounded-pill border border-border-subtle px-6 text-body text-primary hover:bg-accent-wash disabled:opacity-60"
             >
               Cancel
             </button>
@@ -305,14 +305,14 @@ export function AddressesManager({
             setEditing({ ...EMPTY });
             setError(null);
           }}
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
         >
           Add address
         </button>
       )}
 
       {error && editing ? null : error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}

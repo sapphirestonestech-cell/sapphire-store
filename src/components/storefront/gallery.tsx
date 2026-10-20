@@ -30,7 +30,7 @@ export function Gallery({
 
   if (list.length === 0) {
     return (
-      <div className="aspect-square overflow-hidden rounded-image">
+      <div className="aspect-square overflow-hidden rounded-sm">
         <RingPlaceholder label={productName} />
       </div>
     );
@@ -58,14 +58,14 @@ export function Gallery({
                 onClick={() => setActive(i)}
                 aria-label={`Show image ${i + 1}${img.label ? `: ${img.label}` : ""}`}
                 aria-current={selected}
-                className={`block size-16 overflow-hidden rounded-chip-label transition-shadow duration-fast ${
+                className={`block size-16 overflow-hidden rounded-sm transition-shadow duration-fast ${
                   selected
-                    ? "shadow-[0_0_0_2px_var(--color-champagne-gold)]"
-                    : "shadow-[0_0_0_1px_var(--color-hairline)]"
+                    ? "shadow-[0_0_0_2px_var(--accent)]"
+                    : "shadow-[0_0_0_1px_var(--border-subtle)]"
                 }`}
               >
                 {img.url.startsWith(PLACEHOLDER_PREFIX) ? (
-                  <RingPlaceholder label={img.label} className="!bg-pale-sand" />
+                  <RingPlaceholder label={img.label} className="!bg-border-default" />
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -87,7 +87,7 @@ export function Gallery({
       {thumbs("rail")}
 
       <div className="min-w-0 flex-1 space-y-3">
-        <div className="relative aspect-square overflow-hidden rounded-image bg-pale-sand/40">
+        <div className="relative aspect-square overflow-hidden rounded-sm bg-border-default/40">
           {isPlaceholder ? (
             <RingPlaceholder label={current?.label ?? productName} />
           ) : (
@@ -101,7 +101,7 @@ export function Gallery({
             />
           )}
           {current?.label ? (
-            <span className="absolute bottom-3 left-3 rounded-chip-label bg-pure-white/90 px-2.5 py-1 text-label font-medium text-warm-ink">
+            <span className="absolute bottom-3 left-3 rounded-sm bg-card/90 px-2.5 py-1 text-label font-medium text-primary">
               {current.label}
             </span>
           ) : null}

@@ -48,7 +48,7 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5 rounded-card bg-pure-white p-6 shadow-card">
+    <form onSubmit={onSubmit} className="space-y-5 rounded-md bg-card p-6 shadow-card">
       <div className="space-y-1.5">
         <label htmlFor="profile-name" className="text-body font-medium">
           Full name
@@ -61,7 +61,7 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
           autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
         />
       </div>
       <div className="space-y-1.5">
@@ -74,16 +74,16 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
           value={initial.email}
           readOnly
           disabled
-          className="h-12 w-full rounded-pill border border-hairline bg-pale-sand px-5 text-body-lg text-soft-taupe"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-border-default px-5 text-body-lg text-muted"
           aria-describedby="profile-email-hint"
         />
-        <p id="profile-email-hint" className="text-body text-soft-taupe">
+        <p id="profile-email-hint" className="text-body text-muted">
           Your sign-in email can&apos;t be changed here.
         </p>
       </div>
       <div className="space-y-1.5">
         <label htmlFor="profile-phone" className="text-body font-medium">
-          Phone <span className="text-soft-taupe">(optional)</span>
+          Phone <span className="text-muted">(optional)</span>
         </label>
         <input
           id="profile-phone"
@@ -91,7 +91,7 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
           autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
         />
       </div>
       <div className="space-y-1.5">
@@ -102,24 +102,24 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
           id="profile-currency"
           value={preferredCurrency}
           onChange={(e) => setPreferredCurrency(e.target.value as Currency)}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body text-warm-ink"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-4 text-body text-primary"
         >
           <option value="USD">USD — US Dollar</option>
           <option value="NGN">NGN — Nigerian Naira</option>
         </select>
-        <p className="text-body text-soft-taupe">
+        <p className="text-body text-muted">
           Used as your default when signing in on a new device. The header
           switcher still overrides it on any visit.
         </p>
       </div>
 
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}
       {saved ? (
-        <p role="status" className="text-body text-status-success">
+        <p role="status" className="text-body text-success">
           Changes saved.
         </p>
       ) : null}
@@ -127,7 +127,7 @@ export function ProfileForm({ initial }: { initial: ProfileInitial }) {
       <button
         type="submit"
         disabled={saving}
-        className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+        className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
       >
         {saving ? "Saving…" : "Save changes"}
       </button>

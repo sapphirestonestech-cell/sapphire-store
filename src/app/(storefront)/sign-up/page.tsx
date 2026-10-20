@@ -17,9 +17,9 @@ function safeCallbackUrl(raw: unknown): string {
 function CardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-card bg-pure-white p-8 shadow-card">
-        <p className="font-display text-heading-lg">Sapphire</p>
-        <p className="mt-1 text-body text-soft-taupe">{TAGLINE}</p>
+      <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
+        <p className="font-sans text-heading-lg">Sapphire</p>
+        <p className="mt-1 text-body text-muted">{TAGLINE}</p>
         {children}
       </div>
     </div>
@@ -54,7 +54,7 @@ export default async function SignUpPage({
     <Suspense
       fallback={
         <CardShell>
-          <div className="mt-8 h-64 animate-pulse rounded-card bg-gold-wash" />
+          <div className="mt-8 h-64 animate-pulse rounded-md bg-accent-wash" />
         </CardShell>
       }
     >

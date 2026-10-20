@@ -37,10 +37,10 @@ export function browseHref(
 }
 
 const itemClass = (active: boolean) =>
-  `flex min-h-12 items-center rounded-image px-4 text-body transition-colors duration-fast ${
+  `flex min-h-12 items-center rounded-sm px-4 text-body transition-colors duration-fast ${
     active
-      ? "bg-gold-wash font-medium text-warm-ink"
-      : "text-soft-taupe hover:bg-ivory-canvas hover:text-warm-ink"
+      ? "bg-accent-wash font-medium text-primary"
+      : "text-muted hover:bg-app hover:text-primary"
   }`;
 
 function isActiveFilter(
@@ -67,7 +67,7 @@ export function BrowseSidebar({
   return (
     <nav
       aria-label="Browse rings"
-      className="self-start rounded-card bg-pure-white/95 backdrop-blur-sm p-2 shadow-card lg:sticky lg:top-28"
+      className="self-start rounded-md bg-card/95 backdrop-blur-sm p-2 shadow-card lg:sticky lg:top-28"
     >
       <Link
         href="/"
@@ -79,7 +79,7 @@ export function BrowseSidebar({
 
       <p
         id="browse-availability-label"
-        className="px-4 pb-1 pt-4 text-label font-medium text-soft-taupe"
+        className="px-4 pb-1 pt-4 text-label font-medium text-muted"
       >
         Availability
       </p>
@@ -109,7 +109,7 @@ export function BrowseSidebar({
         <>
           <p
             id="browse-categories-label"
-            className="px-4 pb-1 pt-4 text-label font-medium text-soft-taupe"
+            className="px-4 pb-1 pt-4 text-label font-medium text-muted"
           >
             Categories
           </p>
@@ -165,10 +165,10 @@ export function BrowseChips({
     !isActiveFilter(active, "availability") && !isActiveFilter(active, "category");
 
   const chipClass = (isActive: boolean) =>
-    `inline-flex min-h-11 shrink-0 items-center rounded-pill border border-hairline px-4 text-body transition-colors duration-fast ${
+    `inline-flex min-h-11 shrink-0 items-center rounded-pill border border-border-subtle px-4 text-body transition-colors duration-fast ${
       isActive
-        ? "bg-gold-wash font-medium text-warm-ink"
-        : "bg-pure-white text-warm-ink hover:bg-gold-wash"
+        ? "bg-accent-wash font-medium text-primary"
+        : "bg-card text-primary hover:bg-accent-wash"
     }`;
 
   return (

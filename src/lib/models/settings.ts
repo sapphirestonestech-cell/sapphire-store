@@ -42,6 +42,8 @@ export interface AdminUserDoc extends mongoose.Document {
   passwordHash: string;
   role: "admin" | "staff";
   lastLoginAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const AdminUserSchema = new Schema<AdminUserDoc>(

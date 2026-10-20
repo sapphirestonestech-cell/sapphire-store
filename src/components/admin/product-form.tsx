@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { ImageUploader, type SlotValue } from "@/components/admin/image-uploader";
+import { RichTextEditor } from "@/components/admin/rich-text-editor";
 import { priceIn, formatPrice, type Currency } from "@/lib/currency";
 
 export interface CategoryOption {
@@ -68,9 +69,9 @@ function Field({
         {label}
       </label>
       {children}
-      {hint ? <p className="text-label text-soft-taupe">{hint}</p> : null}
+      {hint ? <p className="text-label text-muted">{hint}</p> : null}
       {error ? (
-        <p role="alert" className="text-label text-status-error">
+        <p role="alert" className="text-label text-danger">
           {error}
         </p>
       ) : null}
@@ -79,9 +80,9 @@ function Field({
 }
 
 const inputClass =
-  "h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink placeholder:text-soft-taupe focus-visible:outline-2 focus-visible:outline-champagne-gold";
+  "h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary placeholder:text-muted focus-visible:outline-2 focus-visible:outline-accent";
 const areaClass =
-  "w-full rounded-image border border-hairline bg-pure-white px-4 py-3 text-body-lg text-warm-ink";
+  "w-full rounded-sm border border-border-subtle bg-card px-4 py-3 text-body-lg text-primary";
 
 /**
  * Product form — ProductReq.md §6.3, DESIGN.md §9. Sections: basic info,
@@ -250,16 +251,16 @@ export function ProductForm({
       {error ? (
         <div
           role="alert"
-          className="rounded-card border border-status-error/40 bg-pure-white p-5 shadow-card"
+          className="rounded-md border border-danger/40 bg-card p-5 shadow-card"
         >
-          <p className="text-body text-status-error">{error}</p>
+          <p className="text-body text-danger">{error}</p>
         </div>
       ) : null}
 
       {/* Basic info */}
       <section
         aria-labelledby="basic-info-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="basic-info-heading" className="text-subheading font-semibold">
           Basic info
@@ -274,14 +275,17 @@ export function ProductForm({
             placeholder="e.g. Aurelia solitaire"
           />
         </Field>
-        <Field label="Description" htmlFor="description">
-          <textarea
+        <Field
+          label="Description"
+          htmlFor="description"
+          hint="Use the toolbar to format. Bold, italic, headings, lists and links are supported."
+        >
+          <RichTextEditor
             id="description"
-            rows={4}
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className={areaClass}
+            onChange={setDescription}
             placeholder="A short, honest description of the ring."
+            className={areaClass}
           />
         </Field>
         <Field label="Type" htmlFor="type">
@@ -310,8 +314,8 @@ export function ProductForm({
                   className={[
                     "inline-flex min-h-11 items-center rounded-pill px-4 text-body font-medium transition-colors duration-fast",
                     active
-                      ? "bg-gold-wash text-warm-ink shadow-[inset_0_0_0_1px_var(--color-champagne-gold)]"
-                      : "border border-hairline bg-pure-white text-warm-ink",
+                      ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
+                      : "border border-border-subtle bg-card text-primary",
                   ].join(" ")}
                 >
                   {cat.name}
@@ -326,13 +330,13 @@ export function ProductForm({
               onChange={(e) => setNewCategory(e.target.value)}
               placeholder="Create a new category"
               aria-label="New category name"
-              className="h-11 flex-1 rounded-pill border border-hairline bg-pure-white px-4 text-body"
+              className="h-11 flex-1 rounded-pill border border-border-subtle bg-card px-4 text-body"
             />
             <button
               type="button"
               onClick={createCategory}
               disabled={creatingCategory || !newCategory.trim()}
-              className="inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-4 text-body font-medium disabled:bg-pale-sand disabled:text-soft-taupe"
+              className="inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-4 text-body font-medium disabled:bg-border-default disabled:text-muted"
             >
               {creatingCategory ? "Adding…" : "Add"}
             </button>
@@ -343,7 +347,7 @@ export function ProductForm({
       {/* Specifications */}
       <section
         aria-labelledby="specs-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="specs-heading" className="text-subheading font-semibold">
           Specifications
@@ -386,7 +390,7 @@ export function ProductForm({
           {sizes.map((s, i) => (
             <div key={i} className="flex items-end gap-2">
               <div className="flex-1">
-                <label className="text-label text-soft-taupe" htmlFor={`size-${i}`}>
+                <label className="text-label text-muted" htmlFor={`size-${i}`}>
                   Size label
                 </label>
                 <input
@@ -400,12 +404,12 @@ export function ProductForm({
                     )
                   }
                   placeholder="US 6"
-                  className="h-11 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body"
+                  className="h-11 w-full rounded-pill border border-border-subtle bg-card px-4 text-body"
                 />
               </div>
               <div className="w-28">
                 <label
-                  className="text-label text-soft-taupe"
+                  className="text-label text-muted"
                   htmlFor={`stock-${i}`}
                 >
                   In stock
@@ -424,7 +428,7 @@ export function ProductForm({
                       ),
                     )
                   }
-                  className="h-11 w-full rounded-pill border border-hairline bg-pure-white px-4 text-body tabular"
+                  className="h-11 w-full rounded-pill border border-border-subtle bg-card px-4 text-body tabular"
                 />
               </div>
               {sizes.length > 1 ? (
@@ -434,7 +438,7 @@ export function ProductForm({
                     setSizes((prev) => prev.filter((_, ri) => ri !== i))
                   }
                   aria-label={`Remove size ${s.sizeLabel || i + 1}`}
-                  className="flex h-11 w-11 items-center justify-center text-status-error"
+                  className="flex h-11 w-11 items-center justify-center text-danger"
                 >
                   ×
                 </button>
@@ -446,7 +450,7 @@ export function ProductForm({
             onClick={() =>
               setSizes((prev) => [...prev, { sizeLabel: "", stockQuantity: 0 }])
             }
-            className="inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-4 text-body font-medium"
+            className="inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-4 text-body font-medium"
           >
             Add size
           </button>
@@ -456,12 +460,12 @@ export function ProductForm({
       {/* Pricing */}
       <section
         aria-labelledby="pricing-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="pricing-heading" className="text-subheading font-semibold">
           Pricing
         </h2>
-        <p className="text-body text-soft-taupe">
+        <p className="text-body text-muted">
           Enter the price once in {baseCurrency}. The other currency converts
           automatically from the current exchange rate.
         </p>
@@ -500,7 +504,7 @@ export function ProductForm({
       {/* Availability */}
       <section
         aria-labelledby="availability-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="availability-heading" className="text-subheading font-semibold">
           Availability
@@ -508,7 +512,7 @@ export function ProductForm({
         <div
           role="group"
           aria-label="Availability"
-          className="inline-flex rounded-pill border border-hairline bg-pure-white p-1"
+          className="inline-flex rounded-pill border border-border-subtle bg-card p-1"
         >
           {[
             { value: "in_stock", label: "In stock" },
@@ -524,8 +528,8 @@ export function ProductForm({
                 className={[
                   "min-h-10 rounded-pill px-5 text-body font-medium transition-colors duration-fast",
                   active
-                    ? "bg-gold-wash text-warm-ink shadow-[inset_0_0_0_1px_var(--color-champagne-gold)]"
-                    : "text-soft-taupe",
+                    ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
+                    : "text-muted",
                 ].join(" ")}
               >
                 {opt.label}
@@ -572,7 +576,7 @@ export function ProductForm({
             <div
               role="group"
               aria-label="Pre-order payment mode"
-              className="inline-flex rounded-pill border border-hairline bg-pure-white p-1"
+              className="inline-flex rounded-pill border border-border-subtle bg-card p-1"
             >
               {[
                 { value: "full", label: "Pay in full" },
@@ -588,8 +592,8 @@ export function ProductForm({
                     className={[
                       "min-h-10 rounded-pill px-5 text-body font-medium transition-colors duration-fast",
                       active
-                        ? "bg-gold-wash text-warm-ink shadow-[inset_0_0_0_1px_var(--color-champagne-gold)]"
-                        : "text-soft-taupe",
+                        ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
+                        : "text-muted",
                     ].join(" ")}
                   >
                     {opt.label}
@@ -622,12 +626,12 @@ export function ProductForm({
       {/* Free delivery */}
       <section
         aria-labelledby="free-delivery-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="free-delivery-heading" className="text-subheading font-semibold">
           Free delivery
         </h2>
-        <p className="text-body text-soft-taupe">
+        <p className="text-body text-muted">
           Offer this ring free delivery, everywhere or only to chosen locations.
         </p>
         <label className="inline-flex min-h-11 items-center gap-3 text-body">
@@ -635,14 +639,14 @@ export function ProductForm({
             type="checkbox"
             checked={freeAllLocations}
             onChange={(e) => setFreeAllLocations(e.target.checked)}
-            className="size-5 accent-champagne-gold"
+            className="size-5 accent-accent"
           />
           Free delivery to all locations
         </label>
 
         {!freeAllLocations ? (
           locations.length === 0 ? (
-            <p className="text-body text-soft-taupe">
+            <p className="text-body text-muted">
               No delivery locations yet. Add them under Delivery.
             </p>
           ) : (
@@ -668,8 +672,8 @@ export function ProductForm({
                       className={[
                         "inline-flex min-h-11 items-center rounded-pill px-4 text-body font-medium transition-colors duration-fast",
                         active
-                          ? "bg-gold-wash text-warm-ink shadow-[inset_0_0_0_1px_var(--color-champagne-gold)]"
-                          : "border border-hairline bg-pure-white text-warm-ink",
+                          ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
+                          : "border border-border-subtle bg-card text-primary",
                       ].join(" ")}
                     >
                       {loc.label}
@@ -685,7 +689,7 @@ export function ProductForm({
       {/* Images */}
       <section
         aria-labelledby="images-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="images-heading" className="text-subheading font-semibold">
           Images
@@ -696,7 +700,7 @@ export function ProductForm({
       {/* Publishing */}
       <section
         aria-labelledby="publishing-heading"
-        className="space-y-5 rounded-card bg-pure-white p-6 shadow-card md:p-8"
+        className="space-y-5 rounded-md bg-card p-6 shadow-card md:p-8"
       >
         <h2 id="publishing-heading" className="text-subheading font-semibold">
           Publishing
@@ -718,7 +722,7 @@ export function ProductForm({
             type="checkbox"
             checked={isFeatured}
             onChange={(e) => setIsFeatured(e.target.checked)}
-            className="size-5 accent-champagne-gold"
+            className="size-5 accent-accent"
           />
           Feature this ring on the homepage
         </label>
@@ -746,7 +750,7 @@ export function ProductForm({
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {saving
             ? "Saving…"
@@ -759,7 +763,7 @@ export function ProductForm({
         <button
           type="button"
           onClick={() => router.push("/admin/products")}
-          className="inline-flex min-h-12 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body-lg font-medium text-warm-ink"
+          className="inline-flex min-h-12 items-center rounded-pill border border-border-subtle bg-card px-6 text-body-lg font-medium text-primary"
         >
           Cancel
         </button>

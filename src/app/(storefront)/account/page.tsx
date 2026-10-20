@@ -10,7 +10,7 @@ export default async function ProfilePage() {
       <h2 id="profile-heading" className="text-subheading font-semibold">
         Profile
       </h2>
-      <p className="mt-1 mb-6 text-body text-soft-taupe">
+      <p className="mt-1 mb-6 text-body text-muted">
         Your name, contact details and default display currency.
       </p>
       <div className="max-w-lg">
@@ -24,7 +24,7 @@ export default async function ProfilePage() {
             }}
           />
         ) : (
-          <p className="text-body text-status-error">
+          <p className="text-body text-danger">
             We couldn&apos;t load your profile. Try again shortly.
           </p>
         )}

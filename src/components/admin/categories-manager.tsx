@@ -107,7 +107,7 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
     <div className="space-y-6">
       <form
         onSubmit={createCategory}
-        className="flex flex-wrap gap-3 rounded-card bg-pure-white p-6 shadow-card"
+        className="flex flex-wrap gap-3 rounded-md bg-card p-6 shadow-card"
       >
         <div className="min-w-56 flex-1 space-y-1.5">
           <label htmlFor="new-category" className="text-body font-medium">
@@ -118,28 +118,28 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="e.g. Anniversary"
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
           />
         </div>
         <button
           type="submit"
           disabled={busy || !newName.trim()}
-          className="mt-0 inline-flex min-h-12 items-center self-end rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="mt-0 inline-flex min-h-12 items-center self-end rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {busy ? "Working…" : "Create category"}
         </button>
       </form>
 
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}
 
       {rows.length === 0 ? (
-        <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+        <div className="rounded-md bg-card p-10 text-center shadow-card">
           <p className="text-subheading">No categories yet</p>
-          <p className="mx-auto mt-2 max-w-md text-body text-soft-taupe">
+          <p className="mx-auto mt-2 max-w-md text-body text-muted">
             Create one above, then assign rings to it.
           </p>
         </div>
@@ -148,11 +148,11 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
           {rows.map((row) => (
             <li
               key={row.id}
-              className="flex flex-wrap items-center gap-4 rounded-card bg-pure-white p-4 shadow-card"
+              className="flex flex-wrap items-center gap-4 rounded-md bg-card p-4 shadow-card"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-body-lg font-medium">{row.name}</p>
-                <p className="text-label text-soft-taupe">
+                <p className="text-label text-muted">
                   {row.productCount}{" "}
                   {row.productCount === 1 ? "product" : "products"} ·{" "}
                   {row.isActive ? "Visible" : "Hidden"}
@@ -162,7 +162,7 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
                 type="button"
                 onClick={() => rename(row)}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill border border-hairline bg-pure-white px-4 text-label font-medium disabled:bg-pale-sand"
+                className="inline-flex min-h-10 items-center rounded-pill border border-border-subtle bg-card px-4 text-label font-medium disabled:bg-border-default"
               >
                 Rename
               </button>
@@ -170,7 +170,7 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
                 type="button"
                 onClick={() => toggleActive(row)}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill border border-hairline bg-pure-white px-4 text-label font-medium disabled:bg-pale-sand"
+                className="inline-flex min-h-10 items-center rounded-pill border border-border-subtle bg-card px-4 text-label font-medium disabled:bg-border-default"
               >
                 {row.isActive ? "Hide" : "Show"}
               </button>
@@ -178,7 +178,7 @@ export function CategoriesManager({ initial }: { initial: CategoryRow[] }) {
                 type="button"
                 onClick={() => remove(row)}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-status-error disabled:text-soft-taupe"
+                className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-danger disabled:text-muted"
               >
                 Delete
               </button>

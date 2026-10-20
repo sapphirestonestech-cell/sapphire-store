@@ -60,7 +60,7 @@ export function ReturnPoller({
   }
   return (
     <div className="mx-auto max-w-xl py-16 text-center">
-      <p className="text-body-lg text-soft-taupe">Checking your payment...</p>
+      <p className="text-body-lg text-muted">Checking your payment...</p>
     </div>
   )
 }

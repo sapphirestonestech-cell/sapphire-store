@@ -2,16 +2,8 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { ExchangeRateModel, SettingModel } from "@/lib/models/settings";
 import { getSettings } from "@/lib/settings";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 import type { Currency } from "@/lib/currency";
-
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
 
 async function upsertSetting(key: string, value: string) {
   await SettingModel.updateOne(
@@ -23,8 +15,8 @@ async function upsertSetting(key: string, value: string) {
 
 /** GET /api/admin/settings — store money settings (§6.5, §12.1). */
 export async function GET() {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
   try {
     const settings = await getSettings();
     return NextResponse.json({
@@ -49,8 +41,8 @@ export async function GET() {
  * orders keep the rate they were placed at (§6.5, §9).
  */
 export async function PATCH(request: Request) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   let body: {
     usdToNgn?: number;

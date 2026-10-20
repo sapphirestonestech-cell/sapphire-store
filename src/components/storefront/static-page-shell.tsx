@@ -13,14 +13,14 @@ export function StaticPageShell({
 }) {
   return (
     <div className="page-width py-16 md:py-24">
-      <div className="mx-auto max-w-xl rounded-card bg-pure-white p-10 shadow-card">
-        <h1 className="font-display text-heading-lg">{title}</h1>
-        <p className="mt-4 text-body-lg text-soft-taupe">{blurb}</p>
-        <p className="mt-4 text-body-lg text-soft-taupe">
+      <div className="mx-auto max-w-xl rounded-md bg-card p-10 shadow-card">
+        <h1 className="font-sans text-heading-lg">{title}</h1>
+        <p className="mt-4 text-body-lg text-muted">{blurb}</p>
+        <p className="mt-4 text-body-lg text-muted">
           Need help now?{" "}
           <Link
             href="/contact"
-            className="text-deep-gold underline underline-offset-4"
+            className="text-accent-strong underline underline-offset-4"
           >
             Contact us
           </Link>

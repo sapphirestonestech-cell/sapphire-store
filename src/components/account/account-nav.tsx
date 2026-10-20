@@ -7,6 +7,7 @@ import { SignOutButton } from "@/components/account/sign-out-button";
 const NAV = [
   { href: "/account", label: "Profile", icon: "profile" },
   { href: "/account/orders", label: "Orders", icon: "orders" },
+  { href: "/account/wishlist", label: "Wishlist", icon: "wishlist" },
   { href: "/account/addresses", label: "Addresses", icon: "addresses" },
 ];
 
@@ -37,6 +38,15 @@ function NavIcon({ name }: { name: string }) {
           <path d="M4 8.5L12 12l8-3.5M12 12v7" strokeLinejoin="round" />
         </svg>
       );
+    case "wishlist":
+      return (
+        <svg {...common}>
+          <path
+            d="M12 20S4 15.2 4 9.9A4.1 4.1 0 0112 7.7a4.1 4.1 0 018 2.2C20 15.2 12 20 12 20z"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
     case "addresses":
       return (
         <svg {...common}>
@@ -63,7 +73,7 @@ export function AccountNav() {
   return (
     <nav
       aria-label="Account"
-      className="self-start overflow-hidden rounded-card bg-pure-white shadow-card"
+      className="self-start overflow-hidden rounded-md bg-card shadow-card"
     >
       <ul className="p-2">
         {NAV.map((item) => {
@@ -76,10 +86,10 @@ export function AccountNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-12 items-center gap-3 rounded-image px-4 text-body transition-colors duration-fast ${
+                className={`flex min-h-12 items-center gap-3 rounded-sm px-4 text-body transition-colors duration-fast ${
                   active
-                    ? "bg-gold-wash font-medium text-warm-ink"
-                    : "text-soft-taupe hover:bg-ivory-canvas hover:text-warm-ink"
+                    ? "bg-accent-wash font-medium text-primary"
+                    : "text-muted hover:bg-app hover:text-primary"
                 }`}
               >
                 <NavIcon name={item.icon} />
@@ -89,7 +99,7 @@ export function AccountNav() {
           );
         })}
       </ul>
-      <div className="border-t border-hairline p-3">
+      <div className="border-t border-border-subtle p-3">
         <SignOutButton className="w-full justify-center" />
       </div>
     </nav>

@@ -28,7 +28,7 @@ export function CartLink() {
     <Link
       href="/cart"
       aria-label={count > 0 ? `Cart, ${count} items` : "Cart"}
-      className="relative flex size-11 items-center justify-center rounded-pill text-warm-ink hover:bg-gold-wash"
+      className="relative flex size-11 items-center justify-center rounded-pill text-primary hover:bg-accent-wash"
     >
       <svg
         aria-hidden="true"
@@ -42,7 +42,7 @@ export function CartLink() {
         <path d="M7.5 6a2.5 2.5 0 015 0" />
       </svg>
       {count > 0 ? (
-        <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-chip-label bg-champagne-gold px-1 text-label font-semibold text-warm-ink tabular">
+        <span className="absolute -right-0.5 -top-0.5 grid min-w-5 place-items-center rounded-sm bg-accent px-1 text-label font-semibold text-primary tabular">
           {count > 99 ? "99+" : count}
         </span>
       ) : null}

@@ -549,4 +549,301 @@ paid at the gateway (`E03F1E`, `09F958`, `5369B2`) were left `pending_payment`.
 - `npm run typecheck` clean, `npm run lint` 0 errors (1 pre-existing warning),
   `npm test` 33/33, `npm run build` passes.
 
+## 2026-10-19 — Headings: Cormorant Garamond → Playfair Display
 
+### Changed
+
+- **The display/heading serif is now Playfair Display** (client instruction:
+  "choose a better font for the order title"). Cormorant Garamond's thin,
+  high-contrast strokes read as wispy at the sizes actually used — a 28px order
+  title looked weak. Swapped through the single `--font-display` token in
+  `src/app/globals.css` and the `next/font` import in `src/app/layout.tsx`, so
+  all 45 `font-display` usages across storefront, account/auth and admin follow
+  in one place. Nothing else about the type system changed.
+- `DESIGN.md` §3.1 rewritten (family table, decision note), §13 open question 4
+  marked resolved, and the §14 quick-start token updated.
+
+### Verified
+
+- Order page (`/order/SAP-20261019-E5782A`) title computes to
+  `"Playfair Display"` at 32px; prices still compute to `Inter`, so no serif
+  node renders a `₦` (DESIGN.md §3.1 Naira-glyph rule holds).
+- `/`, `/product/sienna-pav-eternity` and `/shop`: every `h1`/`h2`/`h3` resolves
+  to Playfair Display where `font-display` is applied, Inter otherwise, and
+  **no Cormorant font face loads any more** (`document.fonts` contains none).
+
+### Noted
+
+- The shared `next dev` server served a stale `globals.css` bundle after the
+  edit (it still emitted `--font-display: var(--font-cormorant)` alongside the
+  new `--font-playfair`), so the first browser check showed the old face. A
+  `touch` of `globals.css` forced the recompile and the new token took effect;
+  no code change was needed. Possibly aggravated by a concurrent edit failing to
+  compile at the time.
+- `npm run typecheck` currently reports one error in **`src/lib/admin/orders.ts`**
+  (`Module '"mongoose"' has no exported member 'FilterQuery'`) — an untracked
+  file being written by the parallel session, unrelated to this change. The
+  files touched here are unaffected.
+
+
+
+## 2026-10-19 — Admin commerce: orders, payments, dashboard
+
+### Added
+
+- **Order model history** — `statusHistory` entries (`status`, `at`, `note`,
+  `by`), `adminNotes`, and a `refunded` order status. Payment verification now
+  writes a `paid` history entry.
+- **Admin order helpers** (`src/lib/admin/orders.ts`) — transition policy
+  (`pending_payment → paid → processing → shipped → delivered`, plus
+  cancel/refund rules), list filters, date/search queries, money helpers and
+  CSV export.
+- **Shared payment verification** (`src/lib/payments/verify.ts`) — used by both
+  the customer return route and the admin reconcile action. Flags
+  `paymentStatus: mismatch` when the gateway confirms a different amount or
+  currency.
+- **Admin APIs** — `PATCH /api/admin/orders/[id]` (status, cancel, refund,
+  notes), `GET /api/admin/orders/export` (CSV) and
+  `POST /api/admin/payments/[reference]/verify`.
+- **Orders** — list page with search, status/payment/gateway/availability/
+  location/date filters, CSV export, desktop table and mobile cards; detail page
+  with customer, rings, shipments, payment, totals and timeline, plus status
+  actions, internal notes, cancel/refund and gateway verification.
+- **Payments** — list page filtered to orders with a payment reference (gateway,
+  payment status, search, dates) and a detail page with the payment record,
+  order summary, "Verify with gateway" reconciliation and a note that gateway
+  logs are not stored.
+- **Dashboard** — sales (USD and NGN), orders today, pending payment, awaiting
+  shipment, pre-orders awaiting arrival, low stock, a 30-day/12-week/12-month
+  hand-built sales chart, recent orders and quick actions.
+- **Settings** — "Payment gateways" card with independent Paystack/BACHS
+  switches.
+- **Sidebar** — Orders and Payments entries with icons.
+
+### Verified
+
+- `npm run typecheck` and `npm run lint` were clean for this work (1
+  pre-existing checkout-form warning); `npm test` 52/52 (10 new admin order
+  tests). A later workspace-wide typecheck/lint run is failing on unrelated,
+  in-progress wishlist files (`wishlist-grid` missing, `WishlistSync`
+  undefined); the admin routes still compile and return 200.
+- Next.js dev server: `/_next/mcp` compilation issues empty; `/admin`,
+  `/admin/orders`, `/admin/payments`, `/admin/settings`, an order detail page and
+  a payment detail page all return 200 with the seeded data; all three chart
+  ranges and filtered lists render; CSV export returns
+  `text/csv` with escaped cells.
+
+### Not done / noted
+
+- Stock is not restocked on cancel/refund (tracked in OPEN_QUESTIONS.md).
+- Per-shipment status/tracking (§8.4) is not modelled; actions are order-level.
+- The payment detail page has no raw gateway response or webhook log.
+- Client-side interaction checks were limited to authenticated HTTP verification
+  because `agent-browser` is not installed in this environment.
+
+---
+
+## Phase 5 — Admin accounts and storefront profile menu (2026-10-20)
+
+### Added
+
+- **Multiple admins** — Admin → **Admins** page (`/admin/admins`): list every
+  admin, add a full admin (email + password), and remove one. API:
+  `GET/POST /api/admin/admins` and `DELETE /api/admin/admins/[id]`. Two safety
+  rules are enforced server-side: an admin can never remove themselves, and the
+  last remaining admin can never be removed. Added a Sidebar entry with an icon.
+- **Session revalidation** — `requireAdmin()` / `getAdminIdentity()`
+  (`src/lib/admin/auth.ts`) now resolve the signed cookie against `AdminUser` on
+  every request. Deleting an admin ends their access immediately instead of
+  waiting out the 8-hour cookie, and a dead cookie is cleared.
+- **All admin API routes** now use the shared `requireAdmin()` guard (products,
+  categories, delivery, orders, payments, settings, upload signature).
+- **Storefront account menu** — the navbar account entry is now an avatar +
+  name dropdown with **View user account**, **View back office** (shown only for
+  admins) and **Log out**. "View back office" appears for an admin session even
+  without a customer login; "View user account" routes to `/account`.
+
+### Changed
+
+- Admin login credentials are now `sapphirestonestech@gmail.com` (was
+  `admin@sapphire.test`). The placeholder admin row was renamed in place, so the
+  existing password hash row and `_id` are preserved. `SEED_ADMIN_EMAIL` /
+  `SEED_ADMIN_PASSWORD` in `.env.local` were updated to match.
+
+### Verified
+
+- `npm run typecheck` clean, `npm test` 64/64 (20 new tests:
+  `src/lib/admin/admins.test.ts`, plus the existing order tests), `npx eslint`
+  clean apart from the pre-existing checkout-form warning.
+- Live HTTP checks against the dev server: owner login, list admins, add admin
+  (201), duplicate email (409), short password (400), self-removal (400), owner
+  removes another admin (200), stale-cookie API call (401) and stale-cookie
+  panel visit (307 → `/admin/login`). `/admin/admins` renders 200; the
+  storefront header renders the "Admin" menu label for an admin-only session.
+
+### Not done / noted
+
+- New admins are created by an existing admin setting their password; there is
+  no invite-email or self-service password change yet.
+- All admins have full access (the `staff` role exists in the schema but is not
+  used by the UI).
+
+---
+
+## Phase 6 — Full-width back office, analytics and rich-text editor (2026-10-20)
+
+### Added
+
+- **Dependency-free charts** — `src/components/admin/charts.tsx` with
+  `DonutChart`, `TrendChart`, `RankedBars` and `HorizontalBars`. Each is hand-built
+  SVG/HTML (no chart library) and ships an `sr-only` data table so the numbers are
+  available to screen readers, not just visually. Colour is never the only signal:
+  every slice/bar carries a label, an icon or a count.
+- **Dashboard analytics** — `src/lib/admin/dashboard.ts` now computes
+  `revenueByAvailability`, `revenueByCategory` (top categories),
+  `topProducts` (units + revenue + share), `ordersByStatus`, `paidOrderCount`,
+  `averageOrderValue`, and window-scoped breakdowns. The dashboard is a
+  full-width multi-column grid: dense stat cards (2→4→7 columns), a full-width
+  sales trend with y-axis ticks, gridlines and tooltips, average-order panel, two
+  donuts (availability and category), best-selling rings, orders-by-status bars,
+  quick actions and recent orders (table on desktop, cards on mobile). Range tabs
+  drive `?range=30d|12w|12m`.
+- **List-page metric strips** — `src/lib/admin/summaries.ts` (`loadOrderMetrics`,
+  `loadPaymentMetrics`) and `src/components/admin/metric-strip.tsx`, shown at the
+  top of Orders and Payments.
+- **Rich-text editor rewrite** — `src/components/admin/rich-text-editor.tsx` is now
+  a WYSIWYG `contenteditable` editor with a toolbar (paragraph/H2/H3,
+  bold/italic/underline, bullet/numbered lists, blockquote, link/unlink,
+  undo/redo) and a live word count. Output is sanitised on every change. The
+  allowlist in `src/lib/rich-text.ts` was extended with `<u>` and `<blockquote>`;
+  `.rich-text` typography in `src/app/globals.css` gained matching `u` and
+  `blockquote` styles.
+- **`src/lib/order-status.ts`** — `ORDER_STATUSES`, `statusLabel`, `statusTone`
+  shared by the dashboard and list views.
+
+### Changed
+
+- **Admin panel is full width** — `src/app/admin/(panel)/layout.tsx` drops the
+  `max-w-5xl` cap in favour of `min-w-0 flex-1` with responsive padding, and now
+  awaits `connection()` so the panel renders at request time. This also removes
+  the "unstable value `Date.now()` while prerendering" warning raised by the
+  session's timestamp check.
+- `session.sub` is the admin `_id` (ObjectId string), not the email;
+  order `statusHistory.by` records the admin email.
+
+### Verified
+
+- `npm run typecheck` clean, `npm test` 66/66 (2 new rich-text tests for
+  `<u>`/`<blockquote>` retention and inline-style stripping), `npx eslint` clean
+  apart from the pre-existing checkout-form warning.
+- Sanitizer spot-check via `tsx`: allowed tags kept; `<script>`, `onclick`,
+  inline `style` and `javascript:` hrefs stripped.
+- Browser checks (agent-browser) against the dev server: `/admin` renders
+  full-width (`main` 0→1280 at a 1280 viewport, no cap), 22 SVG charts / 23 donut
+  arcs, all panels present; metric strips render on `/admin/orders` and
+  `/admin/payments`; the product form's editor exposes the full toolbar
+  (including Quote) and round-trips `<h2>`, `<blockquote>` and `<u>`.
+- `/_next/mcp` `get_compilation_issues` clean; the admin `Date.now()` prerender
+  errors are resolved. `/admin` and `/admin/products` report expected "uncached
+  data during prerendering" notices (they must render at request time).
+
+### Not done / noted
+
+- Charts stack on narrow screens while metric cards stay dense; visual review of
+  the rendered screenshots was not possible in this session (the agent model
+  cannot view images), so layout was validated via DOM geometry instead.
+
+### Refinement (2026-10-20, after client feedback: "cheap", "text not clean", "overflowing", "no animations")
+
+- **Stat cards cleaned up** — removed the seven coloured corner dots and all hint
+  text. The dashboard now leads with one featured **Total sales** card (both
+  currencies, `text-display` figure) above a plain row of five operational counts,
+  each a white `rounded-card` with a single figure and a label beneath, per
+  DESIGN.md §9.
+- **Panel titles no longer compete with the page title** — panel `h2` dropped from
+  20px serif to a 14px Inter 500 Warm Ink label; the page `h1` stays serif and is
+  clearly the title. Chatty subtitles ("Every order in the system", "Common jobs",
+  "Confirmed sales in this period", …) were removed; panel subtitles are kept only
+  where they carry a fact (e.g. the sales period).
+- **Overflow fixed** — the donut cards overflowed their grid column at 1280px: the
+  fixed 160px donut plus a three-column legend needed ~497px inside a 428px body.
+  The donut is now `size-36`, the donut/legend break to a row at `md` instead of
+  `sm`, the legend can shrink (`min-w-0`, `shrink-0` on the fixed parts), and long
+  category names wrap instead of being truncated with an ellipsis. A full DOM
+  sweep now reports zero overflowing elements on `/admin` (excluding the
+  intentionally hidden `sr-only` table and the horizontally scrollable orders
+  table).
+- **Charts animate on load** — the single orchestrated moment (DESIGN.md §6):
+  donut arcs scale in with a per-slice stagger, and bars grow from their zero
+  state (`chart-sweep`, `chart-grow-x`, `chart-grow-y` in `src/app/globals.css`,
+  driven by a `data-ready` flag set a frame after mount). All are disabled under
+  `prefers-reduced-motion`.
+- **Note:** Turbopack served a stale CSS chunk after these globals.css edits, so
+  the animation classes did not reach the browser until the dev server was
+  restarted. Confirmed live afterwards (`chart-sweep` present with
+  `transition: transform, opacity 0.25s`).
+
+
+## Phase B — New design system: tokens, dark mode, theme switcher (2026-10-20)
+
+Replaces the gold/ivory/serif token layer with the new flat, dense,
+finance-derived system (DESIGN.md §2, §10, §11). Done in a way that keeps the
+app working at every step.
+
+- **`src/app/globals.css`** — `@theme` rewritten. Theme-dependent colours are
+  now plain custom properties under `:root` / `:root[data-theme="dark"]` /
+  `@media (prefers-color-scheme: dark)`, and the Tailwind `--color-*` names
+  point at them. New tokens: `app/card/raised/hover/active`,
+  `border-subtle/border-default`, `track`, `primary/secondary/muted/disabled`,
+  `accent/accent-strong/accent-wash/accent-contrast`,
+  `danger/success/warning/info`. Card radius 28px→10px, controls 6px, pills
+  999px; the old `soft`/`card`/`gold-glow` shadows are neutralised to zero
+  (menus keep `shadow-menu`). Type scale retuned to Inter-only sizes
+  (heading 19, subheading 17, body 15, caption 13).
+- **Legacy aliases kept** — `ivory-canvas`, `warm-ink`, `champagne-gold`,
+  `font-display`, `radius-card`, etc. now map onto the new palette, so the ~83
+  unmigrated components keep rendering during the phased migration.
+- **`src/app/layout.tsx`** — Playfair Display dropped (Inter only). An inline
+  pre-paint guard applies a saved theme before hydration (no flash) and the
+  tree is wrapped in `ThemeProvider`. The ivory grain `PatternBackground` is no
+  longer rendered (the new system is flat).
+- **`src/components/theme-provider.tsx`** (new) — theme store via
+  `useSyncExternalStore` (same pattern as the currency provider, hydration
+  safe). Saved choice in `localStorage` (`sapphire_theme`); with no choice it
+  follows the OS live and keeps following when the OS changes.
+- **`src/components/theme-toggle.tsx`** (new) — one icon button that flips and
+  remembers the theme, with an accessible label. Placed in the storefront
+  header beside the currency switcher (`sm` and up). The admin sidebar toggle
+  comes with the Phase C shell redesign.
+- **Verified:** `tsc` clean, `eslint` clean, `npm test` 66/66; compiled CSS
+  carries both theme blocks (`#171717` dark, `#f6f6f4` light) and Inter; the
+  pre-paint guard was confirmed in-browser (saved choice survives reload over
+  the OS preference); storefront renders with zero overflowing elements.
+- **Still on the old look:** no component has been migrated to the new visual
+  grammar yet — that is Phase C (admin) and Phase D (storefront).
+
+## 2026-10-20 — Admin sidebar: theme toggle + View store; global 5% zoom
+
+### Added
+
+- **Theme toggle in the admin sidebar** — `ThemeToggle` gained a
+  `variant="row"` (full-width icon + label row, matching the sign-out row);
+  the storefront header keeps the compact icon variant unchanged. Placed in
+  the sidebar footer above Sign out, per DESIGN.md §10 (deferred no longer —
+  it ships ahead of the Phase C shell redesign).
+- **"View store" link in the admin sidebar footer** — external-link icon,
+  `target="_blank"` + `rel="noopener noreferrer"`, so the storefront opens in
+  a new tab. Icon-only on the collapsed 64px rail, icon + label from `md`.
+- **Global 5% scale-down** — `zoom: 0.95` on `<html>` in `globals.css`,
+  applied site-wide (storefront, account/auth and admin) so the whole UI
+  renders uniformly 5% smaller, like browser zoom at 95%.
+
+### Verified
+
+- Sidebar footer live in the browser: "View store" carries
+  `target="_blank" rel="noopener noreferrer" href="/"`; the theme row flips
+  `data-theme` on `<html>`, persists to `localStorage.sapphire_theme` and
+  updates its label/aria-label. The dev server needed a restart for the
+  globals.css edit to reach the compiled chunk (the known Turbopack staleness);
+  computed `zoom` is `0.95` on `/` and `/admin/login`.
+- `npm run typecheck` clean; eslint clean on both touched components.

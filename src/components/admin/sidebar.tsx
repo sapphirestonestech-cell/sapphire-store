@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
   { href: "/admin/products", label: "Products", icon: "products" },
   { href: "/admin/categories", label: "Categories", icon: "categories" },
+  { href: "/admin/orders", label: "Orders", icon: "orders" },
+  { href: "/admin/payments", label: "Payments", icon: "payments" },
   { href: "/admin/delivery", label: "Delivery", icon: "delivery" },
   { href: "/admin/settings", label: "Settings", icon: "settings" },
+  { href: "/admin/admins", label: "Admins", icon: "admins" },
 ];
 
 function NavIcon({ name }: { name: string }) {
@@ -44,6 +48,23 @@ function NavIcon({ name }: { name: string }) {
           <path d="M4 7h16M4 12h16M4 17h10" strokeLinecap="round" />
         </svg>
       );
+    case "orders":
+      return (
+        <svg {...common}>
+          <path
+            d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"
+            strokeLinejoin="round"
+          />
+          <path d="M9 8h6M9 12h6" strokeLinecap="round" />
+        </svg>
+      );
+    case "payments":
+      return (
+        <svg {...common}>
+          <rect x="3" y="6" width="18" height="12" rx="2" />
+          <path d="M3 10h18M7 15h3" strokeLinecap="round" />
+        </svg>
+      );
     case "delivery":
       return (
         <svg {...common}>
@@ -52,6 +73,14 @@ function NavIcon({ name }: { name: string }) {
             strokeLinejoin="round"
           />
           <circle cx="12" cy="10" r="2.5" />
+        </svg>
+      );
+    case "admins":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" strokeLinecap="round" />
+          <path d="M16 5.5a3 3 0 010 5.8M17.5 19c0-2.2-.8-3.8-2-4.8" strokeLinecap="round" />
         </svg>
       );
     case "settings":
@@ -86,12 +115,12 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sticky top-0 z-30 flex h-screen w-16 shrink-0 flex-col border-r border-hairline bg-pure-white md:w-56">
+    <aside className="sticky top-0 z-30 flex h-screen w-16 shrink-0 flex-col border-r border-border-subtle bg-card md:w-56">
       <div className="hidden px-6 pb-2 pt-6 md:block">
-        <Link href="/" className="font-display text-heading">
+        <Link href="/" className="font-sans text-heading">
           Sapphire
         </Link>
-        <p className="text-label text-soft-taupe">Admin</p>
+        <p className="text-label text-muted">Admin</p>
       </div>
       <nav aria-label="Admin" className="flex-1 px-2 py-4 md:px-3">
         <ul className="space-y-1">
@@ -107,10 +136,10 @@ export function Sidebar() {
                   aria-current={active ? "page" : undefined}
                   title={item.label}
                   className={[
-                    "flex min-h-12 items-center gap-3 rounded-image px-3 transition-colors duration-fast",
+                    "flex min-h-12 items-center gap-3 rounded-sm px-3 transition-colors duration-fast",
                     active
-                      ? "bg-gold-wash text-warm-ink"
-                      : "text-soft-taupe hover:bg-ivory-canvas hover:text-warm-ink",
+                      ? "bg-accent-wash text-primary"
+                      : "text-muted hover:bg-app hover:text-primary",
                   ].join(" ")}
                 >
                   <NavIcon name={item.icon} />
@@ -123,13 +152,39 @@ export function Sidebar() {
           })}
         </ul>
       </nav>
-      <div className="border-t border-hairline p-3">
+      <div className="border-t border-border-subtle p-3">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="View store"
+          className="flex min-h-12 w-full items-center gap-3 rounded-sm px-3 text-muted transition-colors duration-fast hover:bg-app hover:text-primary"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            className="size-6 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            <path d="M15 3h6v6" />
+            <path d="M10 14 21 3" />
+          </svg>
+          <span className="hidden text-body font-medium md:inline">
+            View store
+          </span>
+        </a>
+        <ThemeToggle variant="row" />
         <button
           type="button"
           onClick={signOut}
           disabled={busy}
           title="Sign out"
-          className="flex min-h-12 w-full items-center gap-3 rounded-image px-3 text-soft-taupe hover:bg-ivory-canvas hover:text-warm-ink"
+          className="flex min-h-12 w-full items-center gap-3 rounded-sm px-3 text-muted hover:bg-app hover:text-primary"
         >
           <svg
             aria-hidden="true"

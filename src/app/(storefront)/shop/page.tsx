@@ -89,9 +89,9 @@ async function ShopSlot({ searchParams }: { searchParams: SearchParams }) {
       <div className="page-width py-24">
         <div
           role="alert"
-          className="mx-auto max-w-md rounded-card bg-pure-white p-10 text-center shadow-card"
+          className="mx-auto max-w-md rounded-md bg-card p-10 text-center shadow-card"
         >
-          <p className="text-body-lg text-soft-taupe">
+          <p className="text-body-lg text-muted">
             We couldn&apos;t load the collection right now. Refresh the page to
             try again.
           </p>

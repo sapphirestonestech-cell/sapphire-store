@@ -2,22 +2,14 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { CategoryModel } from "@/lib/models/category";
 import { ProductModel } from "@/lib/models/product";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
-
 /** PATCH /api/admin/categories/:id — rename, reorder, hide (§6.4). */
 export async function PATCH(request: Request, { params }: Params) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   let body: {
@@ -65,8 +57,8 @@ export async function PATCH(request: Request, { params }: Params) {
  * category; they simply lose the assignment (§6.4, §17).
  */
 export async function DELETE(_request: Request, { params }: Params) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   try {

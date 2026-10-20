@@ -105,13 +105,13 @@ export function PriceRange({
   const hiPct = ((hi - minBound) / span) * 100;
 
   const thumbClass =
-    "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-warm-ink [&::-webkit-slider-thumb]:transition-shadow [&::-webkit-slider-thumb]:focus-visible:outline-none [&::-webkit-slider-thumb]:focus-visible:ring-2 [&::-webkit-slider-thumb]:focus-visible:ring-deep-gold [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-warm-ink [&::-moz-range-thumb]:transition-shadow [&::-moz-range-thumb]:focus-visible:outline-none [&::-moz-range-thumb]:focus-visible:ring-2 [&::-moz-range-thumb]:focus-visible:ring-deep-gold";
+    "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:transition-shadow [&::-webkit-slider-thumb]:focus-visible:outline-none [&::-webkit-slider-thumb]:focus-visible:ring-2 [&::-webkit-slider-thumb]:focus-visible:ring-accent-strong [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:transition-shadow [&::-moz-range-thumb]:focus-visible:outline-none [&::-moz-range-thumb]:focus-visible:ring-2 [&::-moz-range-thumb]:focus-visible:ring-accent-strong";
 
   return (
     <div className="space-y-2.5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="text-label font-medium text-soft-taupe">Budget</span>
-        <span className="text-body font-medium text-warm-ink tabular">
+        <span className="text-label font-medium text-muted">Budget</span>
+        <span className="text-body font-medium text-primary tabular">
           {fmt(lo)} – {fmt(hi)}
         </span>
       </div>
@@ -119,11 +119,11 @@ export function PriceRange({
       <div className="relative flex h-6 items-center">
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 h-1 rounded-pill bg-pale-sand"
+          className="absolute inset-x-0 h-1 rounded-pill bg-border-default"
         />
         <div
           aria-hidden="true"
-          className="absolute h-1 rounded-pill bg-champagne-gold"
+          className="absolute h-1 rounded-pill bg-accent"
           style={{ left: `${loPct}%`, right: `${100 - hiPct}%` }}
         />
         <input

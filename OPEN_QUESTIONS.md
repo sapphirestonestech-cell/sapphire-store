@@ -27,7 +27,8 @@ the Phase 1 plan approval. Nothing else blocks Phase 1.
 Resolved since Phase 2 planning (see DECISIONS.md): base currency USD (#8),
 per-product pre-order payment full/deposit (#9), per-shipment delivery fees
 (#11), guest checkout only (#12 — superseded 2026-10-18 by optional customer
-accounts), and deferring the payment gateways.
+accounts), deferring the payment gateways, and the admin gateway toggle UI
+(#20 — built 2026-10-19 in Settings).
 
 ## Block Phase 3–4
 
@@ -38,7 +39,6 @@ accounts), and deferring the payment gateways.
 | 17 | **Brand name, logo, gold hex, typefaces, image ratio, status colors, sparkle motif, gateway logos, photography, dark mode** — the ten items in DESIGN.md §13. | Final visual sign-off before launch. |
 | 18 | **Google OAuth credentials** — client must create the OAuth client ID in Google Cloud Console (guide given 2026-10-18) and add `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` to `.env.local`. | Google sign-in going live. Email/password auth works without it; the button stays hidden until keys exist. |
 | 19 | **Size guide scope** — ProductReq.md §22 lists "Ring size guide" as a *future enhancement*, and DESIGN.md §7.13 only permits a Size guide link when a guide exists. Do we build the `/know-my-size` page + product-page link now, or defer? | The Size guide link on the product page and the `/know-my-size` page (both planned, currently held). |
-| 20 | **Admin gateway toggle UI** — the decision (DECISIONS 2026-10-18) is independent per-gateway enable/disable, and `GET/PUT /api/admin/payments/gateways` now works (JSON-string storage), but **no admin page calls it**: gateways are enabled by default in code with no UI to flip them. | Admin actually turning a gateway off before launch. Needs confirmation that building the admin UI is in scope now. |
 | 21 | **BACHS webhook endpoint** — `BACHS_WEBHOOK_SECRET` is empty in `.env.local` and no endpoint is registered with BACHS (and the local tunnel URL is ephemeral), so no webhook ever reaches the app; fulfilment currently rides on the return-page poller. | Production webhook delivery. Client must create the endpoint in the BACHS Developer Portal once the public URL exists (hosting still undecided, #1) and paste the signing secret. |
 
 ## Non-blocking (noted for later)
@@ -65,6 +65,22 @@ accounts), and deferring the payment gateways.
   must be replaced with the client's real photography. Where production uploads
   are stored/served (Cloudinary is configured in `.env.local` but no upload flow
   is built) is still open — AGENTS.md §4.3.
+- **Stock on cancel/refund:** stock is only decremented when an order is
+  fulfilled (paid), not when checkout starts. Cancelling or refunding an order
+  therefore does **not** return rings to stock yet. Decide whether refunds should
+  restock automatically (and whether that applies to pre-orders).
+- **Shipment-level status and tracking:** admin order status is order-level
+  (`paid → processing → shipped → delivered`). ProductReq.md §8.4 describes
+  per-shipment status and tracking numbers; those fields do not exist in the
+  order schema yet. Confirm whether to add them before launch.
+- **Payment audit trail:** payment status/reference/amount live on the order.
+  Raw gateway responses and webhook delivery logs are not stored, so the payment
+  detail page cannot show a gateway event history. Decide whether a
+  webhook/event log is required (§6.8, §10.7).
+- **Low-stock threshold:** the dashboard uses a fixed threshold of **2 rings
+  total** (sum across sizes, published in-stock products). ProductReq.md §6.3
+  calls for a configurable threshold — confirm the value and whether it needs an
+  admin setting.
 - **Seed data verified live** (local MongoDB): `npm run seed`, the storefront
   APIs, delivery estimates, free-delivery, deposit split and order placement were
   run against a live database on 2026-10-17. Admin CRUD is still only
@@ -73,3 +89,11 @@ accounts), and deferring the payment gateways.
 - Lint/format conventions beyond the ESLint defaults (AGENTS.md §9).
 - Commit message style and branching workflow (AGENTS.md §9).
 - Who signs off at the end of each phase (AGENTS.md §4.18).
+- **Admin password management:** additional admins exist and can be removed, but
+  there is no invite-by-email flow, no self-service "change my password", and no
+  password reset for admin accounts. Confirm whether any of these are needed
+  before launch (ProductReq.md lists "Admin users and roles (later)"; roles are
+  still unused).
+- **Remove your own admin account:** the last admin and self-removal are blocked,
+  but an admin cannot delete or deactivate their own account by any route yet.
+  Confirm whether self-service account closure is required.

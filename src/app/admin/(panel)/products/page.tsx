@@ -64,9 +64,9 @@ async function loadProducts(): Promise<{ failed: boolean; products: ProductRow[]
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  published: "bg-gold-wash text-warm-ink",
-  draft: "bg-pale-sand text-soft-taupe",
-  hidden: "bg-pale-sand text-soft-taupe",
+  published: "bg-accent-wash text-primary",
+  draft: "bg-border-default text-muted",
+  hidden: "bg-border-default text-muted",
 };
 
 export default async function AdminProductsPage() {
@@ -76,22 +76,22 @@ export default async function AdminProductsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-heading-lg">Products</h1>
-          <p className="mt-1 text-body text-soft-taupe">
+          <h1 className="font-sans text-heading-lg">Products</h1>
+          <p className="mt-1 text-body text-muted">
             {products.length} {products.length === 1 ? "ring" : "rings"}
           </p>
         </div>
         <Link
           href="/admin/products/new"
-          className="inline-flex min-h-11 items-center rounded-pill bg-champagne-gold px-5 text-body font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-11 items-center rounded-pill bg-accent px-5 text-body font-medium text-primary shadow-gold-glow"
         >
           Add product
         </Link>
       </div>
 
       {failed ? (
-        <div role="alert" className="rounded-card border border-status-error/40 bg-pure-white p-6 shadow-card">
-          <p className="text-body text-status-error">
+        <div role="alert" className="rounded-md border border-danger/40 bg-card p-6 shadow-card">
+          <p className="text-body text-danger">
             We couldn&apos;t reach the database. Check MONGODB_URI in
             .env.local, then refresh.
           </p>
@@ -99,14 +99,14 @@ export default async function AdminProductsPage() {
       ) : null}
 
       {!failed && products.length === 0 ? (
-        <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+        <div className="rounded-md bg-card p-10 text-center shadow-card">
           <p className="text-subheading">No rings yet</p>
-          <p className="mx-auto mt-2 max-w-md text-body text-soft-taupe">
+          <p className="mx-auto mt-2 max-w-md text-body text-muted">
             Add your first ring to see it appear in the storefront.
           </p>
           <Link
             href="/admin/products/new"
-            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Add product
           </Link>
@@ -118,9 +118,9 @@ export default async function AdminProductsPage() {
           {products.map((p) => (
             <li
               key={p.id}
-              className="flex flex-wrap items-center gap-4 rounded-card bg-pure-white p-4 shadow-card"
+              className="flex flex-wrap items-center gap-4 rounded-md bg-card p-4 shadow-card"
             >
-              <div className="size-16 shrink-0 overflow-hidden rounded-image border border-hairline bg-ivory-canvas">
+              <div className="size-16 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-app">
                 {p.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -129,7 +129,7 @@ export default async function AdminProductsPage() {
                     className="size-full object-cover"
                   />
                 ) : (
-                  <div aria-hidden="true" className="grid size-full place-items-center text-soft-taupe">
+                  <div aria-hidden="true" className="grid size-full place-items-center text-muted">
                     <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth={1.4}>
                       <circle cx="12" cy="14" r="5" />
                       <path d="M12 5l2.5 3L12 11 9.5 8 12 5z" />
@@ -147,15 +147,15 @@ export default async function AdminProductsPage() {
                     {p.name}
                   </Link>
                   <span
-                    className={`rounded-chip-label px-2 py-0.5 text-label font-medium ${STATUS_BADGE[p.status] ?? "bg-pale-sand text-soft-taupe"}`}
+                    className={`rounded-sm px-2 py-0.5 text-label font-medium ${STATUS_BADGE[p.status] ?? "bg-border-default text-muted"}`}
                   >
                     {p.status}
                   </span>
-                  <span className="rounded-chip-label bg-pale-sand px-2 py-0.5 text-label font-medium text-soft-taupe">
+                  <span className="rounded-sm bg-border-default px-2 py-0.5 text-label font-medium text-muted">
                     {p.availability === "pre_order" ? "Pre-order" : "In stock"}
                   </span>
                 </div>
-                <p className="mt-1 text-label text-soft-taupe">
+                <p className="mt-1 text-label text-muted">
                   {p.categoryName} · {p.type}
                   {p.arrival ? ` · arrives ${p.arrival}` : ""}
                 </p>

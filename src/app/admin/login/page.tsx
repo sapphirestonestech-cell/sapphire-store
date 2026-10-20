@@ -29,9 +29,9 @@ export default function AdminLoginPage({
 }) {
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm rounded-card bg-pure-white p-8 shadow-card">
-        <p className="font-display text-heading-lg">Sapphire</p>
-        <h1 className="mt-1 text-body text-soft-taupe">{TAGLINE}</h1>
+      <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
+        <p className="font-sans text-heading-lg">Sapphire</p>
+        <h1 className="mt-1 text-body text-muted">{TAGLINE}</h1>
         <h2 className="mb-6 mt-8 text-subheading font-semibold">Sign in</h2>
         <Suspense fallback={<LoginForm googleEnabled={googleEnabled} />}>
           <LoginFormWithParams searchParams={searchParams} />

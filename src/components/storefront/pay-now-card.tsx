@@ -41,8 +41,8 @@ export function PayNowCard({
   }
 
   return (
-    <div className="rounded-card border border-gold-wash bg-gold-wash/50 p-5">
-      <p className="text-body text-warm-ink">
+    <div className="rounded-md border border-accent-wash bg-accent-wash/50 p-5">
+      <p className="text-body text-primary">
         Your order is saved but payment hasn&apos;t been completed yet. Choose a
         payment method below to finish.
       </p>
@@ -50,8 +50,8 @@ export function PayNowCard({
         <label
           className={`flex cursor-pointer items-center gap-2 rounded-pill border px-4 py-2 text-body font-medium transition-colors ${
             gateway === "paystack"
-              ? "border-champagne-gold bg-champagne-gold/20 text-warm-ink"
-              : "border-hairline bg-pure-white text-soft-taupe"
+              ? "border-accent bg-accent/20 text-primary"
+              : "border-border-subtle bg-card text-muted"
           }`}
         >
           <input
@@ -67,8 +67,8 @@ export function PayNowCard({
         <label
           className={`flex cursor-pointer items-center gap-2 rounded-pill border px-4 py-2 text-body font-medium transition-colors ${
             gateway === "bachs"
-              ? "border-champagne-gold bg-champagne-gold/20 text-warm-ink"
-              : "border-hairline bg-pure-white text-soft-taupe"
+              ? "border-accent bg-accent/20 text-primary"
+              : "border-border-subtle bg-card text-muted"
           }`}
         >
           <input
@@ -83,7 +83,7 @@ export function PayNowCard({
         </label>
       </div>
       {error ? (
-        <p role="alert" className="mt-3 text-body text-status-error">
+        <p role="alert" className="mt-3 text-body text-danger">
           {error}
         </p>
       ) : null}
@@ -91,7 +91,7 @@ export function PayNowCard({
         type="button"
         onClick={handlePay}
         disabled={loading}
-        className="mt-4 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+        className="mt-4 inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
       >
         {loading ? "Redirecting…" : "Pay now"}
       </button>

@@ -46,12 +46,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (!token) {
     return (
       <div className="space-y-4 text-center">
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           This reset link is invalid or has expired.
         </p>
         <Link
           href="/forgot-password"
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
         >
           Request a new link
         </Link>
@@ -62,13 +62,13 @@ export function ResetPasswordForm({ token }: { token: string }) {
   if (done) {
     return (
       <div className="space-y-4 text-center">
-        <p className="text-body-lg text-warm-ink">Password updated</p>
-        <p className="text-body text-soft-taupe">
+        <p className="text-body-lg text-primary">Password updated</p>
+        <p className="text-body text-muted">
           Taking you to sign in…
         </p>
         <Link
           href="/sign-in"
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
         >
           Sign in now
         </Link>
@@ -90,10 +90,10 @@ export function ResetPasswordForm({ token }: { token: string }) {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
           aria-describedby="reset-hint"
         />
-        <p id="reset-hint" className="text-body text-soft-taupe">
+        <p id="reset-hint" className="text-body text-muted">
           At least 8 characters.
         </p>
       </div>
@@ -109,12 +109,12 @@ export function ResetPasswordForm({ token }: { token: string }) {
           minLength={8}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
         />
       </div>
 
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}
@@ -122,7 +122,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+        className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
       >
         {loading ? "Saving…" : "Set new password"}
       </button>

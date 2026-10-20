@@ -47,9 +47,9 @@ export function LoginForm({
         <>
           <GoogleSignInButton callbackUrl="/api/admin/google-session" />
           <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-hairline" />
-            <span className="text-label text-soft-taupe">or</span>
-            <span className="h-px flex-1 bg-hairline" />
+            <span className="h-px flex-1 bg-border-subtle" />
+            <span className="text-label text-muted">or</span>
+            <span className="h-px flex-1 bg-border-subtle" />
           </div>
         </>
       ) : null}
@@ -66,7 +66,7 @@ export function LoginForm({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink placeholder:text-soft-taupe"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary placeholder:text-muted"
             placeholder="you@store.com"
           />
         </div>
@@ -81,12 +81,12 @@ export function LoginForm({
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
           />
         </div>
 
         {error ? (
-          <p role="alert" className="text-body text-status-error">
+          <p role="alert" className="text-body text-danger">
             {error}
           </p>
         ) : null}
@@ -94,7 +94,7 @@ export function LoginForm({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>

@@ -14,11 +14,11 @@ function ConstellationCard({
 }) {
   return (
     <div
-      className={`constellation-card absolute w-[190px] rounded-card bg-pure-white p-2 shadow-card ${className}`}
+      className={`constellation-card absolute w-[190px] rounded-md bg-card p-2 shadow-card ${className}`}
       style={{ animationDelay: `${delayMs}ms` }}
     >
       <Link href={`/product/${product.slug}`} tabIndex={-1} aria-hidden="true">
-        <div className="aspect-[4/5.5] overflow-hidden rounded-image">
+        <div className="aspect-[4/5.5] overflow-hidden rounded-sm">
           {product.coverImage &&
           !product.coverImage.url.startsWith("placeholder:") ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -58,11 +58,11 @@ export function Hero({ featured }: { featured: ProductSummary[] }) {
           {mobileCards.map((p, i) => (
             <div
               key={p.id}
-              className="constellation-card w-[42%] max-w-[170px] rounded-card bg-pure-white p-2 shadow-card"
+              className="constellation-card w-[42%] max-w-[170px] rounded-md bg-card p-2 shadow-card"
               style={{ animationDelay: `${(i + 1) * 120}ms` }}
             >
               <Link href={`/product/${p.slug}`} tabIndex={-1} aria-hidden="true">
-                <div className="aspect-[4/5.5] overflow-hidden rounded-image">
+                <div className="aspect-[4/5.5] overflow-hidden rounded-sm">
                   {p.coverImage &&
                   !p.coverImage.url.startsWith("placeholder:") ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -99,21 +99,21 @@ export function Hero({ featured }: { featured: ProductSummary[] }) {
       ) : null}
 
       <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <h1 className="font-display text-display text-warm-ink">{TAGLINE}</h1>
-        <p className="mx-auto mt-5 max-w-md text-body-lg text-soft-taupe">
+        <h1 className="font-sans text-display text-primary">{TAGLINE}</h1>
+        <p className="mx-auto mt-5 max-w-md text-body-lg text-muted">
           Get affordable yet luxurious rings — ready to ship or available to
           pre-order, with clear prices in dollars or naira.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <Link
             href="/shop"
-            className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow transition-transform duration-fast hover:scale-[1.03]"
+            className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow transition-transform duration-fast hover:scale-[1.03]"
           >
             Shop rings
           </Link>
           <Link
             href="/shop?availability=pre_order"
-            className="text-body-lg font-medium text-deep-gold underline-offset-4 hover:underline"
+            className="text-body-lg font-medium text-accent-strong underline-offset-4 hover:underline"
           >
             See the pre-order collection
           </Link>

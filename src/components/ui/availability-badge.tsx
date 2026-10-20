@@ -15,7 +15,7 @@ export function AvailabilityBadge({
 }) {
   if (soldOut) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-pill bg-pale-sand px-3 py-1.5 text-label font-medium text-soft-taupe">
+      <span className="inline-flex items-center gap-1.5 rounded-pill bg-border-default px-3 py-1.5 text-label font-medium text-muted">
         Sold out
       </span>
     );
@@ -23,7 +23,7 @@ export function AvailabilityBadge({
   if (availability === "pre_order") {
     const short = arrivalDate ? formatArrivalShort(arrivalDate) : null;
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-pill bg-gold-wash px-3 py-1.5 text-label font-medium text-deep-gold">
+      <span className="inline-flex items-center gap-1.5 rounded-pill bg-accent-wash px-3 py-1.5 text-label font-medium text-accent-strong">
         <svg
           aria-hidden="true"
           viewBox="0 0 16 16"
@@ -40,8 +40,8 @@ export function AvailabilityBadge({
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-pill border border-hairline bg-pure-white px-3 py-1.5 text-label font-medium text-warm-ink">
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-warm-ink" />
+    <span className="inline-flex items-center gap-1.5 rounded-pill border border-border-subtle bg-card px-3 py-1.5 text-label font-medium text-primary">
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
       In stock
     </span>
   );

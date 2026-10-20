@@ -27,6 +27,16 @@ export async function fulfilPaidOrder(
   order.status = "paid";
   order.paymentStatus = "paid";
   order.paidAt = paidAt;
+  order.statusHistory = [
+    ...(order.statusHistory ?? []),
+    {
+      status: "paid",
+      at: paidAt,
+      note: order.paymentGateway
+        ? `Payment verified with ${order.paymentGateway}`
+        : "Payment verified",
+    },
+  ];
   await order.save();
 
   for (const item of order.items) {

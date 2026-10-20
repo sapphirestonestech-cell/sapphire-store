@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { ProductModel } from "@/lib/models/product";
 import { CategoryModel } from "@/lib/models/category";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/admin/auth";
 import {
   PayloadError,
   validateProductPayload,
@@ -11,18 +11,10 @@ import {
 
 type Params = { params: Promise<{ id: string }> };
 
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
-
 /** PATCH /api/admin/products/:id — update a ring (§6.3). */
 export async function PATCH(request: Request, { params }: Params) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   let payload: ProductPayload;
@@ -67,8 +59,8 @@ export async function PATCH(request: Request, { params }: Params) {
 
 /** DELETE /api/admin/products/:id — remove a ring (§6.3 bulk delete). */
 export async function DELETE(_request: Request, { params }: Params) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   try {

@@ -1,4 +1,5 @@
 import type { ProductImageSubdoc, ProductSizeSubdoc } from "@/lib/models/product";
+import { normalizeDescription } from "@/lib/rich-text";
 import { slugify } from "@/lib/slug";
 
 /** Shape the admin form submits. */
@@ -179,7 +180,7 @@ export function validateProductPayload(
   return {
     name,
     slug,
-    description: payload.description?.trim() ?? "",
+    description: normalizeDescription(payload.description),
     type,
     categories: payload.categoryIds.map(String),
     shape,

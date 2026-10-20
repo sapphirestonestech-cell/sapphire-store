@@ -2,15 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { DeliveryLocationModel } from "@/lib/models/settings";
 import { ProductModel } from "@/lib/models/product";
-import { getSession } from "@/lib/session";
-
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
+import { requireAdmin } from "@/lib/admin/auth";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -29,8 +21,8 @@ interface LocationInput {
 
 /** PATCH /api/admin/delivery/:id — edit a delivery location (§9). */
 export async function PATCH(request: Request, { params }: RouteContext) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   let body: LocationInput;
@@ -87,8 +79,8 @@ export async function PATCH(request: Request, { params }: RouteContext) {
  * that offered free delivery to it simply lose that entry (§17).
  */
 export async function DELETE(_request: Request, { params }: RouteContext) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   try {

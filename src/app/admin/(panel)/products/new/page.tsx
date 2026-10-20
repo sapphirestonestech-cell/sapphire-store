@@ -40,15 +40,15 @@ export default async function NewProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-heading-lg">Add product</h1>
-        <p className="mt-1 text-body text-soft-taupe">
+        <h1 className="font-sans text-heading-lg">Add product</h1>
+        <p className="mt-1 text-body text-muted">
           Up to four images, categories, and in-stock or pre-order settings.
         </p>
       </div>
 
       {failed ? (
-        <div role="alert" className="rounded-card border border-status-error/40 bg-pure-white p-6 shadow-card">
-          <p className="text-body text-status-error">
+        <div role="alert" className="rounded-md border border-danger/40 bg-card p-6 shadow-card">
+          <p className="text-body text-danger">
             We couldn&apos;t reach the database. Check MONGODB_URI in
             .env.local, then refresh.
           </p>

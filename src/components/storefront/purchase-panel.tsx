@@ -220,7 +220,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
                   setFlash(null);
                   clearToast();
                 }}
-                className="h-12 w-full appearance-none rounded-pill border border-hairline bg-pure-white pl-5 pr-11 text-body font-medium text-warm-ink transition-colors duration-fast hover:bg-gold-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-champagne-gold"
+                className="h-12 w-full appearance-none rounded-pill border border-border-subtle bg-card pl-5 pr-11 text-body font-medium text-primary transition-colors duration-fast hover:bg-accent-wash focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <option value="" disabled>
                   Choose a size
@@ -247,7 +247,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
               <svg
                 aria-hidden="true"
                 viewBox="0 0 20 20"
-                className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-soft-taupe"
+                className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.6"
@@ -269,7 +269,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
           <div
             role="group"
             aria-labelledby="qty-label"
-            className="flex h-12 w-full items-center justify-between rounded-pill border border-hairline bg-pure-white px-1"
+            className="flex h-12 w-full items-center justify-between rounded-pill border border-border-subtle bg-card px-1"
           >
             <button
               type="button"
@@ -280,7 +280,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
               }}
               disabled={effectiveQty <= 1}
               aria-label="Decrease quantity"
-              className="flex size-11 items-center justify-center rounded-pill text-warm-ink transition-colors hover:bg-gold-wash disabled:text-pale-sand"
+              className="flex size-11 items-center justify-center rounded-pill text-primary transition-colors hover:bg-accent-wash disabled:text-border-default"
             >
               <svg
                 aria-hidden="true"
@@ -309,7 +309,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
               }}
               disabled={effectiveQty >= stepperMax}
               aria-label="Increase quantity"
-              className="flex size-11 items-center justify-center rounded-pill text-warm-ink transition-colors hover:bg-gold-wash disabled:text-pale-sand"
+              className="flex size-11 items-center justify-center rounded-pill text-primary transition-colors hover:bg-accent-wash disabled:text-border-default"
             >
               <svg
                 aria-hidden="true"
@@ -330,12 +330,12 @@ export function PurchasePanel(props: PurchasePanelProps) {
       {/* Stock / per-order limit — shows what is left to buy. */}
       {isPreorder ? (
         props.preorderMaxQty ? (
-          <p className="text-body text-soft-taupe">
+          <p className="text-body text-muted">
             Up to {props.preorderMaxQty} per order.
           </p>
         ) : null
       ) : hasSizes && selectedSize ? (
-        <p className="text-body text-soft-taupe">
+        <p className="text-body text-muted">
           {selectedSize.stockQuantity} left in {selectedSize.sizeLabel}.
         </p>
       ) : null}
@@ -350,7 +350,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
           onClick={add}
           disabled={soldOut || atLimit}
           aria-disabled={soldOut || atLimit}
-          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow transition-transform duration-fast hover:scale-[1.02] disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none disabled:hover:scale-100"
+          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow transition-transform duration-fast hover:scale-[1.02] disabled:bg-border-default disabled:text-muted disabled:shadow-none disabled:hover:scale-100"
         >
           {soldOut ? "Sold out" : "Add to cart"}
         </button>
@@ -359,7 +359,7 @@ export function PurchasePanel(props: PurchasePanelProps) {
           onClick={proceed}
           disabled={soldOut}
           aria-disabled={soldOut}
-          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-pill border border-hairline bg-pure-white px-6 text-body-lg font-medium text-warm-ink transition-colors duration-fast hover:bg-gold-wash disabled:bg-pale-sand disabled:text-soft-taupe"
+          className="inline-flex min-h-12 flex-1 items-center justify-center rounded-pill border border-border-subtle bg-card px-6 text-body-lg font-medium text-primary transition-colors duration-fast hover:bg-accent-wash disabled:bg-border-default disabled:text-muted"
         >
           Proceed to checkout
         </button>
@@ -367,13 +367,13 @@ export function PurchasePanel(props: PurchasePanelProps) {
 
       {/* Live region kept mounted for announcements, but it reserves no height
           until it has something to say (client: less empty space, 2026-10-19). */}
-      <p aria-live="polite" className="empty:hidden text-body text-deep-gold">
+      <p aria-live="polite" className="empty:hidden text-body text-accent-strong">
         {status}
       </p>
       {isPreorder && deposit && depositAmount !== null ? (
-        <p className="text-body text-soft-taupe">
+        <p className="text-body text-muted">
           Reserve with a {deposit}% deposit of{" "}
-          <span className="font-semibold text-warm-ink">
+          <span className="font-semibold text-primary">
             {formatPrice(depositAmount, currency)}
           </span>
           {props.preorderArrivalDate
@@ -383,17 +383,9 @@ export function PurchasePanel(props: PurchasePanelProps) {
         </p>
       ) : null}
 
-      {props.freeDelivery.allLocations ? (
-        <p className="text-body text-soft-taupe">Free delivery everywhere.</p>
-      ) : (props.freeDeliveryLabels?.length ?? 0) > 0 ? (
-        <p className="text-body text-soft-taupe">
-          Free delivery to {props.freeDeliveryLabels!.join(", ")}.
-        </p>
-      ) : null}
-
-      {/* Toast — DESIGN.md §7.19, top-centre below the header (client pick). */}
+      {/* Toast — DESIGN.md §7.19, pinned top-right below the sticky header. */}
       {toast ? (
-        <div className="pointer-events-none fixed inset-x-0 top-32 z-50 flex justify-center px-4">
+        <div className="pointer-events-none fixed right-4 top-20 z-50 w-[calc(100%-2rem)] max-w-sm md:right-6 md:top-24">
           <Toast
             message={toast.message}
             kind={toast.kind}

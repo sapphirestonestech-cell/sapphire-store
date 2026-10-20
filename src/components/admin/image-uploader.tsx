@@ -124,18 +124,18 @@ export function ImageUploader({
     <div className="space-y-3">
       <div className="flex items-baseline justify-between">
         <p className="text-body font-medium">Images</p>
-        <p className="text-label text-soft-taupe tabular">
+        <p className="text-label text-muted tabular">
           {filledCount} of {MAX_IMAGES} images
         </p>
       </div>
 
       {configError ? (
-        <p role="alert" className="text-body text-status-warning">
+        <p role="alert" className="text-body text-warning">
           {configError}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}
@@ -143,7 +143,7 @@ export function ImageUploader({
       <div className="grid grid-cols-2 gap-3">
         {slots.map((slot, i) => (
           <div key={i} className="space-y-2">
-            <div className="relative aspect-square overflow-hidden rounded-image border border-hairline bg-pure-white">
+            <div className="relative aspect-square overflow-hidden rounded-sm border border-border-subtle bg-card">
               {slot.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -155,12 +155,12 @@ export function ImageUploader({
                 <RingPlaceholder label={i === 0 ? "Cover" : `Image ${i + 1}`} />
               )}
               {i === 0 ? (
-                <span className="absolute left-2 top-2 rounded-chip-label bg-pure-white/90 px-2 py-0.5 text-label font-medium">
+                <span className="absolute left-2 top-2 rounded-sm bg-card/90 px-2 py-0.5 text-label font-medium">
                   Cover
                 </span>
               ) : null}
               {busyIndex === i ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-pure-white/70 text-label">
+                <div className="absolute inset-0 flex items-center justify-center bg-card/70 text-label">
                   Uploading…
                 </div>
               ) : null}
@@ -175,12 +175,12 @@ export function ImageUploader({
                 placeholder={
                   i === 0 ? "Cover (optional label)" : "e.g. Left hand"
                 }
-                className="h-10 w-full rounded-pill border border-hairline bg-pure-white px-3 text-body"
+                className="h-10 w-full rounded-pill border border-border-subtle bg-card px-3 text-body"
               />
             </label>
 
             <div className="flex gap-2">
-              <label className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-pill border border-hairline bg-pure-white px-3 text-label font-medium">
+              <label className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-pill border border-border-subtle bg-card px-3 text-label font-medium">
                 {slot.url ? "Replace" : "Upload"}
                 <input
                   type="file"
@@ -198,7 +198,7 @@ export function ImageUploader({
                 <button
                   type="button"
                   onClick={() => setSlot(i, { url: "", publicId: "" })}
-                  className="inline-flex min-h-9 items-center rounded-pill px-3 text-label font-medium text-status-error"
+                  className="inline-flex min-h-9 items-center rounded-pill px-3 text-label font-medium text-danger"
                 >
                   Remove
                 </button>

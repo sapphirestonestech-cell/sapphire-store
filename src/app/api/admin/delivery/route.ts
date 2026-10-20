@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDb } from "@/lib/db";
 import { DeliveryLocationModel } from "@/lib/models/settings";
-import { getSession } from "@/lib/session";
-
-async function ensureAdmin() {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
-  }
-  return null;
-}
+import { requireAdmin } from "@/lib/admin/auth";
 
 interface LocationInput {
   country?: string;
@@ -62,8 +54,8 @@ function validateInput(body: LocationInput, partial: boolean) {
 
 /** GET /api/admin/delivery — every delivery location (§9, §12.1). */
 export async function GET() {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
   try {
     await connectDb();
     const docs = await DeliveryLocationModel.find()
@@ -92,8 +84,8 @@ export async function GET() {
 
 /** POST /api/admin/delivery — create a delivery location. */
 export async function POST(request: Request) {
-  const unauthorized = await ensureAdmin();
-  if (unauthorized) return unauthorized;
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.response;
 
   let body: LocationInput;
   try {

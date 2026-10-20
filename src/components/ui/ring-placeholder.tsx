@@ -14,11 +14,11 @@ export function RingPlaceholder({
     <div
       role="img"
       aria-label={label ? `Placeholder image: ${label}` : "Placeholder image"}
-      className={`flex size-full items-center justify-center bg-pale-sand/50 ${className}`}
+      className={`flex size-full items-center justify-center bg-border-default/50 ${className}`}
     >
       <svg
         viewBox="0 0 64 64"
-        className="w-1/3 min-w-10 max-w-16 text-deep-gold"
+        className="w-1/3 min-w-10 max-w-16 text-accent-strong"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.6"

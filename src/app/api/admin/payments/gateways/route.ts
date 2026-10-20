@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/session'
+import { requireAdmin } from '@/lib/admin/auth'
 import { connectDb } from '@/lib/db'
 import { SettingModel } from '@/lib/models/settings'
 import { parseGatewayFlags } from '@/lib/payments/gateways'
@@ -8,8 +8,8 @@ const DEFAULTS = { paystack: true, bachs: true }
 
 export async function GET() {
   try {
-    const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
     await connectDb()
     const s = await SettingModel.findOne({ key: 'payment_gateways' }).lean()
     return NextResponse.json({ gateways: parseGatewayFlags(s?.value) ?? DEFAULTS })
@@ -21,8 +21,8 @@ export async function GET() {
 
 export async function PUT(req: Request) {
   try {
-    const session = await getSession()
-    if (!session) return NextResponse.json({ error: 'Sign in to continue.' }, { status: 401 })
+    const auth = await requireAdmin()
+    if (!auth.ok) return auth.response
     const body = await req.json().catch(() => ({}))
     const { paystack, bachs } = body as { paystack?: unknown; bachs?: unknown }
     const value = JSON.stringify({ paystack: !!paystack, bachs: !!bachs })

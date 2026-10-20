@@ -30,8 +30,8 @@ export default function OrderPage({ params }: PageProps) {
 function OrderSkeleton() {
   return (
     <div className="page-width animate-pulse py-12">
-      <div className="h-10 w-1/2 rounded-pill bg-pale-sand" />
-      <div className="mt-8 h-64 w-full rounded-card bg-pale-sand" />
+      <div className="h-10 w-1/2 rounded-pill bg-border-default" />
+      <div className="mt-8 h-64 w-full rounded-md bg-border-default" />
     </div>
   );
 }
@@ -60,14 +60,14 @@ async function OrderDetail({ params }: PageProps) {
     <div className="page-width py-8 md:py-12">
       <div className="mx-auto max-w-3xl space-y-8">
         <header className="space-y-2">
-          <span className="inline-flex items-center rounded-chip-label bg-gold-wash px-3 py-1 text-label font-medium text-deep-gold">
+          <span className="inline-flex items-center rounded-sm bg-accent-wash px-3 py-1 text-label font-medium text-accent-strong">
             {ORDER_STATUS_LABELS[order.status] ?? order.status}
           </span>
-          <h1 className="font-display text-heading-lg text-warm-ink">
+          <h1 className="font-sans text-heading-lg text-primary">
             Thank you — your order is saved
           </h1>
-          <p className="text-body text-soft-taupe">
-            Order <span className="font-medium text-warm-ink">{order.orderNumber}</span>
+          <p className="text-body text-muted">
+            Order <span className="font-medium text-primary">{order.orderNumber}</span>
             {" · "}
             {new Date(order.createdAt).toLocaleDateString("en-US", {
               month: "long",
@@ -85,17 +85,17 @@ async function OrderDetail({ params }: PageProps) {
         <section aria-labelledby="order-items-heading">
           <h2
             id="order-items-heading"
-            className="mb-3 font-display text-subheading text-warm-ink"
+            className="mb-3 font-sans text-subheading text-primary"
           >
             Your rings
           </h2>
-          <ul className="divide-y divide-hairline rounded-card bg-pure-white px-5 shadow-card">
+          <ul className="divide-y divide-border-subtle rounded-md bg-card px-5 shadow-card">
             {order.items.map((item, idx) => {
               const hasImage =
                 item.imageUrl != null && !item.imageUrl.startsWith("placeholder:");
               return (
                 <li key={idx} className="flex gap-4 py-4">
-                  <div className="relative size-20 shrink-0 overflow-hidden rounded-image">
+                  <div className="relative size-20 shrink-0 overflow-hidden rounded-sm">
                     {hasImage ? (
                       // eslint-disable-next-line @next/next/no-img-element -- Cloudinary CDN
                       <img
@@ -112,17 +112,17 @@ async function OrderDetail({ params }: PageProps) {
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/product/${item.slug}`}
-                      className="text-body-lg font-medium text-warm-ink hover:text-deep-gold"
+                      className="text-body-lg font-medium text-primary hover:text-accent-strong"
                     >
                       {item.name}
                     </Link>
-                    <p className="text-body text-soft-taupe">
+                    <p className="text-body text-muted">
                       Size {item.sizeLabel} ·{" "}
                       {item.availability === "pre_order" ? "Pre-order" : "In stock"}
                       {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
                     </p>
                     {item.preorderArrivalDate ? (
-                      <p className="text-body text-deep-gold">
+                      <p className="text-body text-accent-strong">
                         Arriving{" "}
                         {new Date(item.preorderArrivalDate).toLocaleDateString(
                           "en-US",
@@ -131,7 +131,7 @@ async function OrderDetail({ params }: PageProps) {
                       </p>
                     ) : null}
                     {item.paymentMode === "deposit" && item.depositPercent ? (
-                      <p className="text-body text-soft-taupe">
+                      <p className="text-body text-muted">
                         {item.depositPercent}% deposit · {money(item.dueNowMinor, order)}{" "}
                         now, {money(item.dueLaterMinor, order)} before shipping
                       </p>
@@ -150,12 +150,12 @@ async function OrderDetail({ params }: PageProps) {
         <section aria-labelledby="order-delivery-heading">
           <h2
             id="order-delivery-heading"
-            className="mb-3 font-display text-subheading text-warm-ink"
+            className="mb-3 font-sans text-subheading text-primary"
           >
             Delivery
           </h2>
-          <div className="space-y-4 rounded-card bg-pure-white p-5 shadow-card">
-            <p className="text-body text-warm-ink">
+          <div className="space-y-4 rounded-md bg-card p-5 shadow-card">
+            <p className="text-body text-primary">
               <span className="font-medium">To:</span> {location.cityArea}
               {location.region ? `, ${location.region}` : ""}, {location.country}
             </p>
@@ -163,13 +163,13 @@ async function OrderDetail({ params }: PageProps) {
               {order.shipments.map((s) => (
                 <li
                   key={s.kind}
-                  className="flex items-start justify-between gap-4 border-t border-hairline pt-3 first:border-t-0 first:pt-0"
+                  className="flex items-start justify-between gap-4 border-t border-border-subtle pt-3 first:border-t-0 first:pt-0"
                 >
                   <div>
                     <p className="text-body font-medium">
                       {s.kind === "in_stock" ? "In-stock rings" : "Pre-order rings"}
                     </p>
-                    <p className="text-body text-soft-taupe">
+                    <p className="text-body text-muted">
                       {s.kind === "pre_order" && s.arrivalDate
                         ? `Ships after ${new Date(s.arrivalDate).toLocaleDateString(
                             "en-US",
@@ -185,32 +185,32 @@ async function OrderDetail({ params }: PageProps) {
                 </li>
               ))}
             </ul>
-            <dl className="space-y-2 border-t border-hairline pt-4 text-body">
+            <dl className="space-y-2 border-t border-border-subtle pt-4 text-body">
               <div className="flex justify-between">
-                <dt className="text-soft-taupe">Subtotal</dt>
+                <dt className="text-muted">Subtotal</dt>
                 <dd>{money(order.subtotalMinor, order)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-soft-taupe">Delivery</dt>
+                <dt className="text-muted">Delivery</dt>
                 <dd>
                   {order.deliveryTotalMinor === 0
                     ? "Free"
                     : money(order.deliveryTotalMinor, order)}
                 </dd>
               </div>
-              <div className="flex justify-between border-t border-hairline pt-2 text-body-lg">
+              <div className="flex justify-between border-t border-border-subtle pt-2 text-body-lg">
                 <dt className="font-medium">Total</dt>
                 <dd className="font-semibold">{money(order.totalMinor, order)}</dd>
               </div>
               {order.amountDueLaterMinor > 0 ? (
                 <>
-                  <div className="flex justify-between pt-1 text-deep-gold">
+                  <div className="flex justify-between pt-1 text-accent-strong">
                     <dt>Due now</dt>
                     <dd className="font-semibold">
                       {money(order.amountDueNowMinor, order)}
                     </dd>
                   </div>
-                  <div className="flex justify-between text-soft-taupe">
+                  <div className="flex justify-between text-muted">
                     <dt>Due before shipping</dt>
                     <dd>{money(order.amountDueLaterMinor, order)}</dd>
                   </div>
@@ -222,19 +222,19 @@ async function OrderDetail({ params }: PageProps) {
 
         {/* Delivery to + contact */}
         <section className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-card bg-pure-white p-5 shadow-card">
-            <h2 className="font-display text-subheading text-warm-ink">Ships to</h2>
-            <p className="mt-2 text-body text-warm-ink">{order.customer.name}</p>
-            <p className="text-body text-soft-taupe">{order.customer.phone}</p>
-            <p className="text-body text-soft-taupe">{order.customer.email}</p>
-            <p className="mt-2 text-body text-soft-taupe">
+          <div className="rounded-md bg-card p-5 shadow-card">
+            <h2 className="font-sans text-subheading text-primary">Ships to</h2>
+            <p className="mt-2 text-body text-primary">{order.customer.name}</p>
+            <p className="text-body text-muted">{order.customer.phone}</p>
+            <p className="text-body text-muted">{order.customer.email}</p>
+            <p className="mt-2 text-body text-muted">
               {location.cityArea}
               {location.region ? `, ${location.region}` : ""}, {location.country}
             </p>
           </div>
-          <div className="rounded-card bg-pure-white p-5 shadow-card">
-            <h2 className="font-display text-subheading text-warm-ink">Need help?</h2>
-            <p className="mt-2 text-body text-soft-taupe">
+          <div className="rounded-md bg-card p-5 shadow-card">
+            <h2 className="font-sans text-subheading text-primary">Need help?</h2>
+            <p className="mt-2 text-body text-muted">
               Keep your order number handy and reach out — we&apos;ll take care of
               the rest.
             </p>
@@ -244,7 +244,7 @@ async function OrderDetail({ params }: PageProps) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/shop"
-            className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Continue shopping
           </Link>

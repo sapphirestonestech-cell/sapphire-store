@@ -18,17 +18,17 @@ export function SectionHeader({
   return (
     <div className="mb-6 flex items-baseline justify-between gap-4">
       <div className="flex min-w-0 items-baseline gap-3">
-        <h2 className="font-display text-heading-lg text-warm-ink md:text-heading-lg">
+        <h2 className="font-sans text-heading-lg text-primary md:text-heading-lg">
           {title}
         </h2>
         {meta ? (
-          <span className="text-body text-soft-taupe">{meta}</span>
+          <span className="text-body text-muted">{meta}</span>
         ) : null}
       </div>
       {href ? (
         <Link
           href={href}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-body font-medium text-deep-gold hover:underline"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-body font-medium text-accent-strong hover:underline"
         >
           {linkLabel}
           <svg

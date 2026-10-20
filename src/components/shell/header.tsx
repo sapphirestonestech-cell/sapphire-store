@@ -10,6 +10,7 @@ import {
 } from "react";
 import { signOut } from "next-auth/react";
 import { CurrencySwitcher } from "@/components/currency-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { CartLink } from "@/components/cart-provider";
 
 export interface NavCategory {
@@ -50,12 +51,12 @@ function SearchField() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search rings"
-        className="h-12 w-full rounded-pill border border-hairline bg-pure-white py-1 pl-5 pr-14 text-body-lg text-warm-ink placeholder:text-soft-taupe"
+        className="h-12 w-full rounded-pill border border-border-subtle bg-card py-1 pl-5 pr-14 text-body-lg text-primary placeholder:text-muted"
       />
       <button
         type="submit"
         aria-label="Search"
-        className="absolute right-1 flex size-10 items-center justify-center rounded-pill bg-champagne-gold text-warm-ink shadow-gold-glow transition-transform duration-fast hover:scale-105"
+        className="absolute right-1 flex size-10 items-center justify-center rounded-pill bg-accent text-primary shadow-gold-glow transition-transform duration-fast hover:scale-105"
       >
         <svg
           aria-hidden="true"
@@ -92,7 +93,7 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
         aria-label="Open menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="flex size-11 items-center justify-center rounded-pill text-warm-ink md:hidden"
+        className="flex size-11 items-center justify-center rounded-pill text-primary md:hidden"
       >
         <svg
           aria-hidden="true"
@@ -111,12 +112,12 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
           <button
             type="button"
             aria-label="Close menu"
-            className="absolute inset-0 bg-warm-ink/30"
+            className="absolute inset-0 bg-primary/30"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-card bg-pure-white p-6 shadow-float">
+          <div className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-card bg-card p-6 shadow-float">
             <div className="mb-4 flex items-center justify-between">
-              <p className="text-heading font-display">Shop</p>
+              <p className="text-heading font-sans">Shop</p>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -138,14 +139,14 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
             </div>
             <nav>
               <ul className="space-y-1">
-                <li className="px-4 pb-1 text-label font-medium text-soft-taupe">
+                <li className="px-4 pb-1 text-label font-medium text-muted">
                   Categories
                 </li>
                 <li>
                   <Link
                     href="/shop"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-accent-wash"
                   >
                     All rings
                   </Link>
@@ -155,17 +156,17 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
                     <Link
                       href={`/shop?category=${cat.slug}`}
                       onClick={() => setOpen(false)}
-                      className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                      className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-accent-wash"
                     >
                       {cat.name}
                     </Link>
                   </li>
                 ))}
-                <li className="mt-3 border-t border-hairline pt-3">
+                <li className="mt-3 border-t border-border-subtle pt-3">
                   <Link
                     href="/track"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-accent-wash"
                   >
                     Track order
                   </Link>
@@ -174,14 +175,14 @@ function MobileMenu({ categories }: { categories: NavCategory[] }) {
                   <Link
                     href="/shop?availability=pre_order"
                     onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-gold-wash"
+                    className="flex min-h-11 items-center rounded-pill px-4 text-body hover:bg-accent-wash"
                   >
                     Pre-order
                   </Link>
                 </li>
               </ul>
             </nav>
-            <div className="mt-6 border-t border-hairline pt-6">
+            <div className="mt-6 border-t border-border-subtle pt-6">
               <SearchField />
             </div>
           </div>
@@ -196,7 +197,7 @@ function SignInLink() {
     <Link
       href="/sign-in"
       aria-label="Sign in"
-      className="flex size-11 items-center justify-center rounded-pill text-warm-ink hover:bg-gold-wash"
+      className="flex size-11 items-center justify-center rounded-pill text-primary hover:bg-accent-wash"
     >
       <svg
         aria-hidden="true"
@@ -264,13 +265,13 @@ function MenuSignOutIcon() {
 }
 
 const MENU_ITEM_CLASS =
-  "flex min-h-10 w-full items-center gap-2.5 rounded-image px-3 text-left text-body text-warm-ink hover:bg-gold-wash";
+  "flex min-h-10 w-full items-center gap-2.5 rounded-sm px-3 text-left text-body text-primary hover:bg-accent-wash";
 
 /**
- * Account menu — DESIGN.md §7.2 account entry. Name + chevron opens a
- * dropdown with "View my account" (customers), "View admin dashboard"
- * (admins only) and "Log out". Replaces the old lone logout icon so signing
- * out is never a one-click accident. Escape and outside clicks close it.
+ * Account menu — DESIGN.md §7.2 account entry. Avatar + name opens a
+ * dropdown with "View user account", "View back office" (admins only) and
+ * "Log out". Replaces the old lone logout icon so signing out is never a
+ * one-click accident. Escape and outside clicks close it.
  */
 function AccountMenu({ user }: { user: HeaderUser | null }) {
   const router = useRouter();
@@ -301,6 +302,7 @@ function AccountMenu({ user }: { user: HeaderUser | null }) {
 
   const account = user;
   const firstName = account.name?.split(" ")[0] ?? "Account";
+  const initial = (account.name?.trim().charAt(0) || "A").toUpperCase();
 
   async function onLogout() {
     // Clear the admin HMAC cookie too — it is httpOnly, so the browser
@@ -328,9 +330,15 @@ function AccountMenu({ user }: { user: HeaderUser | null }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-3 text-label text-warm-ink hover:bg-gold-wash"
+        className="inline-flex min-h-11 items-center gap-2 rounded-pill py-1 pl-1 pr-2.5 text-label text-primary hover:bg-accent-wash"
       >
-        <span className="max-w-24 truncate">{firstName}</span>
+        <span
+          aria-hidden="true"
+          className="flex size-8 items-center justify-center rounded-pill bg-accent-wash text-label font-medium text-accent-strong ring-1 ring-border-subtle"
+        >
+          {initial}
+        </span>
+        <span className="hidden max-w-24 truncate sm:inline">{firstName}</span>
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"
@@ -348,19 +356,17 @@ function AccountMenu({ user }: { user: HeaderUser | null }) {
         <div
           role="menu"
           aria-label="Account"
-          className="absolute right-0 top-full z-50 mt-1 min-w-56 overflow-hidden rounded-card border border-hairline bg-pure-white p-1.5 shadow-float"
+          className="absolute right-0 top-full z-50 mt-1 min-w-56 overflow-hidden rounded-md border border-border-subtle bg-card p-1.5 shadow-float"
         >
-          {account.isCustomer ? (
-            <Link
-              href="/account"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className={MENU_ITEM_CLASS}
-            >
-              <MenuAccountIcon />
-              View my account
-            </Link>
-          ) : null}
+          <Link
+            href="/account"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className={MENU_ITEM_CLASS}
+          >
+            <MenuAccountIcon />
+            View user account
+          </Link>
           {account.isAdmin ? (
             <Link
               href="/admin"
@@ -369,10 +375,10 @@ function AccountMenu({ user }: { user: HeaderUser | null }) {
               className={MENU_ITEM_CLASS}
             >
               <MenuDashboardIcon />
-              View admin dashboard
+              View back office
             </Link>
           ) : null}
-          <div className="my-1.5 border-t border-hairline" />
+          <div className="my-1.5 border-t border-border-subtle" />
           <button
             type="button"
             role="menuitem"
@@ -428,7 +434,7 @@ function CategoriesMenu({ categories }: { categories: NavCategory[] }) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex min-h-11 items-center gap-1 rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
+        className="inline-flex min-h-11 items-center gap-1 rounded-pill px-3.5 text-label text-primary hover:bg-accent-wash"
       >
         Categories
         <svg
@@ -448,7 +454,7 @@ function CategoriesMenu({ categories }: { categories: NavCategory[] }) {
         <div
           role="menu"
           aria-label="Categories"
-          className="absolute left-0 top-full z-50 mt-1 max-h-72 min-w-52 overflow-y-auto rounded-card border border-hairline bg-pure-white p-1.5 shadow-float"
+          className="absolute left-0 top-full z-50 mt-1 max-h-72 min-w-52 overflow-y-auto rounded-md border border-border-subtle bg-card p-1.5 shadow-float"
         >
           <Link
             href="/shop"
@@ -459,7 +465,7 @@ function CategoriesMenu({ categories }: { categories: NavCategory[] }) {
             All rings
           </Link>
           {categories.length > 0 ? (
-            <div className="my-1.5 border-t border-hairline" />
+            <div className="my-1.5 border-t border-border-subtle" />
           ) : null}
           {categories.map((cat) => (
             <Link
@@ -503,14 +509,14 @@ export function Header({
 
   return (
     <header
-      className={`sticky top-0 z-40 bg-pure-white transition-shadow duration-fast ${
+      className={`sticky top-0 z-40 bg-card transition-shadow duration-fast ${
         scrolled ? "shadow-float" : ""
       }`}
     >
       <div className="page-width flex h-16 items-center gap-3 md:h-20 md:gap-6">
         <Link
           href="/"
-          className="font-display text-heading-lg font-medium tracking-tight text-warm-ink"
+          className="font-sans text-heading-lg font-medium tracking-tight text-primary"
         >
           Sapphire
         </Link>
@@ -523,7 +529,7 @@ export function Header({
             <li>
               <Link
                 href="/track"
-                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
+                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-primary hover:bg-accent-wash"
               >
                 Track order
               </Link>
@@ -531,7 +537,7 @@ export function Header({
             <li>
               <Link
                 href="/shop?availability=pre_order"
-                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-warm-ink hover:bg-gold-wash"
+                className="inline-flex min-h-11 items-center rounded-pill px-3.5 text-label text-primary hover:bg-accent-wash"
               >
                 Pre-order
               </Link>
@@ -544,6 +550,7 @@ export function Header({
             <SearchField />
           </div>
           <CurrencySwitcher className="hidden sm:inline-flex" />
+          <ThemeToggle className="hidden sm:inline-flex" />
           <CartLink />
           <AccountMenu user={user} />
         <MobileMenu categories={categories} />

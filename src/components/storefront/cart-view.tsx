@@ -13,6 +13,7 @@ import {
   type CartItem,
 } from "@/lib/cart";
 import { formatArrivalLong } from "@/lib/format";
+import { SaveForLaterButton } from "@/components/storefront/save-for-later-button";
 
 const PLACEHOLDER_PREFIX = "placeholder:";
 
@@ -24,12 +25,12 @@ function Stepper({ item }: { item: CartItem }) {
     item.availability === "pre_order" ? HARD_LINE_CAP : MAX_QUANTITY_PER_LINE;
   const atMax = item.quantity >= max;
   return (
-    <div className="inline-flex items-center rounded-pill border border-hairline">
+    <div className="inline-flex items-center rounded-pill border border-border-subtle">
       <button
         type="button"
         onClick={() => setQuantity(item.productId, item.sizeLabel, item.quantity - 1)}
         aria-label={`Decrease quantity of ${item.name}`}
-        className="flex size-10 items-center justify-center rounded-pill text-warm-ink hover:bg-gold-wash"
+        className="flex size-10 items-center justify-center rounded-pill text-primary hover:bg-accent-wash"
       >
         <svg
           aria-hidden="true"
@@ -54,7 +55,7 @@ function Stepper({ item }: { item: CartItem }) {
         onClick={() => setQuantity(item.productId, item.sizeLabel, item.quantity + 1)}
         disabled={atMax}
         aria-label={`Increase quantity of ${item.name}`}
-        className="flex size-10 items-center justify-center rounded-pill text-warm-ink hover:bg-gold-wash disabled:text-pale-sand"
+        className="flex size-10 items-center justify-center rounded-pill text-primary hover:bg-accent-wash disabled:text-border-default"
       >
         <svg
           aria-hidden="true"
@@ -81,7 +82,7 @@ function LineItem({ item }: { item: CartItem }) {
     <li className="flex gap-4 py-5">
       <Link
         href={`/product/${item.slug}`}
-        className="relative size-24 shrink-0 overflow-hidden rounded-image"
+        className="relative size-24 shrink-0 overflow-hidden rounded-sm"
       >
         {hasImage ? (
           // eslint-disable-next-line @next/next/no-img-element -- Cloudinary CDN
@@ -101,21 +102,21 @@ function LineItem({ item }: { item: CartItem }) {
         <div className="min-w-0 space-y-1">
           <Link
             href={`/product/${item.slug}`}
-            className="text-body-lg font-medium text-warm-ink hover:text-deep-gold"
+            className="text-body-lg font-medium text-primary hover:text-accent-strong"
           >
             {item.name}
           </Link>
-          <p className="text-body text-soft-taupe">
+          <p className="text-body text-muted">
             Size {item.sizeLabel} ·{" "}
             {item.availability === "pre_order" ? "Pre-order" : "In stock"}
           </p>
           {item.availability === "pre_order" && item.preorderArrivalDate ? (
-            <p className="text-body text-deep-gold">
+            <p className="text-body text-accent-strong">
               Arriving {formatArrivalLong(item.preorderArrivalDate)}
             </p>
           ) : null}
           {item.paymentMode === "deposit" && item.depositPercent > 0 ? (
-            <p className="text-body text-soft-taupe">
+            <p className="text-body text-muted">
               {item.depositPercent}% deposit due at checkout
             </p>
           ) : null}
@@ -131,10 +132,14 @@ function LineItem({ item }: { item: CartItem }) {
           <button
             type="button"
             onClick={() => removeItem(item.productId, item.sizeLabel)}
-            className="text-body text-soft-taupe hover:text-warm-ink hover:underline"
+            className="text-body text-muted hover:text-primary hover:underline"
           >
             Remove
           </button>
+          <SaveForLaterButton
+            productId={item.productId}
+            sizeLabel={item.sizeLabel}
+          />
         </div>
       </div>
     </li>
@@ -147,12 +152,12 @@ export function CartView() {
   if (items.length === 0) {
     return (
       <div className="page-width py-16">
-        <div className="mx-auto max-w-md rounded-card bg-pure-white p-8 text-center shadow-card">
-          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-gold-wash">
+        <div className="mx-auto max-w-md rounded-md bg-card p-8 text-center shadow-card">
+          <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-full bg-accent-wash">
             <svg
               aria-hidden="true"
               viewBox="0 0 20 20"
-              className="size-7 text-deep-gold"
+              className="size-7 text-accent-strong"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
@@ -161,15 +166,15 @@ export function CartView() {
               <path d="M7.5 6a2.5 2.5 0 015 0" />
             </svg>
           </div>
-          <h1 className="font-display text-heading-lg text-warm-ink">
+          <h1 className="font-sans text-heading-lg text-primary">
             Your cart is empty
           </h1>
-          <p className="mx-auto mt-2 max-w-sm text-body text-soft-taupe">
+          <p className="mx-auto mt-2 max-w-sm text-body text-muted">
             Add a ring and it will wait for you here.
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Browse rings
           </Link>
@@ -182,13 +187,13 @@ export function CartView() {
 
   return (
     <div className="page-width py-8 md:py-12">
-      <h1 className="font-display text-heading-lg text-warm-ink">Your cart</h1>
-      <p className="mt-1 text-body text-soft-taupe">
+      <h1 className="font-sans text-heading-lg text-primary">Your cart</h1>
+      <p className="mt-1 text-body text-muted">
         {items.length} {items.length === 1 ? "ring" : "rings"} ready to go
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-12">
-        <ul className="divide-y divide-hairline rounded-card bg-pure-white px-5 shadow-card">
+        <ul className="divide-y divide-border-subtle rounded-md bg-card px-5 shadow-card">
           {items.map((item) => (
             <LineItem
               key={`${item.productId}:${item.sizeLabel}`}
@@ -197,35 +202,35 @@ export function CartView() {
           ))}
         </ul>
 
-        <aside className="space-y-4 rounded-card bg-pure-white p-6 shadow-card lg:sticky lg:top-28">
-          <h2 className="font-display text-subheading text-warm-ink">Summary</h2>
+        <aside className="space-y-4 rounded-md bg-card p-6 shadow-card lg:sticky lg:top-28">
+          <h2 className="font-sans text-subheading text-primary">Summary</h2>
           <div className="flex items-center justify-between text-body-lg">
-            <span className="text-soft-taupe">Subtotal</span>
+            <span className="text-muted">Subtotal</span>
             <span className="font-semibold">
               <Price amount={subtotalBase} />
             </span>
           </div>
-          <p className="text-body text-soft-taupe">
+          <p className="text-body text-muted">
             Delivery is calculated at checkout from your location
             {anyPreorder ? ", with in-stock and pre-order rings shipped separately" : ""}.
           </p>
           <Link
             href="/checkout"
-            className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Go to checkout
           </Link>
           <div className="flex items-center justify-between pt-1">
             <Link
               href="/shop"
-              className="text-body font-medium text-deep-gold hover:underline"
+              className="text-body font-medium text-accent-strong hover:underline"
             >
               Keep shopping
             </Link>
             <button
               type="button"
               onClick={clearCart}
-              className="text-body text-soft-taupe hover:text-warm-ink"
+              className="text-body text-muted hover:text-primary"
             >
               Clear cart
             </button>

@@ -29,7 +29,7 @@ export default async function AccountOrdersPage() {
     return (
       <section>
         <h2 className="text-subheading font-semibold">Orders</h2>
-        <p className="mt-2 text-body text-soft-taupe">
+        <p className="mt-2 text-body text-muted">
           Sign in to see your order history.
         </p>
       </section>
@@ -43,19 +43,19 @@ export default async function AccountOrdersPage() {
       <h2 id="orders-heading" className="text-subheading font-semibold">
         Orders
       </h2>
-      <p className="mt-1 mb-6 text-body text-soft-taupe">
+      <p className="mt-1 mb-6 text-body text-muted">
         Every order placed with this account, newest first.
       </p>
 
       {orders.length === 0 ? (
-        <div className="rounded-card bg-pure-white p-8 text-center shadow-card">
-          <p className="text-body-lg text-warm-ink">No orders yet</p>
-          <p className="mt-2 text-body text-soft-taupe">
+        <div className="rounded-md bg-card p-8 text-center shadow-card">
+          <p className="text-body-lg text-primary">No orders yet</p>
+          <p className="mt-2 text-body text-muted">
             When you place an order, it will show up here with its status.
           </p>
           <Link
             href="/shop"
-            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Browse rings
           </Link>
@@ -65,17 +65,17 @@ export default async function AccountOrdersPage() {
           {orders.map((order) => (
             <li
               key={order.orderNumber}
-              className="rounded-card bg-pure-white p-6 shadow-card"
+              className="rounded-md bg-card p-6 shadow-card"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <Link
                     href={`/order/${order.orderNumber}`}
-                    className="text-body-lg font-medium text-warm-ink underline-offset-4 hover:underline"
+                    className="text-body-lg font-medium text-primary underline-offset-4 hover:underline"
                   >
                     {order.orderNumber}
                   </Link>
-                  <p className="mt-1 text-body text-soft-taupe">
+                  <p className="mt-1 text-body text-muted">
                     {formatDate(order.createdAt)} · {order.items.length}{" "}
                     {order.items.length === 1 ? "ring" : "rings"} ·{" "}
                     {order.location.cityArea}, {order.location.country}
@@ -88,12 +88,12 @@ export default async function AccountOrdersPage() {
                       order.baseCurrency,
                     )}
                   </p>
-                  <p className="mt-1 inline-flex rounded-chip-label bg-gold-wash px-2 py-0.5 text-label font-medium text-deep-gold">
+                  <p className="mt-1 inline-flex rounded-sm bg-accent-wash px-2 py-0.5 text-label font-medium text-accent-strong">
                     {STATUS_LABEL[order.status] ?? order.status}
                   </p>
                 </div>
               </div>
-              <ul className="mt-4 flex flex-wrap gap-3 border-t border-hairline pt-4">
+              <ul className="mt-4 flex flex-wrap gap-3 border-t border-border-subtle pt-4">
                 {order.items.map((item, i) => (
                   <li key={`${order.orderNumber}:${i}`} className="flex items-center gap-2">
                     {item.imageUrl ? (
@@ -101,16 +101,16 @@ export default async function AccountOrdersPage() {
                       <img
                         src={item.imageUrl}
                         alt=""
-                        className="size-10 rounded-chip-label object-cover"
+                        className="size-10 rounded-sm object-cover"
                       />
                     ) : (
-                      <span className="grid size-10 place-items-center rounded-chip-label bg-gold-wash text-label text-deep-gold">
+                      <span className="grid size-10 place-items-center rounded-sm bg-accent-wash text-label text-accent-strong">
                         Ring
                       </span>
                     )}
-                    <span className="text-body text-soft-taupe">
+                    <span className="text-body text-muted">
                       {item.name}{" "}
-                      <span className="text-warm-ink">· {item.sizeLabel}</span> ×{" "}
+                      <span className="text-primary">· {item.sizeLabel}</span> ×{" "}
                       {item.quantity}
                     </span>
                   </li>

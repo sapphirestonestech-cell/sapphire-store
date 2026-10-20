@@ -63,9 +63,9 @@ export function SignUpForm({
         <>
           <GoogleSignInButton callbackUrl={callbackUrl} />
           <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-hairline" />
-            <span className="text-label text-soft-taupe">or</span>
-            <span className="h-px flex-1 bg-hairline" />
+            <span className="h-px flex-1 bg-border-subtle" />
+            <span className="text-label text-muted">or</span>
+            <span className="h-px flex-1 bg-border-subtle" />
           </div>
         </>
       ) : null}
@@ -83,7 +83,7 @@ export function SignUpForm({
             minLength={2}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
           />
         </div>
         <div className="space-y-1.5">
@@ -97,7 +97,7 @@ export function SignUpForm({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink placeholder:text-soft-taupe"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary placeholder:text-muted"
             placeholder="you@example.com"
           />
         </div>
@@ -113,16 +113,16 @@ export function SignUpForm({
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
             aria-describedby="password-hint"
           />
-          <p id="password-hint" className="text-body text-soft-taupe">
+          <p id="password-hint" className="text-body text-muted">
             At least 8 characters.
           </p>
         </div>
 
         {error ? (
-          <p role="alert" className="text-body text-status-error">
+          <p role="alert" className="text-body text-danger">
             {error}
           </p>
         ) : null}
@@ -130,17 +130,17 @@ export function SignUpForm({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {loading ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="text-center text-body text-soft-taupe">
+      <p className="text-center text-body text-muted">
         Already have an account?{" "}
         <Link
           href={`/sign-in${callbackUrl !== "/account" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
-          className="text-warm-ink underline underline-offset-4"
+          className="text-primary underline underline-offset-4"
         >
           Sign in
         </Link>

@@ -15,7 +15,7 @@ export function CurrencySwitcher({ className = "" }: { className?: string }) {
     <div
       role="group"
       aria-label="Currency"
-      className={`inline-flex items-center rounded-pill border border-hairline bg-pure-white p-0.5 ${className}`}
+      className={`inline-flex items-center rounded-pill border border-border-subtle bg-card p-0.5 ${className}`}
     >
       {OPTIONS.map((c) => {
         const active = c === currency;
@@ -28,8 +28,8 @@ export function CurrencySwitcher({ className = "" }: { className?: string }) {
             className={[
               "inline-flex h-8 items-center gap-1 rounded-pill px-2.5 text-label font-medium transition-colors duration-fast",
               active
-                ? "bg-gold-wash text-warm-ink shadow-[inset_0_0_0_1px_var(--color-champagne-gold)]"
-                : "text-soft-taupe hover:text-warm-ink",
+                ? "bg-accent-wash text-primary shadow-[inset_0_0_0_1px_var(--accent)]"
+                : "text-muted hover:text-primary",
             ].join(" ")}
           >
             <span aria-hidden="true">{currencySymbol(c)}</span>

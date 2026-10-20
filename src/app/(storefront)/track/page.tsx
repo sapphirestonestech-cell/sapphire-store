@@ -14,7 +14,7 @@ export const metadata = {
   robots: { index: false },
 };
 
-const CARD = "rounded-card bg-pure-white p-5 shadow-card";
+const CARD = "rounded-md bg-card p-5 shadow-card";
 
 /**
  * Track order — ProductReq.md §5.7 (public order lookup by number).
@@ -31,10 +31,10 @@ export default function TrackPage({
     <div className="page-width py-8 md:py-12">
       <div className="mx-auto max-w-2xl space-y-8">
         <header className="space-y-2">
-          <h1 className="font-display text-heading-lg text-warm-ink">
+          <h1 className="font-sans text-heading-lg text-primary">
             Track your order
           </h1>
-          <p className="text-body-lg text-soft-taupe">
+          <p className="text-body-lg text-muted">
             Enter your order number from your confirmation email — it starts
             with SAP-.
           </p>
@@ -50,8 +50,8 @@ export default function TrackPage({
 function TrackSkeleton() {
   return (
     <div className="animate-pulse space-y-6">
-      <div className="h-24 rounded-card bg-pale-sand" />
-      <div className="h-40 rounded-card bg-pale-sand" />
+      <div className="h-24 rounded-md bg-border-default" />
+      <div className="h-40 rounded-md bg-border-default" />
     </div>
   );
 }
@@ -103,11 +103,11 @@ async function TrackLookup({ searchParams }: { searchParams: SearchParams }) {
           placeholder="e.g. SAP-20261018-9B7C2D"
           autoComplete="off"
           spellCheck={false}
-          className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink placeholder:text-soft-taupe"
+          className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary placeholder:text-muted"
         />
         <button
           type="submit"
-          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
         >
           Track order
         </button>
@@ -122,18 +122,18 @@ async function TrackLookup({ searchParams }: { searchParams: SearchParams }) {
 function NotFound() {
   return (
     <div role="status" className={`space-y-2 ${CARD}`}>
-      <p className="text-body-lg font-medium text-warm-ink">
+      <p className="text-body-lg font-medium text-primary">
         We couldn&apos;t find an order with that number.
       </p>
-      <p className="text-body text-soft-taupe">
+      <p className="text-body text-muted">
         Check the order number in your confirmation email — it looks like
         SAP-20261018-9B7C2D — and try again.
       </p>
-      <p className="text-body text-soft-taupe">
+      <p className="text-body text-muted">
         Still stuck?{" "}
         <Link
           href="/contact"
-          className="text-warm-ink underline underline-offset-4 hover:text-deep-gold"
+          className="text-primary underline underline-offset-4 hover:text-accent-strong"
         >
           Contact us
         </Link>{" "}
@@ -218,7 +218,7 @@ function Timeline({ order }: { order: OrderDoc }) {
     <section aria-labelledby="timeline-heading" className={`${CARD} p-6`}>
       <h2
         id="timeline-heading"
-        className="font-display text-subheading text-warm-ink"
+        className="font-sans text-subheading text-primary"
       >
         Where your order is
       </h2>
@@ -239,17 +239,17 @@ function Timeline({ order }: { order: OrderDoc }) {
                 <span
                   aria-hidden="true"
                   className={`absolute bottom-[-2px] left-[11px] top-[26px] w-0.5 ${
-                    lineGold ? "bg-champagne-gold" : "bg-hairline"
+                    lineGold ? "bg-accent" : "bg-border-subtle"
                   }`}
                 />
               ) : null}
               <span
                 className={`relative z-10 mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${
                   isDone
-                    ? "bg-champagne-gold text-warm-ink"
+                    ? "bg-accent text-primary"
                     : isCurrent
-                      ? "border-2 border-deep-gold bg-pure-white text-deep-gold"
-                      : "border border-hairline bg-pale-sand"
+                      ? "border-2 border-accent-strong bg-card text-accent-strong"
+                      : "border border-border-subtle bg-border-default"
                 }`}
               >
                 {isDone ? <CheckIcon /> : isCurrent ? <SparkleIcon /> : null}
@@ -258,14 +258,14 @@ function Timeline({ order }: { order: OrderDoc }) {
                 <p
                   className={`text-body-lg ${
                     isDone || isCurrent
-                      ? "font-medium text-warm-ink"
-                      : "text-soft-taupe"
+                      ? "font-medium text-primary"
+                      : "text-muted"
                   }`}
                 >
                   {label}
                 </p>
                 {note ? (
-                  <p className="mt-0.5 text-body text-soft-taupe">{note}</p>
+                  <p className="mt-0.5 text-body text-muted">{note}</p>
                 ) : null}
               </div>
             </li>
@@ -282,7 +282,7 @@ function Summary({ order }: { order: OrderDoc }) {
     <section aria-labelledby="summary-heading" className={CARD}>
       <h2
         id="summary-heading"
-        className="font-display text-subheading text-warm-ink"
+        className="font-sans text-subheading text-primary"
       >
         Order summary
       </h2>
@@ -291,11 +291,11 @@ function Summary({ order }: { order: OrderDoc }) {
           <li key={idx} className="text-body">
             <Link
               href={`/product/${item.slug}`}
-              className="font-medium text-warm-ink hover:text-deep-gold"
+              className="font-medium text-primary hover:text-accent-strong"
             >
               {item.name}
             </Link>
-            <p className="text-soft-taupe">
+            <p className="text-muted">
               Size {item.sizeLabel} ·{" "}
               {item.availability === "pre_order" ? "Pre-order" : "In stock"}
               {item.quantity > 1 ? ` · ×${item.quantity}` : ""}
@@ -307,10 +307,10 @@ function Summary({ order }: { order: OrderDoc }) {
         ))}
       </ul>
 
-      <ul className="mt-4 space-y-2 border-t border-hairline pt-4">
+      <ul className="mt-4 space-y-2 border-t border-border-subtle pt-4">
         {order.shipments.map((s) => (
           <li key={s.kind} className="flex justify-between gap-4 text-body">
-            <span className="text-soft-taupe">
+            <span className="text-muted">
               {s.kind === "in_stock" ? "In-stock rings" : "Pre-order rings"}
             </span>
             <span className="text-right">
@@ -323,13 +323,13 @@ function Summary({ order }: { order: OrderDoc }) {
         ))}
       </ul>
 
-      <dl className="mt-4 space-y-2 border-t border-hairline pt-4 text-body">
+      <dl className="mt-4 space-y-2 border-t border-border-subtle pt-4 text-body">
         <div className="flex justify-between gap-4">
-          <dt className="text-soft-taupe">Total</dt>
+          <dt className="text-muted">Total</dt>
           <dd className="font-semibold">{money(order.totalMinor, order)}</dd>
         </div>
         <div className="flex justify-between gap-4">
-          <dt className="text-soft-taupe">Destination</dt>
+          <dt className="text-muted">Destination</dt>
           <dd className="text-right">
             {location.cityArea}
             {location.region ? `, ${location.region}` : ""},{" "}
@@ -341,13 +341,13 @@ function Summary({ order }: { order: OrderDoc }) {
       <div className="mt-5 flex flex-wrap gap-3">
         <Link
           href={`/order/${order.orderNumber}`}
-          className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+          className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
         >
           View full order details
         </Link>
         <Link
           href="/contact"
-          className="inline-flex min-h-12 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body-lg text-warm-ink hover:bg-gold-wash"
+          className="inline-flex min-h-12 items-center rounded-pill border border-border-subtle bg-card px-6 text-body-lg text-primary hover:bg-accent-wash"
         >
           Need help?
         </Link>
@@ -359,15 +359,15 @@ function Summary({ order }: { order: OrderDoc }) {
 function CancelledNotice({ order }: { order: OrderDoc }) {
   return (
     <div className={`space-y-3 ${CARD}`}>
-      <p className="text-body-lg font-medium text-warm-ink">
+      <p className="text-body-lg font-medium text-primary">
         This order was cancelled
       </p>
-      <p className="text-body text-soft-taupe">
+      <p className="text-body text-muted">
         Order {order.orderNumber}, placed {prettyDate(order.createdAt)}. Keep
         the number handy and{" "}
         <Link
           href="/contact"
-          className="text-warm-ink underline underline-offset-4 hover:text-deep-gold"
+          className="text-primary underline underline-offset-4 hover:text-accent-strong"
         >
           reach out
         </Link>{" "}
@@ -375,7 +375,7 @@ function CancelledNotice({ order }: { order: OrderDoc }) {
       </p>
       <Link
         href="/shop"
-        className="inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+        className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow"
       >
         Continue shopping
       </Link>
@@ -390,20 +390,20 @@ function TrackResult({ order }: { order: OrderDoc }) {
       <div className={`flex flex-wrap items-center justify-between gap-3 ${CARD}`}>
         <div>
           <span
-            className={`inline-flex items-center rounded-chip-label px-3 py-1 text-label font-medium ${
+            className={`inline-flex items-center rounded-sm px-3 py-1 text-label font-medium ${
               cancelled
-                ? "bg-pale-sand text-soft-taupe"
-                : "bg-gold-wash text-deep-gold"
+                ? "bg-border-default text-muted"
+                : "bg-accent-wash text-accent-strong"
             }`}
           >
             {ORDER_STATUS_LABELS[order.status]}
           </span>
-          <p className="mt-2 text-body text-soft-taupe">
+          <p className="mt-2 text-body text-muted">
             Order {order.orderNumber} · placed {prettyDate(order.createdAt)}
           </p>
         </div>
         {!cancelled ? (
-          <p className="text-body text-soft-taupe">
+          <p className="text-body text-muted">
             {order.location.minDays}–{order.location.maxDays} day delivery
           </p>
         ) : null}

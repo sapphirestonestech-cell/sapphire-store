@@ -40,8 +40,8 @@ export default async function AdminDeliveryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-heading-lg">Delivery</h1>
-        <p className="mt-1 text-body text-soft-taupe">
+        <h1 className="font-sans text-heading-lg">Delivery</h1>
+        <p className="mt-1 text-body text-muted">
           Fees are in your base currency. In-stock and pre-order rings have their
           own fee and delivery days.
         </p>
@@ -50,9 +50,9 @@ export default async function AdminDeliveryPage() {
       {failed ? (
         <div
           role="alert"
-          className="rounded-card border border-status-error/40 bg-pure-white p-6 shadow-card"
+          className="rounded-md border border-danger/40 bg-card p-6 shadow-card"
         >
-          <p className="text-body text-status-error">
+          <p className="text-body text-danger">
             We couldn&apos;t reach the database. Check MONGODB_URI in .env.local,
             then refresh.
           </p>

@@ -1,12 +1,15 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { Sidebar } from "@/components/admin/sidebar";
-import { getSession } from "@/lib/session";
+import { getAdminIdentity } from "@/lib/admin/auth";
 
 /**
  * Admin panel — protected by session cookie (§6.1). The whole area is a
- * blocking route: it reads auth (cookies) and live database data, and must
- * never be prerendered or cached, so `instant = false` is intentional.
+ * request-time route: it reads auth (cookies) and live database data, so it
+ * must never be prerendered. `connection()` opts the segment into dynamic
+ * rendering, which also silences the "unstable value while prerendering"
+ * warning raised by the session's timestamp check.
  */
 export const instant = false;
 
@@ -15,14 +18,15 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  const session = await getSession();
-  if (!session) redirect("/admin/login");
+  await connection();
+  const admin = await getAdminIdentity();
+  if (!admin) redirect("/admin/login");
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="min-w-0 flex-1 px-4 py-8 md:px-10 md:py-10">
-        <div className="mx-auto max-w-5xl">{children}</div>
+      <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8 xl:px-10 xl:py-10">
+        {children}
       </main>
     </div>
   );

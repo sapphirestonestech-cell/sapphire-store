@@ -50,9 +50,9 @@ export function SignInForm({
         <>
           <GoogleSignInButton callbackUrl={callbackUrl} />
           <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-hairline" />
-            <span className="text-label text-soft-taupe">or</span>
-            <span className="h-px flex-1 bg-hairline" />
+            <span className="h-px flex-1 bg-border-subtle" />
+            <span className="text-label text-muted">or</span>
+            <span className="h-px flex-1 bg-border-subtle" />
           </div>
         </>
       ) : null}
@@ -69,7 +69,7 @@ export function SignInForm({
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink placeholder:text-soft-taupe"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary placeholder:text-muted"
             placeholder="you@example.com"
           />
         </div>
@@ -80,7 +80,7 @@ export function SignInForm({
             </label>
             <Link
               href="/forgot-password"
-              className="text-body text-soft-taupe underline-offset-4 hover:text-warm-ink hover:underline"
+              className="text-body text-muted underline-offset-4 hover:text-primary hover:underline"
             >
               Forgot password?
             </Link>
@@ -92,12 +92,12 @@ export function SignInForm({
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg text-warm-ink"
+            className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg text-primary"
           />
         </div>
 
         {error ? (
-          <p role="alert" className="text-body text-status-error">
+          <p role="alert" className="text-body text-danger">
             {error}
           </p>
         ) : null}
@@ -105,17 +105,17 @@ export function SignInForm({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-champagne-gold px-8 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
-      <p className="text-center text-body text-soft-taupe">
+      <p className="text-center text-body text-muted">
         New to Sapphire?{" "}
         <Link
           href={`/sign-up${callbackUrl !== "/account" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
-          className="text-warm-ink underline underline-offset-4"
+          className="text-primary underline underline-offset-4"
         >
           Create an account
         </Link>

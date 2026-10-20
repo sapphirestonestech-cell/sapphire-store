@@ -4,7 +4,8 @@ import { connection } from "next/server";
 import type { Metadata } from "next";
 import { Gallery } from "@/components/storefront/gallery";
 import { PurchasePanel } from "@/components/storefront/purchase-panel";
-import { DeliveryEstimator } from "@/components/storefront/delivery-estimator";
+import { RichText } from "@/components/rich-text";
+import { WishlistButton } from "@/components/wishlist-button";
 import { AvailabilityBadge } from "@/components/ui/availability-badge";
 import { Price } from "@/components/price";
 import { ProductGrid, SectionHeader } from "@/components/storefront/product-section";
@@ -12,7 +13,6 @@ import { connectDb } from "@/lib/db";
 import { ProductModel, type ProductDoc } from "@/lib/models/product";
 import { CategoryModel } from "@/lib/models/category";
 import { queryProducts, toSummary, type ProductSummary } from "@/lib/products";
-import { getDeliveryLocations } from "@/lib/settings";
 import { formatArrivalLong } from "@/lib/format";
 import { TAGLINE } from "@/lib/tagline";
 
@@ -72,12 +72,12 @@ export default function ProductDetailPage({ params }: PageProps) {
 function ProductSkeleton() {
   return (
     <div className="page-width grid animate-pulse gap-10 py-8 md:grid-cols-2 md:gap-12 md:py-12">
-      <div className="aspect-square rounded-card bg-pale-sand" />
+      <div className="aspect-square rounded-md bg-border-default" />
       <div className="space-y-4">
-        <div className="h-8 w-2/3 rounded-pill bg-pale-sand" />
-        <div className="h-6 w-1/4 rounded-pill bg-pale-sand" />
-        <div className="h-12 w-full rounded-pill bg-pale-sand" />
-        <div className="h-40 w-full rounded-card bg-pale-sand" />
+        <div className="h-8 w-2/3 rounded-pill bg-border-default" />
+        <div className="h-6 w-1/4 rounded-pill bg-border-default" />
+        <div className="h-12 w-full rounded-pill bg-border-default" />
+        <div className="h-40 w-full rounded-md bg-border-default" />
       </div>
     </div>
   );
@@ -99,20 +99,11 @@ async function ProductDetail({ params }: PageProps) {
     ? formatArrivalLong(summary.preorderArrivalDate ?? "")
     : null;
 
-  const [locations, related] = await Promise.all([
-    getDeliveryLocations(),
-    relatedRings(product),
-  ]);
+  const related = await relatedRings(product);
 
   const categoryNames = product.categories
     .map((c) => (c as unknown as { name?: string }).name)
     .filter(Boolean) as string[];
-
-  const freeDeliveryLabels = summary.freeDelivery.allLocations
-    ? []
-    : locations
-        .filter((l) => summary.freeDelivery.locationIds.includes(l.id))
-        .map((l) => l.label);
 
   return (
     <div className="page-width pb-32 pt-8 md:pb-24 md:pt-12">
@@ -125,11 +116,11 @@ async function ProductDetail({ params }: PageProps) {
         {/* Purchase panel */}
         <div className="space-y-4">
           <div className="space-y-3">
-            <h1 className="font-display text-heading-lg text-warm-ink md:text-heading-lg">
+            <h1 className="font-sans text-display text-primary">
               {product.name}
             </h1>
             {categoryNames.length > 0 ? (
-              <p className="text-body text-soft-taupe">
+              <p className="text-body text-muted">
                 {categoryNames.join(" · ")}
               </p>
             ) : null}
@@ -144,7 +135,7 @@ async function ProductDetail({ params }: PageProps) {
             {product.compareAtPrice ? (
               <Price
                 amount={product.compareAtPrice}
-                className="text-body text-soft-taupe line-through"
+                className="text-body text-muted line-through"
               />
             ) : null}
             <AvailabilityBadge
@@ -155,20 +146,24 @@ async function ProductDetail({ params }: PageProps) {
           </div>
 
           {isPreorder && arrivalLong ? (
-            <p className="text-body text-deep-gold">
+            <p className="text-body text-accent-strong">
               Arriving {arrivalLong} — shipping time is added after arrival.
             </p>
           ) : null}
 
           {/* Description sits directly under the price (client instruction,
-              2026-10-19) so the story reads before the buying controls. */}
+              2026-10-19) so the story reads before the buying controls. It
+              uses the same Gold Wash panel as the closing tagline card, so
+              the two quiet gold moments bookend the buying controls. Supports
+              the admin's rich-text formatting (headings, bold, lists). */}
           {product.description ? (
-            <p className="max-w-prose whitespace-pre-line text-body-lg text-soft-taupe">
-              {product.description}
-            </p>
+            <RichText
+              value={product.description}
+              className="max-w-prose text-body-lg"
+            />
           ) : null}
 
-          <div id="buy" className="scroll-mt-28">
+          <div id="buy" className="scroll-mt-28 space-y-3">
             <PurchasePanel
               productId={summary.id}
               slug={summary.slug}
@@ -182,16 +177,9 @@ async function ProductDetail({ params }: PageProps) {
               sizes={summary.sizes}
               imageUrl={summary.coverImage?.url ?? null}
               preorderMaxQty={summary.preorderMaxQty}
-              freeDeliveryLabels={freeDeliveryLabels}
             />
+            <WishlistButton variant="full" className="w-full" productId={summary.id} />
           </div>
-
-          <DeliveryEstimator
-            locations={locations}
-            productId={summary.id}
-            availability={summary.availability}
-            arrivalDate={summary.preorderArrivalDate}
-          />
 
           {/* Specifications — §5.3. Plain two-column list, no card (client
               instruction, 2026-10-19): the white card read as one more heavy
@@ -214,18 +202,18 @@ async function ProductDetail({ params }: PageProps) {
               ].map(([term, value]) => (
                 <div
                   key={term}
-                  className="flex justify-between gap-4 border-b border-hairline py-2.5 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"
+                  className="flex justify-between gap-4 border-b border-border-subtle py-2.5 last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0"
                 >
-                  <dt className="text-body text-soft-taupe">{term}</dt>
+                  <dt className="text-body text-muted">{term}</dt>
                   <dd className="text-body font-medium capitalize">{value}</dd>
                 </div>
               ))}
             </dl>
           </section>
 
-          <div className="rounded-card bg-gold-wash/60 p-5">
-            <p className="text-body text-warm-ink">{TAGLINE}</p>
-            <p className="mt-1 text-body text-soft-taupe">
+          <div className="rounded-md bg-accent-wash/60 p-5">
+            <p className="text-body-lg text-primary">{TAGLINE}</p>
+            <p className="mt-1 text-body text-muted">
               Secure payment · Clear delivery costs · Pre-order welcome
             </p>
           </div>
@@ -243,10 +231,10 @@ async function ProductDetail({ params }: PageProps) {
       ) : null}
 
       {/* Sticky bottom bar — mobile (DESIGN.md §8.3) */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-hairline bg-pure-white px-4 py-3 shadow-float md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border-subtle bg-card px-4 py-3 shadow-float md:hidden">
         <div className="flex items-center gap-4">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-body text-soft-taupe">{product.name}</p>
+            <p className="truncate text-body text-muted">{product.name}</p>
             <Price
               amount={product.basePrice}
               className="text-body-lg font-semibold"
@@ -254,7 +242,7 @@ async function ProductDetail({ params }: PageProps) {
           </div>
           <a
             href="#buy"
-            className="inline-flex min-h-12 shrink-0 items-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow"
+            className="inline-flex min-h-12 shrink-0 items-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow"
           >
             Add to cart
           </a>

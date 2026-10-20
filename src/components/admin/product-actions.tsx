@@ -36,7 +36,7 @@ export function ProductActions({ id, name }: { id: string; name: string }) {
     <div className="flex items-center gap-2">
       <Link
         href={`/admin/products/${id}`}
-        className="inline-flex min-h-10 items-center rounded-pill border border-hairline bg-pure-white px-4 text-label font-medium"
+        className="inline-flex min-h-10 items-center rounded-pill border border-border-subtle bg-card px-4 text-label font-medium"
       >
         Edit
       </Link>
@@ -44,12 +44,12 @@ export function ProductActions({ id, name }: { id: string; name: string }) {
         type="button"
         onClick={confirmDelete}
         disabled={deleting}
-        className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-status-error disabled:text-soft-taupe"
+        className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-danger disabled:text-muted"
       >
         {deleting ? "Deleting…" : "Delete"}
       </button>
       {error ? (
-        <span role="alert" className="text-label text-status-error">
+        <span role="alert" className="text-label text-danger">
           {error}
         </span>
       ) : null}

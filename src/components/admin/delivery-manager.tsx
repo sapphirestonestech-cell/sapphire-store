@@ -153,10 +153,10 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
     <div className="space-y-6">
       <form
         onSubmit={submit}
-        className="rounded-card bg-pure-white p-6 shadow-card"
+        className="rounded-md bg-card p-6 shadow-card"
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-subheading">
+          <h2 className="font-sans text-subheading">
             {editingId ? "Edit location" : "Add a location"}
           </h2>
           {editingId ? (
@@ -166,7 +166,7 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
                 setEditingId(null);
                 setForm(BLANK);
               }}
-              className="text-body text-soft-taupe hover:text-warm-ink"
+              className="text-body text-muted hover:text-primary"
             >
               Cancel
             </button>
@@ -186,22 +186,22 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
         <button
           type="submit"
           disabled={busy}
-          className="mt-4 inline-flex min-h-12 items-center rounded-pill bg-champagne-gold px-6 text-body-lg font-medium text-warm-ink shadow-gold-glow disabled:bg-pale-sand disabled:text-soft-taupe disabled:shadow-none"
+          className="mt-4 inline-flex min-h-12 items-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
           {busy ? "Saving…" : editingId ? "Save changes" : "Add location"}
         </button>
       </form>
 
       {error ? (
-        <p role="alert" className="text-body text-status-error">
+        <p role="alert" className="text-body text-danger">
           {error}
         </p>
       ) : null}
 
       {rows.length === 0 ? (
-        <div className="rounded-card bg-pure-white p-10 text-center shadow-card">
+        <div className="rounded-md bg-card p-10 text-center shadow-card">
           <p className="text-subheading">No delivery locations yet</p>
-          <p className="mx-auto mt-2 max-w-md text-body text-soft-taupe">
+          <p className="mx-auto mt-2 max-w-md text-body text-muted">
             Add the places you deliver to, with their fees and delivery days.
           </p>
         </div>
@@ -210,14 +210,14 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
           {rows.map((row) => (
             <li
               key={row.id}
-              className="flex flex-wrap items-center gap-4 rounded-card bg-pure-white p-4 shadow-card"
+              className="flex flex-wrap items-center gap-4 rounded-md bg-card p-4 shadow-card"
             >
               <div className="min-w-0 flex-1">
                 <p className="text-body-lg font-medium">
                   {row.cityArea}
                   {row.region ? `, ${row.region}` : ""}, {row.country}
                 </p>
-                <p className="text-label text-soft-taupe">
+                <p className="text-label text-muted">
                   In-stock {row.instockFee} · Pre-order {row.preorderFee} ·{" "}
                   {row.minDays}–{row.maxDays} days ·{" "}
                   {row.isActive ? "Visible" : "Hidden"}
@@ -230,7 +230,7 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
                   setForm(toForm(row));
                 }}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill border border-hairline bg-pure-white px-4 text-label font-medium disabled:bg-pale-sand"
+                className="inline-flex min-h-10 items-center rounded-pill border border-border-subtle bg-card px-4 text-label font-medium disabled:bg-border-default"
               >
                 Edit
               </button>
@@ -238,7 +238,7 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
                 type="button"
                 onClick={() => toggleActive(row)}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill border border-hairline bg-pure-white px-4 text-label font-medium disabled:bg-pale-sand"
+                className="inline-flex min-h-10 items-center rounded-pill border border-border-subtle bg-card px-4 text-label font-medium disabled:bg-border-default"
               >
                 {row.isActive ? "Hide" : "Show"}
               </button>
@@ -246,7 +246,7 @@ export function DeliveryManager({ initial }: { initial: DeliveryRow[] }) {
                 type="button"
                 onClick={() => remove(row)}
                 disabled={busy}
-                className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-status-error disabled:text-soft-taupe"
+                className="inline-flex min-h-10 items-center rounded-pill px-4 text-label font-medium text-danger disabled:text-muted"
               >
                 Delete
               </button>
@@ -281,7 +281,7 @@ function Field({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-full rounded-pill border border-hairline bg-pure-white px-5 text-body-lg"
+        className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
       />
     </label>
   );

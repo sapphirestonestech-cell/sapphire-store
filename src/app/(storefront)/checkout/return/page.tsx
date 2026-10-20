@@ -82,18 +82,18 @@ export default async function CheckoutReturnPage({ searchParams }: PageProps) {
   if (cancelled) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
-        <p className="text-body-lg text-soft-taupe">Checkout cancelled. You have not been charged.</p>
+        <p className="text-body-lg text-muted">Checkout cancelled. You have not been charged.</p>
         {order ? (
           <Link
             href={`/order/${order}`}
-            className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+            className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
           >
             View order
           </Link>
         ) : (
           <Link
             href="/shop"
-            className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+            className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
           >
             Continue shopping
           </Link>
@@ -105,12 +105,12 @@ export default async function CheckoutReturnPage({ searchParams }: PageProps) {
   if (!ref || !order) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
-        <p className="text-body-lg text-soft-taupe">
+        <p className="text-body-lg text-muted">
           We couldn&apos;t match this return to an order. Check your order number to see its status.
         </p>
         <Link
           href="/track"
-          className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-hairline bg-pure-white px-6 text-body font-medium text-warm-ink"
+          className="mt-6 inline-flex min-h-11 items-center rounded-pill border border-border-subtle bg-card px-6 text-body font-medium text-primary"
         >
           Track an order
         </Link>

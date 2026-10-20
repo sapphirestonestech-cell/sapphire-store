@@ -46,10 +46,10 @@ export function SizeSelector({
               className={[
                 "relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-pill px-4 text-body font-medium transition-colors duration-fast",
                 unavailable
-                  ? "cursor-not-allowed text-pale-sand"
+                  ? "cursor-not-allowed text-border-default"
                   : active
-                    ? "bg-warm-ink text-ivory-canvas"
-                    : "border border-hairline bg-pure-white text-warm-ink hover:bg-gold-wash",
+                    ? "bg-primary text-app"
+                    : "border border-border-subtle bg-card text-primary hover:bg-accent-wash",
               ].join(" ")}
             >
               {s.sizeLabel}
@@ -57,7 +57,7 @@ export function SizeSelector({
                 <>
                   <span
                     aria-hidden="true"
-                    className="absolute inset-x-2 top-1/2 h-px -rotate-12 bg-pale-sand"
+                    className="absolute inset-x-2 top-1/2 h-px -rotate-12 bg-border-default"
                   />
                   <span className="sr-only"> (unavailable)</span>
                 </>

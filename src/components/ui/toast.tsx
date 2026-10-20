@@ -1,9 +1,10 @@
 /**
  * Toast card — DESIGN.md §7.19: white 20px-radius card with the `float`
- * shadow and a small status icon; wording matches the action ("Added to
- * cart"). Success toasts are dismissed by the caller after a few seconds;
- * errors stay until the customer dismisses them (or an interaction clears
- * them). Status colour is always paired with an icon (DESIGN.md §2.2).
+ * shadow, a status icon and a thin status-colour accent, pinned to the
+ * **top-right** below the sticky header (client instruction, 2026-10-19).
+ * Success toasts are dismissed by the caller after a few seconds; errors stay
+ * until the customer dismisses them (or an interaction clears them). Status
+ * colour is always paired with an icon (DESIGN.md §2.2).
  */
 
 export interface ToastProps {
@@ -13,18 +14,27 @@ export interface ToastProps {
 }
 
 export function Toast({ message, kind, onDismiss }: ToastProps) {
+  const isError = kind === "error";
+
   return (
     <div
-      role={kind === "error" ? "alert" : "status"}
-      className="toast-in pointer-events-auto flex max-w-md items-center gap-3 rounded-image bg-pure-white px-4 py-3 shadow-float"
+      role={isError ? "alert" : "status"}
+      aria-live={isError ? "assertive" : "polite"}
+      className="toast-in pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-sm bg-card py-3.5 pl-4 pr-2.5 shadow-float"
     >
       <span
         aria-hidden="true"
-        className={
-          kind === "error" ? "text-status-error" : "text-status-success"
-        }
+        className={`toast-accent absolute inset-y-0 left-0 w-1 ${
+          isError ? "bg-danger" : "bg-success"
+        }`}
+      />
+      <span
+        aria-hidden="true"
+        className={`toast-icon mt-0.5 shrink-0 ${
+          isError ? "text-danger" : "text-success"
+        }`}
       >
-        {kind === "error" ? (
+        {isError ? (
           <svg
             viewBox="0 0 20 20"
             className="size-5 shrink-0"
@@ -52,13 +62,15 @@ export function Toast({ message, kind, onDismiss }: ToastProps) {
           </svg>
         )}
       </span>
-      <p className="text-body text-warm-ink">{message}</p>
-      {kind === "error" && onDismiss ? (
+      <p className="min-w-0 flex-1 pt-0.5 text-body leading-snug text-primary">
+        {message}
+      </p>
+      {onDismiss ? (
         <button
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss"
-          className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-pill text-soft-taupe transition-colors hover:bg-gold-wash hover:text-warm-ink"
+          className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-pill text-muted transition-colors hover:bg-accent-wash hover:text-primary"
         >
           <svg
             aria-hidden="true"
