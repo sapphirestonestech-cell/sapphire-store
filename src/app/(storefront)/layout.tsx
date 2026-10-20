@@ -89,7 +89,7 @@ async function HeaderWithData() {
  * the header (which may stream later) so the wishlist provider and hearts
  * have sign-in state without blocking on the nav categories.
  */
-async function SignedInSlot() {
+async function resolveSignedIn(): Promise<boolean> {
   try {
     const session = await auth();
     return Boolean(session?.user?.customerId);
@@ -99,21 +99,49 @@ async function SignedInSlot() {
 }
 
 /** Storefront shell — announcement bar, header, footer (DESIGN.md §7). */
-export default async function StorefrontLayout({
+function StorefrontShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative flex min-h-full flex-col">
+      <AnnouncementBar />
+      <HeaderSlot />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+}
+
+/**
+ * The session check reads cookies, so it cannot run at the layout level under
+ * `cacheComponents`. Instead the static shell prerenders with
+ * `signedIn={false}` and the real value streams in behind a Suspense
+ * boundary — the same pattern as HeaderSlot above.
+ */
+export default function StorefrontLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const signedIn = await SignedInSlot();
+  return (
+    <Suspense
+      fallback={
+        <SignedInProvider signedIn={false}>
+          <WishlistProvider>
+            <StorefrontShell>{children}</StorefrontShell>
+          </WishlistProvider>
+        </SignedInProvider>
+      }
+    >
+      <SignedInGate>{children}</SignedInGate>
+    </Suspense>
+  );
+}
+
+async function SignedInGate({ children }: { children: ReactNode }) {
+  const signedIn = await resolveSignedIn();
   return (
     <SignedInProvider signedIn={signedIn}>
       <WishlistProvider>
-        <div className="relative flex min-h-full flex-col">
-          <AnnouncementBar />
-          <HeaderSlot />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <StorefrontShell>{children}</StorefrontShell>
       </WishlistProvider>
     </SignedInProvider>
   );
