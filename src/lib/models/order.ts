@@ -105,8 +105,13 @@ export interface OrderDoc extends mongoose.Document {
   paymentCheckoutId?: string;
   /** paymentStatus: initiated | paid | failed | refunded. */
   paymentStatus?: string;
-  /** Amount sent to the gateway, in the order's display currency minor units. */
+  /** Amount sent to the gateway, in `paymentCurrency` minor units. */
   paymentAmountMinor?: number;
+  /**
+   * Currency the gateway was actually charged in. Differs from `currency`
+   * only when "Always pay in naira" converted a USD order at initialize.
+   */
+  paymentCurrency?: Currency;
   /** When the payment was verified as paid. */
   paidAt?: Date;
   createdAt: Date;
@@ -216,6 +221,7 @@ const OrderSchema = new Schema<OrderDoc>(
     paymentCheckoutId: { type: String },
     paymentStatus: { type: String },
     paymentAmountMinor: { type: Number, min: 0 },
+    paymentCurrency: { type: String, enum: ["USD", "NGN"] },
     paidAt: Date,
   },
   { timestamps: true },

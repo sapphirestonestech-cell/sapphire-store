@@ -16,8 +16,8 @@ const STORAGE_KEY = "sapphire_theme";
 
 /**
  * Theme store (DESIGN.md §10). A saved choice is read from localStorage and
- * applied to `<html data-theme>`; with nothing saved the OS preference wins
- * (the CSS media query covers first paint — see globals.css).
+ * applied to `<html data-theme>`; with nothing saved the store defaults to
+ * light (client instruction, 2026-10-21 — no longer follows the OS preference).
  *
  * Read through useSyncExternalStore like the currency provider, so the
  * browser value is applied without a synchronous setState in an effect and
@@ -52,13 +52,9 @@ function getServerSnapshot(): Theme | null {
   return null;
 }
 
-/** The theme actually in effect: a saved choice, else the OS preference. */
+/** The theme actually in effect: a saved choice, else light. */
 function resolve(choice: Theme | null): Theme {
-  if (choice) return choice;
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return choice ?? "light";
 }
 
 function apply(theme: Theme | null) {
@@ -83,10 +79,10 @@ function persist(theme: Theme | null) {
 interface ThemeContextValue {
   /** The theme in effect right now. */
   theme: Theme;
-  /** The visitor's explicit choice, or null when following the OS. */
+  /** The visitor's explicit choice, or null for the light default. */
   choice: Theme | null;
   setTheme: (theme: Theme) => void;
-  /** Clear the explicit choice and follow the OS again. */
+  /** Clear the explicit choice and return to the light default. */
   reset: () => void;
 }
 
@@ -102,15 +98,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     apply(choice);
-  }, [choice]);
-
-  // Follow the OS live while no explicit choice has been made.
-  useEffect(() => {
-    if (choice) return;
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => listeners.forEach((cb) => cb());
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
   }, [choice]);
 
   const setTheme = useCallback((next: Theme) => {

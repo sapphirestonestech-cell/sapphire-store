@@ -6,6 +6,7 @@ import { OrderModel, type OrderDoc } from "@/lib/models/order";
 import {
   orderFilterQuery,
   parseOrderFilters,
+  paymentChargeCurrency,
   paymentChargeMinor,
   type OrderFilter,
 } from "@/lib/admin/orders";
@@ -28,7 +29,10 @@ function formatDate(iso: string | Date): string {
 }
 
 function amount(order: OrderDoc): string {
-  return formatPrice(fromMinor(paymentChargeMinor(order)), order.currency);
+  return formatPrice(
+    fromMinor(paymentChargeMinor(order)),
+    paymentChargeCurrency(order),
+  );
 }
 
 export default function AdminPaymentsPage({

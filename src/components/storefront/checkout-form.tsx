@@ -73,14 +73,19 @@ export function CheckoutForm({
   const [error, setError] = useState<string | null>(null);
   const [gateway, setGateway] = useState<"paystack" | "bachs" | "">("");
   const [gatewayOptions, setGatewayOptions] = useState<Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }>>([]);
+  const [chargeCurrency, setChargeCurrency] = useState<"USD" | "NGN" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/payments/available")
+    // Send the display currency so the server evaluates gateway support
+    // against the currency each gateway will actually be charged in (which
+    // "Always pay in naira" may convert to NGN).
+    fetch(`/api/payments/available?currency=${currency}`)
       .then((res) => res.json())
-      .then((data: { gateways?: Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }> }) => {
+      .then((data: { gateways?: Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }>; chargeCurrency?: "USD" | "NGN" }) => {
         if (cancelled) return;
         if (data.gateways) setGatewayOptions(data.gateways);
+        if (data.chargeCurrency) setChargeCurrency(data.chargeCurrency);
       })
       .catch(() => {})
       .finally(() => {
@@ -464,6 +469,12 @@ export function CheckoutForm({
               {gatewayOptions.filter((g) => g.enabled && g.supports).length === 0 ? (
                 <p className="text-body text-muted">
                   No payment methods available for {currency}.
+                </p>
+              ) : null}
+              {chargeCurrency === "NGN" && currency === "USD" ? (
+                <p className="text-body text-muted">
+                  You&apos;ll be charged in naira at the exchange rate shown on
+                  your order.
                 </p>
               ) : null}
             </div>

@@ -31,17 +31,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Order not in pending_payment (status: ${order.status})` }, { status: 400 })
     }
 
+    // Charge currency: "Always pay in naira" converts every order to NGN at
+    // the frozen order rate before the gateway sees it (Paystack on this
+    // merchant account rejects USD with 403 unsupported_currency — client
+    // report 2026-10-21). Otherwise charge in the order's display currency.
     const currency = order.currency as Currency
-    if (!gatewaySupportsCurrency(gateway, currency)) {
-      return NextResponse.json({ error: `${gateway} does not support currency ${currency}` }, { status: 400 })
+    const chargeCurrency: Currency = enabled.alwaysPayInNaira ? 'NGN' : currency
+    if (!gatewaySupportsCurrency(gateway, chargeCurrency)) {
+      return NextResponse.json({ error: `${gateway} does not support currency ${chargeCurrency}` }, { status: 400 })
     }
 
     const ref = `${order.orderNumber}-${Date.now()}-${randomUUID().slice(0, 8)}`.toUpperCase()
-    // Charge the due-now amount **in the order's display currency** — exactly
-    // the figure the customer was shown. Every `*Minor` field on the order is
-    // in the base currency, so they must never be sent to a gateway raw
-    // (ProductReq.md §10.2; DECISIONS 2026-10-18).
-    const charge = chargeAmountForOrder(order)
+    // Charge the due-now amount in the charge currency — the figure the
+    // customer saw, or its NGN equivalent at the frozen rate. Every `*Minor`
+    // field on the order is in the base currency, so they must never be sent
+    // to a gateway raw (ProductReq.md §10.2; DECISIONS 2026-10-18).
+    const charge = chargeAmountForOrder(order, chargeCurrency)
     const chargedMinor = charge.minor
 
     // Two origins, deliberately different:
@@ -104,13 +109,14 @@ export async function POST(req: NextRequest) {
       order.paymentReference = ref
       order.paymentStatus = 'initiated'
       order.paymentAmountMinor = chargedMinor
+      order.paymentCurrency = charge.currency
       await order.save()
       return NextResponse.json({ paymentUrl: init.authorization_url, reference: ref })
     } else if (gateway === 'bachs') {
       const { amountDecimal } = formatAmountForGateway('bachs', chargedMinor)
       const init = await bachsCreateCheckout({
         amountDecimal,
-        currency,
+        currency: charge.currency,
         reference: ref,
         successUrl: `${returnTo}/checkout/return?order=${order.orderNumber}&ref=${ref}&success=1${bounce}`,
         cancelUrl: `${returnTo}/checkout/return?order=${order.orderNumber}&ref=${ref}&cancel=1${bounce}`,
@@ -125,6 +131,7 @@ export async function POST(req: NextRequest) {
       order.paymentCheckoutId = init.checkout_id
       order.paymentStatus = 'initiated'
       order.paymentAmountMinor = chargedMinor
+      order.paymentCurrency = charge.currency
       await order.save()
       return NextResponse.json({ paymentUrl: init.checkout_url, reference: ref })
     }

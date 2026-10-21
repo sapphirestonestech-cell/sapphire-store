@@ -6,6 +6,7 @@ import { useState } from "react";
 export interface GatewayFlags {
   paystack: boolean;
   bachs: boolean;
+  alwaysPayInNaira: boolean;
 }
 
 function Switch({
@@ -44,7 +45,8 @@ function Switch({
 /**
  * Independent gateway switches — ProductReq.md §6.9 / §10.2, DECISIONS
  * 2026-10-18. A disabled gateway disappears from checkout; the other stays
- * available.
+ * available. "Always pay in naira" converts every charge to NGN at the
+ * order's frozen exchange rate (DECISIONS 2026-10-21).
  */
 export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
   const router = useRouter();
@@ -99,7 +101,7 @@ export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
               Paystack
             </p>
             <p className="text-label text-muted">
-              Cards and local payments. USD and NGN.
+              Cards and local payments. NGN only.
             </p>
           </div>
           <Switch
@@ -123,6 +125,26 @@ export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
             label="Enable BACHS"
             checked={flags.bachs}
             onChange={(next) => setFlags((f) => ({ ...f, bachs: next }))}
+          />
+        </li>
+        <li className="flex items-center justify-between gap-4 py-4">
+          <div>
+            <p id="always-pay-naira-label" className="text-body font-medium">
+              Always pay in naira
+            </p>
+            <p className="text-label text-muted">
+              Charge every payment in ₦ at the exchange rate locked on the
+              order, even when customers shop in USD. This lets Paystack
+              accept international shoppers.
+            </p>
+          </div>
+          <Switch
+            id="always-pay-naira"
+            label="Always pay in naira"
+            checked={flags.alwaysPayInNaira}
+            onChange={(next) =>
+              setFlags((f) => ({ ...f, alwaysPayInNaira: next }))
+            }
           />
         </li>
       </ul>

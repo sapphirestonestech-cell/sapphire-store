@@ -940,3 +940,51 @@ app working at every step.
   unlayered `zoom: 0.97; font-size: 97.087%` — so the effective zoom is 0.97
   everywhere; Chrome fills the screen under root zoom so there is no gap.
   Left as-is pending a decision (see OPEN_QUESTIONS.md).
+
+## 2026-10-21 — Paystack currency fix + light default
+
+### Added
+
+- **"Always pay in naira" gateway setting** (`payment_gateways.alwaysPayInNaira`,
+  default off) — new switch in Admin → Settings → Payment gateways. When on,
+  every payment is converted to NGN at the order's frozen exchange rate before
+  reaching Paystack or BACHS, so USD-displaying shoppers can pay via Paystack
+  (whose merchant account here is NGN-only). When off, charges use the display
+  currency and Paystack is hidden for USD. Backend: `parseGatewayFlags` /
+  `getEnabledGateways` return the flag; `GET`/`PUT /api/admin/payments/gateways`
+  persist it.
+- **`paymentCurrency` on orders** (`src/lib/models/order.ts`) — records the
+  currency the gateway was actually charged in, so converted USD orders are
+  verifiable and displayable.
+
+### Changed
+
+- **Charge currency is now explicit** — `chargeAmountForOrder(order,
+  chargeCurrency?)` builds the due-now amount directly in the target currency
+  via `priceIn(fromMinor(base), baseCurrency, target, order.exchangeRate)`;
+  `initialize` passes `'NGN'` when the setting is on and stores
+  `paymentCurrency`. `chargeMatches` compares the paid currency against
+  `paymentCurrency ?? currency`.
+- **Gateway availability** (`GET /api/payments/available`) is evaluated against
+  the charge currency and now returns `chargeCurrency`; the checkout sends the
+  display currency and shows a "You'll be charged in naira…" note when a USD
+  order will convert. BACHS initialize now sends the charge currency (was the
+  display currency).
+- **Admin revenue math reads the charge currency** — `paymentChargeMinor`
+  fallback and new `paymentChargeCurrency` helper; order/payment detail pages
+  format gateway amounts in `paymentCurrency`; `dashboard.ts` / `summaries.ts`
+  convert `paymentAmountMinor` from `paymentCurrency ?? currency` (base
+  currency for rows with no payment) to avoid double-converting converted
+  orders. Payment detail shows the conversion source.
+- **Paystack copy** in the gateway settings now reads "NGN only".
+- **Light is the default theme** — `ThemeProvider.resolve()` returns
+  `choice ?? 'light'`; removed the OS-follow effect and the
+  `@media (prefers-color-scheme: dark)` block in `globals.css`. Dark applies
+  only from an explicit saved choice (client instruction, 2026-10-21).
+
+### Verified
+
+- `npm run typecheck` clean; `npm test` 66/66; lint 0 errors (1 pre-existing
+  warning in `checkout-form.tsx`).
+- Webhook mismatch logs report the expected charge currency for reconciliation.
+

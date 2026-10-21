@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { connectDb } from "@/lib/db";
 import { OrderModel, type OrderDoc } from "@/lib/models/order";
-import { orderMoney, paymentChargeMinor } from "@/lib/admin/orders";
+import { orderMoney, paymentChargeCurrency, paymentChargeMinor } from "@/lib/admin/orders";
 import { formatPrice } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
 import { PaymentStatusBadge, OrderStatusBadge } from "@/components/admin/order-status-badge";
@@ -56,7 +56,7 @@ export default async function AdminPaymentDetailPage({
 
   const charge = formatPrice(
     fromMinor(paymentChargeMinor(order)),
-    order.currency,
+    paymentChargeCurrency(order),
   );
   const pending = order.status === "pending_payment";
 
@@ -99,7 +99,12 @@ export default async function AdminPaymentDetailPage({
                 </div>
                 <div>
                   <dt className="text-label text-muted">Currency</dt>
-                  <dd className="text-body">{order.currency}</dd>
+                  <dd className="text-body">
+                    {paymentChargeCurrency(order)}
+                    {order.paymentCurrency && order.paymentCurrency !== order.currency
+                      ? ` (converted from ${order.currency})`
+                      : ""}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-label text-muted">Gateway</dt>

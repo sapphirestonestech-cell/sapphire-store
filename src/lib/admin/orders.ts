@@ -1,6 +1,6 @@
 import type { sanitizeFilter } from "mongoose";
 import { OrderModel, type OrderDoc, type OrderStatus } from "@/lib/models/order";
-import { formatPrice, priceIn } from "@/lib/currency";
+import { formatPrice, priceIn, type Currency } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
 import { chargeAmountForOrder } from "@/lib/payments";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
@@ -309,11 +309,12 @@ export function orderMoney(
   return formatPrice(amount, order.currency);
 }
 
-/** The amount actually sent to the gateway, in display-currency minor units. */
+/** The amount actually sent to the gateway, in charge-currency minor units. */
 export function paymentChargeMinor(
   order: Pick<
     OrderDoc,
     | "paymentAmountMinor"
+    | "paymentCurrency"
     | "amountDueNowMinor"
     | "totalMinor"
     | "baseCurrency"
@@ -321,7 +322,21 @@ export function paymentChargeMinor(
     | "exchangeRate"
   >,
 ): number {
-  return order.paymentAmountMinor ?? chargeAmountForOrder(order).minor;
+  return (
+    order.paymentAmountMinor ??
+    chargeAmountForOrder(order, paymentChargeCurrency(order)).minor
+  );
+}
+
+/**
+ * The currency the gateway was actually charged in — naira for a converted USD
+ * order under "Always pay in naira", otherwise the display currency. Money
+ * sent to the gateway must be formatted with this, not `order.currency`.
+ */
+export function paymentChargeCurrency(
+  order: Pick<OrderDoc, "paymentCurrency" | "currency">,
+): Currency {
+  return order.paymentCurrency ?? order.currency;
 }
 
 const CSV_COLUMNS = [

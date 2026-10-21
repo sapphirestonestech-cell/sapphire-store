@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       // repeated failures; a short/over payment must not fulfil either way, so
       // acknowledge and leave the order pending for admin reconciliation.
       console.warn(
-        `[webhooks] Paystack amount/currency mismatch for order ${order.orderNumber}: got ${String(data?.amount)} ${String(data?.currency)}, expected minor ${order.paymentAmountMinor ?? order.totalMinor} ${order.currency} — left pending for admin reconciliation.`,
+        `[webhooks] Paystack amount/currency mismatch for order ${order.orderNumber}: got ${String(data?.amount)} ${String(data?.currency)}, expected minor ${order.paymentAmountMinor ?? order.totalMinor} ${order.paymentCurrency ?? order.currency} — left pending for admin reconciliation.`,
       )
       return NextResponse.json({ ok: true })
     }
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
   const amountMinor = decimalStringToMinor(String(data?.amount ?? ''))
   if (!chargeMatches(order, amountMinor, data?.currency)) {
     console.warn(
-      `[webhooks] BACHS amount/currency mismatch for order ${order.orderNumber}: got ${String(data?.amount)} ${String(data?.currency)}, expected minor ${order.paymentAmountMinor ?? order.totalMinor} ${order.currency} — left pending for admin reconciliation.`,
+      `[webhooks] BACHS amount/currency mismatch for order ${order.orderNumber}: got ${String(data?.amount)} ${String(data?.currency)}, expected minor ${order.paymentAmountMinor ?? order.totalMinor} ${order.paymentCurrency ?? order.currency} — left pending for admin reconciliation.`,
     )
     return NextResponse.json({ ok: true })
   }

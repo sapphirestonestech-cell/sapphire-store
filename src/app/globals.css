@@ -147,10 +147,9 @@
  * `@theme`, so `[data-theme="dark"]` can override them at runtime. The
  * `@theme` colour names above point here.
  *
- * Light is the default. Dark also applies from the OS when no explicit
- * `data-theme` has been set (the ThemeProvider / inline guard in layout.tsx
- * writes `data-theme` before paint, so this media query mostly covers first
- * paint and no-JS).
+ * Light is the default and no longer follows the OS (client instruction,
+ * 2026-10-21). Dark applies only when an explicit `data-theme="dark"` has
+ * been set by the ThemeProvider / inline guard in layout.tsx.
  */
 @layer base {
   :root {
@@ -237,44 +236,6 @@
 
     --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
     --shadow-float: 0 4px 24px rgba(0, 0, 0, 0.5);
-  }
-
-  /* OS default when no explicit choice has been stored (§10). The inline
-     guard sets `data-theme`, so this only runs on first paint / no-JS. */
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) {
-      color-scheme: dark;
-
-      --surface-app: #171717;
-      --surface-card: #202020;
-      --surface-raised: #262626;
-      --surface-hover: #2a2a2a;
-      --surface-active: #2b2b2b;
-
-      --border-subtle: #2c2c2c;
-      --border-default: #3a3a3a;
-      --track: #333333;
-      --track-flat: #2b2b26;
-
-      --text-primary: #f5f5f5;
-      --text-secondary: #b3b3b3;
-      --text-muted: #8c8c8c;
-      --text-disabled: #5e5e5e;
-
-      --accent: #d9b45f;
-      --accent-strong: #e6c77a;
-      --accent-wash: #3a2f17;
-      --accent-contrast: #211d19;
-
-      --danger: #e5484d;
-      --danger-text: #f26b6f;
-      --success: #3dbe6b;
-      --warning: #f5b83a;
-      --info: #5b8def;
-
-      --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.5);
-      --shadow-float: 0 4px 24px rgba(0, 0, 0, 0.5);
-    }
   }
 
   html {

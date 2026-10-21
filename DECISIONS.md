@@ -287,3 +287,18 @@ existing design concept — desktop unchanged."
 | — | `DESIGN.md` says `page-width` = 80% centred, flagged **[Confirm]**. AGENTS.md wants mobile-first full screen width. Which? | **Full width below `md` with a 16px gutter; `width: 80%` restored at `≥768px`.** Desktop stays exactly as before (verified 1152px = 80% of 1440). |
 | — | Currency switcher vs the Tailwind-v4 `hidden`/`inline-flex` sort bug: should the switcher hide on phones? | **No — the currency switcher stays visible at all widths.** ProductReq.md requires the switcher "always reachable from the header" and AGENTS.md a "visible switch between USD and NGN at all times". Below `sm` it compacts to symbols-only (`$`/`₦`) with `sr-only` full labels for a11y. |
 | — | What about the theme toggle (same sort bug, no such requirement)? | **Hidden below `sm`** via `max-sm:hidden` (Tailwind v4 emits `.hidden` before `.inline-flex`, so `hidden sm:inline-flex` never works). Reusable pattern for any future visibility toggle: use `max-*:hidden`, not `hidden sm:*`. |
+
+## 2026-10-21 — Paystack currency fix ("Always pay in naira") and light default
+
+Client report: Paystack checkout failed with HTTP 403 `unsupported_currency` for
+USD orders, and the storefront should default to light mode.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Why does Paystack reject USD orders? | The Paystack merchant account is **NGN-only** — a USD `initialize` returns `403 unsupported_currency`. Fix must be server-side; the browser redirect cannot change this. |
+| — | How do we let international (USD-displaying) shoppers still pay with Paystack? | **New admin setting "Always pay in naira."** When ON, every charge is converted to NGN at the order's **frozen** exchange rate (`order.exchangeRate`) before being sent to either gateway; orders store the currency actually charged in `paymentCurrency` and website amounts remain in the customer's display currency. When OFF, the charge currency is the display currency and **Paystack is hidden for USD** (`SUPPORTED.paystack = ['NGN']`); BACHS still accepts both. |
+| — | Which currency does the admin setting store in? | The flag lives inside the existing `payment_gateways` JSON setting as `alwaysPayInNaira` (default `false` for rows written before the field existed), parsed by `parseGatewayFlags`. |
+| — | How is the frozen rate preserved for converted orders? | Conversion uses `chargeAmountForOrder(order, 'NGN')`, which converts base minor units → NGN at `order.exchangeRate`. Webhook and poll verification compare the paid amount **and** currency against `paymentCurrency` (via `chargeMatches`), so a converted order is only fulfilled when the gateway is charged exactly the naira figure we sent. |
+| — | Why do admin revenue figures change? | `paymentAmountMinor` is now in `paymentCurrency`, not `currency`, so dashboard/summary revenue math reads the source currency from `paymentCurrency ?? currency` (falling back to `baseCurrency` for rows with no payment). Without this a USD order charged in naira would be double-converted. |
+| — | Default theme? | **Light, always** (client instruction). The storefront no longer follows the OS `prefers-color-scheme`; `resolve()` returns `choice ?? 'light'`, the OS-follow effect and the CSS `@media (prefers-color-scheme: dark)` block are removed. Dark applies only from an explicit saved choice. |
+

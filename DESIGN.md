@@ -2,7 +2,7 @@
 
 > Flat, dense, quiet surfaces. One gold accent. Dark and light, side by side.
 
-**Theme:** light + dark (follows OS; manual toggle overrides)
+**Theme:** light (default) + dark (manual toggle)
 **Product:** Luxury ring e-commerce store (storefront and admin dashboard)
 **Brand promise:** Luxurious rings at an affordable price.
 **Brand feel:** Sleek, a little cute, luxurious, gold, elegant.
@@ -367,9 +367,9 @@ Chart axis labels are 13px `--text-secondary`; legends are 12px `--text-muted`.
 
 ## 10. Dark and light theme
 
-- **Default:** the visitor's OS preference (`prefers-color-scheme`), applied before paint (no flash).
+- **Default:** light, always (client instruction, 2026-10-21). The theme no longer follows the OS `prefers-color-scheme`.
 - **Override:** a manual toggle in the header (storefront) and the sidebar (admin), persisted in `localStorage` and applied via `data-theme="dark|light"` on `<html>`.
-- **Implementation:** all colour tokens are defined for `:root` (light) and overridden under `[data-theme="dark"]` (and `@media (prefers-color-scheme: dark)` for the OS default). Components reference tokens only — no hard-coded colours.
+- **Implementation:** all colour tokens are defined for `:root` (light) and overridden under `[data-theme="dark"]`. Dark applies only from an explicit saved choice. Components reference tokens only — no hard-coded colours.
 - **Both themes are first-class.** Every token pairing must pass contrast in both (§2.3).
 
 ---
@@ -493,7 +493,7 @@ Tailwind (v4) exposes these through `@theme` using `--color-*`, `--radius-*`, `-
 | Playfair Display + Inter | Inter only | The reference is single-family; hierarchy from size/weight |
 | One gold accent | **Kept** as the sole brand accent (light + dark) | Deliberate deviation: Sapphire's brief is "luxurious gold" (§0) |
 | Restricted green/red/amber status | Full data palette (red/orange/green/blue/yellow) + one info blue | Charts and budgets need more than three status colours; still never chrome |
-| Light only | Light + dark, OS-default + manual toggle | Client instruction (2026-10-20) |
+| Light only | Light + dark, light-default + manual toggle | Client instruction (2026-10-20; default changed to light 2026-10-21) |
 | Cormorant→Playfair (2026-10-19) | Playfair dropped | Superseded by the single-family decision |
 
 ---
@@ -507,7 +507,7 @@ Tailwind (v4) exposes these through `@theme` using `--color-*`, `--radius-*`, `-
 5. **Dark-mode photography** — do product shots work on `#202020`, or do they need a light frame?
 6. **Gateway logos** — permission/brand guidelines for BACHS and Paystack logos?
 7. **Photography** — real photos or placeholders, and how to mark placeholders?
-8. **Default theme** — follow OS (current) or force one?
+8. **Default theme** — resolved 2026-10-21: light, with a manual dark toggle.
 9. **Storefront page width** — keep 80% or cap at 1200px?
 
 ---

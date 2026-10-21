@@ -78,22 +78,33 @@ export async function loadPaymentMetrics(): Promise<Metric[]> {
       paymentStatus: "paid",
       status: { $nin: ["cancelled", "refunded"] },
     })
-      .select("paymentAmountMinor amountDueNowMinor baseCurrency currency exchangeRate")
+      .select("paymentAmountMinor paymentCurrency amountDueNowMinor baseCurrency currency exchangeRate")
       .lean(),
   ]);
 
   let collectedTotal = 0;
   for (const order of collected as unknown as {
     paymentAmountMinor?: number;
+    paymentCurrency?: Currency;
     amountDueNowMinor: number;
     baseCurrency?: Currency;
     currency: Currency;
     exchangeRate: number;
   }[]) {
+    // `paymentAmountMinor` is in `paymentCurrency` (naira after a conversion),
+    // not `currency`, so every figure must be read in the same currency before
+    // converting to the reporting base — otherwise a USD order charged in
+    // naira would be double-converted. Rows with no charge yet fall back to
+    // the base-currency "due now" amount.
+    const charged = order.paymentAmountMinor != null;
+    const sourceCurrency = charged
+      ? order.paymentCurrency ?? order.currency
+      : order.baseCurrency ?? order.currency;
+    const minor = charged ? order.paymentAmountMinor! : order.amountDueNowMinor;
     collectedTotal += convertAmount(
-      fromMinor(order.paymentAmountMinor ?? order.amountDueNowMinor),
+      fromMinor(minor),
       order.exchangeRate,
-      order.baseCurrency ?? order.currency,
+      sourceCurrency,
       settings.baseCurrency,
     );
   }

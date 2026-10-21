@@ -159,11 +159,23 @@ function collectedMinor(order: OrderDoc): number {
   return order.paymentAmountMinor ?? order.amountDueNowMinor;
 }
 
+/**
+ * The currency `paymentAmountMinor` is expressed in: the currency the gateway
+ * was charged in (naira after a conversion), or the base currency for rows
+ * that never started a payment and fall back to `amountDueNowMinor`.
+ */
+function collectedSourceCurrency(order: OrderDoc): Currency {
+  if (order.paymentAmountMinor != null) {
+    return order.paymentCurrency ?? order.currency;
+  }
+  return order.baseCurrency ?? order.currency;
+}
+
 function collectedIn(order: OrderDoc, currency: Currency): number {
   return convertAmount(
     fromMinor(collectedMinor(order)),
     order.exchangeRate,
-    order.currency,
+    collectedSourceCurrency(order),
     currency,
   );
 }
@@ -219,7 +231,7 @@ export async function loadDashboard(range: ChartRange): Promise<DashboardData> {
   ] = await Promise.all([
     OrderModel.find(paidQuery)
       .select(
-        "paymentAmountMinor amountDueNowMinor baseCurrency currency exchangeRate paidAt createdAt items",
+        "paymentAmountMinor paymentCurrency amountDueNowMinor baseCurrency currency exchangeRate paidAt createdAt items",
       )
       .lean(),
     OrderModel.countDocuments({ createdAt: { $gte: today } }),

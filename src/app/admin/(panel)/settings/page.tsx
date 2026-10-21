@@ -14,6 +14,7 @@ export default async function AdminSettingsPage() {
   const gateways = await getEnabledGateways().catch(() => ({
     paystack: true,
     bachs: true,
+    alwaysPayInNaira: false,
   }));
   const settings = await getSettings();
   const initial: SettingsState = {

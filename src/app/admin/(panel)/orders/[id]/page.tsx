@@ -8,6 +8,7 @@ import {
   canRefundOrder,
   getAdminOrder,
   orderMoney,
+  paymentChargeCurrency,
   paymentChargeMinor,
 } from "@/lib/admin/orders";
 import { formatPrice } from "@/lib/currency";
@@ -56,7 +57,10 @@ function SectionHeading({
 }
 
 function gatewayMoney(order: OrderDoc): string {
-  return formatPrice(fromMinor(paymentChargeMinor(order)), order.currency);
+  return formatPrice(
+    fromMinor(paymentChargeMinor(order)),
+    paymentChargeCurrency(order),
+  );
 }
 
 export default async function AdminOrderDetailPage({
