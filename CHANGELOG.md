@@ -1029,6 +1029,10 @@ app working at every step.
   test payment per gateway, confirm no stock/email side effects, then confirm
   the Test/Live toggle and CSV scope.
 
-### Not done / blocked
+### Deployment
 
-- Deployment waits on the four new env vars being set on Helicarrier.
+- Deployed 2026-10-29 (deployment `1355f675`, commit `1230d9f`).
+- Test keys added to Helicarrier; live mode uses the legacy key fallback until
+  explicit `*_LIVE_SECRET_KEY` values are supplied.
+- `BACHS_WEBHOOK_SECRET` is still unset on Helicarrier, so BACHS webhooks fail
+  closed and BACHS relies on return-page verification; set it when available.
