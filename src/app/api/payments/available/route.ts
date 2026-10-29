@@ -1,44 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getEnabledGateways, gatewayMode, gatewaySupportsCurrency, Gateway } from '@/lib/payments/gateways'
+import { connectDb } from '@/lib/db'
+import { isCurrency, type Currency } from '@/lib/currency'
+import { OrderModel } from '@/lib/models/order'
+import { getSettings } from '@/lib/settings'
+import { chargeAmountForOrder } from '@/lib/payments'
+import { getEnabledGateways, gatewayMode, type Gateway } from '@/lib/payments/gateways'
+import { resolveCheckoutOptions } from '@/lib/payments/checkout-options'
 import { readGatewayKey } from '@/lib/payments/keys'
-import { Currency } from '@/lib/currency'
 
+/**
+ * GET /api/payments/available — the gateways a customer may see and the
+ * currency they will be charged in. An `order` number pins the answer to that
+ * order's display/base currency; otherwise `currency` is the shopper's current
+ * display currency. `charge` carries the customer's USD/NGN choice.
+ */
 export async function GET(req: NextRequest) {
-  const displayCurrency = (req.nextUrl.searchParams.get('currency') as Currency) || 'USD'
+  const params = req.nextUrl.searchParams
+  const orderNumber = params.get('order')
+  const displayParam = params.get('currency')
+  const chargeParam = params.get('charge')
+
+  let displayCurrency: Currency = isCurrency(displayParam) ? displayParam : 'USD'
+  let baseCurrency: Currency | null = null
+  let order = null
+
+  if (orderNumber) {
+    await connectDb()
+    order = await OrderModel.findOne({ orderNumber }).lean()
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+    displayCurrency = order.currency
+    baseCurrency = order.baseCurrency
+  }
+
   const enabled = await getEnabledGateways()
-  // The currency the gateway will actually be charged in. "Always pay in
-  // naira" converts every order to NGN at the frozen rate, which re-enables
-  // Paystack for USD-displaying customers (Paystack here only accepts NGN);
-  // otherwise the charge currency is the display currency and Paystack is
-  // hidden for USD.
-  const chargeCurrency: Currency = enabled.alwaysPayInNaira ? 'NGN' : displayCurrency
-  // A gateway flagged on but missing the key for its selected mode is shown as
-  // unavailable, so checkout never offers a method that cannot initialize.
   const configured: Record<Gateway, boolean> = {
     paystack: readGatewayKey('paystack', gatewayMode(enabled, 'paystack')) !== null,
     bachs: readGatewayKey('bachs', gatewayMode(enabled, 'bachs')) !== null,
   }
-  const out: Array<{ id: Gateway; enabled: boolean; supports: boolean; note?: string }> = [
+  if (!baseCurrency) {
+    baseCurrency = (await getSettings()).baseCurrency
+  }
+
+  const options = resolveCheckoutOptions({
+    flags: enabled,
+    configured,
+    baseCurrency,
+    displayCurrency,
+    requestedCharge: isCurrency(chargeParam) ? chargeParam : null,
+  })
+
+  return NextResponse.json(
     {
-      id: 'paystack',
-      enabled: enabled.paystack && configured.paystack,
-      supports: gatewaySupportsCurrency('paystack', chargeCurrency),
-      note: !configured.paystack
-        ? 'Paystack is temporarily unavailable.'
-        : !gatewaySupportsCurrency('paystack', chargeCurrency)
-          ? `Paystack does not support ${chargeCurrency} in this setup.`
-          : undefined,
+      ...options,
+      displayCurrency,
+      baseCurrency,
+      chargeAmountMinor: order
+        ? chargeAmountForOrder(order, options.chargeCurrency).minor
+        : undefined,
     },
-    {
-      id: 'bachs',
-      enabled: enabled.bachs && configured.bachs,
-      supports: gatewaySupportsCurrency('bachs', chargeCurrency),
-      note: !configured.bachs
-        ? 'BACHS is temporarily unavailable.'
-        : !gatewaySupportsCurrency('bachs', chargeCurrency)
-          ? `BACHS does not support ${chargeCurrency} in this setup.`
-          : undefined,
-    },
-  ]
-  return NextResponse.json({ gateways: out, chargeCurrency })
+    { headers: { 'Cache-Control': 'no-store' } },
+  )
 }

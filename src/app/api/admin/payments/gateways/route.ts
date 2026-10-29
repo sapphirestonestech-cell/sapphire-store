@@ -15,7 +15,7 @@ import {
 const DEFAULTS: GatewayFlags = {
   paystack: true,
   bachs: true,
-  alwaysPayInNaira: false,
+  allowUsdCheckout: false,
   paystackMode: 'live',
   bachsMode: 'live',
 }
@@ -43,7 +43,7 @@ export async function PUT(req: Request) {
     const body = (await req.json().catch(() => ({}))) as {
       paystack?: unknown
       bachs?: unknown
-      alwaysPayInNaira?: unknown
+      allowUsdCheckout?: unknown
       paystackMode?: unknown
       bachsMode?: unknown
     }
@@ -58,10 +58,10 @@ export async function PUT(req: Request) {
       paystack:
         body.paystack === undefined ? current.paystack : body.paystack === true,
       bachs: body.bachs === undefined ? current.bachs : body.bachs === true,
-      alwaysPayInNaira:
-        body.alwaysPayInNaira === undefined
-          ? current.alwaysPayInNaira
-          : body.alwaysPayInNaira === true,
+      allowUsdCheckout:
+        body.allowUsdCheckout === undefined
+          ? current.allowUsdCheckout
+          : body.allowUsdCheckout === true,
       paystackMode: isPaymentMode(body.paystackMode)
         ? body.paystackMode
         : current.paystackMode,

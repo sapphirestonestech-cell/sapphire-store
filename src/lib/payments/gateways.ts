@@ -16,8 +16,8 @@ const SUPPORTED: Record<Gateway, Currency[]> = {
 export interface GatewayFlags {
   paystack: boolean
   bachs: boolean
-  /** When on, every payment is charged in NGN at the order's frozen rate. */
-  alwaysPayInNaira: boolean
+  /** When on (and the store is priced in USD), a USD shopper may choose USD or NGN. */
+  allowUsdCheckout: boolean
   /** Which credential set the admin chose for each gateway (DECISIONS 2026-10-29). */
   paystackMode: PaymentMode
   bachsMode: PaymentMode
@@ -26,7 +26,7 @@ export interface GatewayFlags {
 const DEFAULT_FLAGS: GatewayFlags = {
   paystack: true,
   bachs: true,
-  alwaysPayInNaira: false,
+  allowUsdCheckout: false,
   paystackMode: 'live',
   bachsMode: 'live',
 }
@@ -51,26 +51,28 @@ export async function getEnabledGateways(): Promise<GatewayFlags> {
 /**
  * The payment_gateways setting is stored as a JSON string (SettingModel.value
  * is a String path — an object there fails mongoose's cast). Returns null when
- * absent or unreadable so callers can apply defaults. `alwaysPayInNaira`
- * defaults to false, and both modes default to live, for rows written before
- * those fields existed.
+ * absent or unreadable so callers can apply defaults. `allowUsdCheckout`
+ * defaults to false (every charge is NGN), and both modes default to live,
+ * for rows written before those fields existed. The retired
+ * `alwaysPayInNaira` field is ignored.
  */
 export function parseGatewayFlags(raw: unknown): GatewayFlags | null {
   if (typeof raw !== 'string') return null
   try {
     const v: unknown = JSON.parse(raw)
     if (!v || typeof v !== 'object') return null
-    const { paystack, bachs, alwaysPayInNaira, paystackMode, bachsMode } = v as {
-      paystack?: unknown
-      bachs?: unknown
-      alwaysPayInNaira?: unknown
-      paystackMode?: unknown
-      bachsMode?: unknown
-    }
+    const { paystack, bachs, allowUsdCheckout, paystackMode, bachsMode } =
+      v as {
+        paystack?: unknown
+        bachs?: unknown
+        allowUsdCheckout?: unknown
+        paystackMode?: unknown
+        bachsMode?: unknown
+      }
     return {
       paystack: paystack !== false,
       bachs: bachs !== false,
-      alwaysPayInNaira: alwaysPayInNaira === true,
+      allowUsdCheckout: allowUsdCheckout === true,
       paystackMode: isPaymentMode(paystackMode) ? paystackMode : 'live',
       bachsMode: isPaymentMode(bachsMode) ? bachsMode : 'live',
     }

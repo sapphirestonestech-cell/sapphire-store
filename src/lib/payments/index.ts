@@ -19,10 +19,10 @@ export interface ChargeAmount {
  * the charge currency at the frozen order exchange rate and rounded by the
  * admin's rules. When no `chargeCurrency` is given, the charge currency is the
  * order's display currency — i.e. exactly the "Due now" figure the customer
- * saw. When `alwaysPayInNaira` is on, the initialize route passes "NGN" so a
- * USD-displaying order is converted to naira at the same frozen rate before
- * the gateway sees it (ProductReq.md §7; DECISIONS 2026-10-21). Gateways
- * charge this; webhooks and poll-verify compare against it.
+ * saw. The initialize route passes the customer's chosen charge currency when
+ * the admin allows USD checkout; every other charge is NGN at the same frozen
+ * rate (ProductReq.md §7; DECISIONS 2026-10-21, 2026-10-29). Gateways charge
+ * this; webhooks and poll-verify compare against it.
  */
 export function chargeAmountForOrder(
   order: {

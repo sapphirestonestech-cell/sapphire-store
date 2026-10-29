@@ -1,21 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { connectDb } from '@/lib/db'
 import { OrderModel } from '@/lib/models/order'
-import { Currency } from '@/lib/currency'
-import { getEnabledGateways, gatewaySupportsCurrency, formatAmountForGateway, chargeAmountForOrder } from '@/lib/payments'
+import { isCurrency } from '@/lib/currency'
+import { getEnabledGateways, formatAmountForGateway, chargeAmountForOrder } from '@/lib/payments'
 import { paystackInitialize } from '@/lib/payments/paystack'
 import { bachsCreateCheckout } from '@/lib/payments/bachs'
-import { gatewayMode } from '@/lib/payments/gateways'
+import { gatewayMode, type Gateway } from '@/lib/payments/gateways'
+import { resolveCheckoutOptions } from '@/lib/payments/checkout-options'
 import { readGatewayKey } from '@/lib/payments/keys'
 import { randomUUID } from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
-    const { orderNumber, gateway } = body as { orderNumber: string; gateway: 'paystack' | 'bachs' }
+    const { orderNumber, gateway, chargeCurrency: requestedCharge } = body as {
+      orderNumber: string
+      gateway: 'paystack' | 'bachs'
+      chargeCurrency?: unknown
+    }
 
     if (!orderNumber || !gateway) {
       return NextResponse.json({ error: 'orderNumber and gateway required' }, { status: 400 })
+    }
+    if (requestedCharge !== undefined && !isCurrency(requestedCharge)) {
+      return NextResponse.json({ error: 'Unsupported charge currency' }, { status: 400 })
     }
 
     const enabled = await getEnabledGateways()
@@ -49,15 +57,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Order not in pending_payment (status: ${order.status})` }, { status: 400 })
     }
 
-    // Charge currency: "Always pay in naira" converts every order to NGN at
-    // the frozen order rate before the gateway sees it (Paystack on this
-    // merchant account rejects USD with 403 unsupported_currency — client
-    // report 2026-10-21). Otherwise charge in the order's display currency.
-    const currency = order.currency as Currency
-    const chargeCurrency: Currency = enabled.alwaysPayInNaira ? 'NGN' : currency
-    if (!gatewaySupportsCurrency(gateway, chargeCurrency)) {
-      return NextResponse.json({ error: `${gateway} does not support currency ${chargeCurrency}` }, { status: 400 })
+    // The charge currency is NGN unless the admin allows USD checkout and this
+    // USD order is eligible (USD-priced store, USD-capable gateway enabled).
+    // A customer choice of USD/NGN is validated here, never trusted blindly.
+    const configured: Record<Gateway, boolean> = {
+      paystack: readGatewayKey('paystack', gatewayMode(enabled, 'paystack')) !== null,
+      bachs: readGatewayKey('bachs', gatewayMode(enabled, 'bachs')) !== null,
     }
+    const options = resolveCheckoutOptions({
+      flags: enabled,
+      configured,
+      baseCurrency: order.baseCurrency,
+      displayCurrency: order.currency,
+      requestedCharge: isCurrency(requestedCharge) ? requestedCharge : null,
+    })
+    if (isCurrency(requestedCharge) && requestedCharge !== options.chargeCurrency) {
+      return NextResponse.json(
+        { error: `That payment currency is not available. This order is charged in ${options.chargeCurrency}.` },
+        { status: 400 },
+      )
+    }
+    if (!options.gateways.some((option) => option.id === gateway)) {
+      return NextResponse.json(
+        { error: `${gateway === 'paystack' ? 'Paystack' : 'BACHS'} is not available for ${options.chargeCurrency} payments.` },
+        { status: 400 },
+      )
+    }
+    const chargeCurrency = options.chargeCurrency
 
     const ref = `${order.orderNumber}-${Date.now()}-${randomUUID().slice(0, 8)}`.toUpperCase()
     // Charge the due-now amount in the charge currency — the figure the

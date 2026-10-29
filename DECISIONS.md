@@ -320,3 +320,17 @@ coexist without keeping gateway keys in the database.
 | — | What do test payments do? | They are fulfilled and tagged, but **skip stock decrement and the customer confirmation email**. |
 | — | How does the back office separate test data? | A cookie-backed **Live/Test data toggle** in the admin layout, independent of gateway mode. It scopes dashboard stats/recent orders, Orders list/detail, Payments list/detail and their metric strips and CSV export. Products, categories, delivery, settings and admins are unaffected. Test rows carry a "Test" badge and the layout shows a "Test data" chip. |
 | — | Deployment note? | 2026-10-29: test keys were added to Helicarrier and the feature deployed (deployment `1355f675`). Paystack live mode now uses the explicit `PAYSTACK_LIVE_SECRET_KEY`; BACHS live mode still reads the legacy `BACHS_SECRET_KEY` through the migration fallback until the client supplies a live BACHS key. `BACHS_WEBHOOK_SECRET` remains unset on Helicarrier, so BACHS webhooks fail closed and rely on the return-page verification. |
+
+## 2026-10-29 — Customer-chosen USD/NGN charge currency
+
+Client decisions: replace "Always pay in naira" with a USD permission switch;
+choose currency first, then gateways; show the due-now NGN equivalent.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | What replaces "Always pay in naira"? | **"Allow customers to pay in USD"** (`allowUsdCheckout`, default **false**). When off, every charge is NGN at the order's frozen rate. The retired `alwaysPayInNaira` field is ignored. |
+| — | When may a customer choose USD? | Only when the store is **priced in USD**, the shopper is **viewing USD**, the admin allows USD checkout, and at least one enabled gateway with a configured key accepts USD (currently **BACHS**; Paystack is NGN-only on this merchant account). |
+| — | How do currency and gateway choices interact? | **Currency first, then gateways.** USD shows only USD-capable gateways (BACHS); NGN shows every enabled NGN-capable gateway. If only one gateway is available, it is selected automatically and the currency question is hidden. |
+| — | What if BACHS is off or USD is not allowed? | Force NGN, hide the currency question, and show the shopper the **due-now** naira equivalent at the order's locked rate. Paystack-only checkout works this way. |
+| — | Can a disabled gateway still surface? | **No.** Checkout, the order-page Pay-now card and `POST /api/payments/initialize` all use the same server-side resolver; a disabled gateway is omitted and initialize rejects it. |
+| — | Is the customer's currency choice trusted? | **No.** Initialize re-runs the resolver against the stored order and the current settings, then charges the frozen amount in the resulting currency. |

@@ -100,18 +100,21 @@ function ModeChoice({
 
 /**
  * Independent gateway switches and per-gateway test/live mode — ProductReq.md
- * §6.9 / §10.2, DECISIONS 2026-10-18 and 2026-10-29. A disabled gateway
- * disappears from checkout; the other stays available. "Always pay in naira"
- * converts every charge to NGN at the order's frozen exchange rate
- * (DECISIONS 2026-10-21). Keys are never entered here: each mode reads its
- * secret from the server environment, and a mode with no key cannot be used.
+ * §6.9 / §10.2, DECISIONS 2026-10-18, 2026-10-21 and 2026-10-29. A disabled
+ * gateway disappears from checkout. "Allow customers to pay in USD" only
+ * offers USD when the store is priced in USD and BACHS is available; every
+ * other charge is NGN at the order's frozen rate. Keys are never entered
+ * here: each mode reads its secret from the server environment, and a mode
+ * with no key cannot be used.
  */
 export function GatewaySettings({
   initial,
   keys,
+  baseCurrency,
 }: {
   initial: GatewayFlags;
   keys: GatewayKeysStatus;
+  baseCurrency: "USD" | "NGN";
 }) {
   const router = useRouter();
   const [flags, setFlags] = useState(initial);
@@ -154,9 +157,9 @@ export function GatewaySettings({
     <section className="max-w-2xl rounded-md bg-card p-6 shadow-card">
       <h2 className="font-sans text-subheading">Payment gateways</h2>
       <p className="mt-1 text-body text-muted">
-        Turn a gateway off while it is down, and choose whether it charges test
-        or live payments. Customers only see enabled gateways that support their
-        currency and have a key for the selected mode.
+        Each switch controls whether customers see that gateway at checkout.
+        Turn one off and it disappears immediately. A gateway also needs a key
+        for its selected mode, and must support the currency being charged.
       </p>
 
       <ul className="mt-4 divide-y divide-border-subtle">
@@ -166,7 +169,10 @@ export function GatewaySettings({
               Paystack
             </p>
             <p className="text-label text-muted">
-              Cards and local payments. NGN only.
+              Cards and local payments. NGN only.{" "}
+              <span aria-live="polite">
+                {flags.paystack ? "Visible at checkout." : "Hidden from checkout."}
+              </span>
             </p>
             <ModeChoice
               label="Paystack"
@@ -190,7 +196,10 @@ export function GatewaySettings({
               BACHS
             </p>
             <p className="text-label text-muted">
-              International checkout. USD and NGN.
+              International checkout. USD and NGN.{" "}
+              <span aria-live="polite">
+                {flags.bachs ? "Visible at checkout." : "Hidden from checkout."}
+              </span>
             </p>
             <ModeChoice
               label="BACHS"
@@ -208,23 +217,33 @@ export function GatewaySettings({
             onChange={(next) => setFlags((f) => ({ ...f, bachs: next }))}
           />
         </li>
-        <li className="flex items-center justify-between gap-4 py-4">
-          <div>
-            <p id="always-pay-naira-label" className="text-body font-medium">
-              Always pay in naira
+        <li className="flex items-start justify-between gap-4 py-4">
+          <div className="min-w-0">
+            <p id="allow-usd-label" className="text-body font-medium">
+              Allow customers to pay in USD
             </p>
             <p className="text-label text-muted">
-              Charge every payment in ₦ at the exchange rate locked on the
-              order, even when customers shop in USD. This lets Paystack
-              accept international shoppers.
+              When the store is priced in USD and a shopper is viewing USD, they
+              can choose USD or NGN at checkout. USD payments go through BACHS;
+              Paystack is naira-only. When off, every charge is in naira at the
+              order&apos;s locked rate.
             </p>
+            {baseCurrency !== "USD" ? (
+              <p className="mt-1 text-label text-warning">
+                Only takes effect when the base currency is USD (Currency tab).
+              </p>
+            ) : !flags.bachs ? (
+              <p className="mt-1 text-label text-warning">
+                Turn BACHS on to offer USD payments.
+              </p>
+            ) : null}
           </div>
           <Switch
-            id="always-pay-naira"
-            label="Always pay in naira"
-            checked={flags.alwaysPayInNaira}
+            id="allow-usd"
+            label="Allow customers to pay in USD"
+            checked={flags.allowUsdCheckout}
             onChange={(next) =>
-              setFlags((f) => ({ ...f, alwaysPayInNaira: next }))
+              setFlags((f) => ({ ...f, allowUsdCheckout: next }))
             }
           />
         </li>

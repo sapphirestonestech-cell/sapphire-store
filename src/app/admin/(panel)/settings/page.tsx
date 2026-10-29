@@ -30,7 +30,7 @@ export default async function AdminSettingsPage({
   const gateways = await getEnabledGateways().catch(() => ({
     paystack: true,
     bachs: true,
-    alwaysPayInNaira: false,
+    allowUsdCheckout: false,
     paystackMode: "live" as const,
     bachsMode: "live" as const,
   }));
@@ -81,7 +81,11 @@ export default async function AdminSettingsPage({
       </nav>
 
       {tab === "payments" ? (
-        <GatewaySettings initial={gateways} keys={keys} />
+        <GatewaySettings
+          initial={gateways}
+          keys={keys}
+          baseCurrency={settings.baseCurrency}
+        />
       ) : (
         <SettingsManager initial={initial} section={tab} />
       )}

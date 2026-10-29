@@ -1062,3 +1062,40 @@ app working at every step.
 - Browser check in `next dev`: all three tabs load the right panel, deep links
   keep the selected tab, an invalid tab falls back to Store, and each tab link
   exposes `aria-current="page"`.
+
+## 2026-10-29 — USD/NGN charge choice and explicit gateway visibility
+
+### Added
+
+- **"Allow customers to pay in USD"** setting replaces "Always pay in naira"
+  (default off). When on, a USD shopper in a USD-priced store can choose USD or
+  NGN before picking a gateway. USD is offered only through BACHS; NGN works
+  with every enabled gateway.
+- **Shared checkout resolver** (`src/lib/payments/checkout-options.ts`) used by
+  the availability API, initialize route and order-page Pay-now card. Disabled
+  gateways are omitted everywhere; initialize rejects a disabled or
+  currency-incompatible gateway.
+- **Naira notice** on checkout and the order page: when a USD shopper will be
+  charged NGN, the due-now naira equivalent is shown at the order's locked rate.
+
+### Changed
+
+- Gateway list is currency-aware: choosing USD leaves BACHS; choosing NGN shows
+  Paystack and BACHS. With BACHS off, checkout forces NGN, hides the currency
+  question and offers Paystack with the naira notice.
+- Settings → Payments says whether each gateway is visible or hidden and links
+  the USD permission to the store's base currency.
+- The order-page Pay-now card now respects gateway switches and the USD/NGN
+  choice instead of always offering both gateways.
+- Currency context exposes the admin's rounding rules so displayed naira
+  equivalents match the amount sent to the gateway.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` clean; `npm test` 92/92; build
+  succeeds.
+- Resolver unit tests cover USD off/on, NGN display, NGN base currency,
+  BACHS off, missing BACHS key, one gateway and no gateways; migration tests
+  confirm the retired `alwaysPayInNaira` field is ignored.
+- Browser check: with Paystack available and BACHS keyless locally, checkout
+  showed Paystack only, no currency question, and the naira charge notice.

@@ -6,6 +6,10 @@
 
 export type Currency = "USD" | "NGN";
 
+export function isCurrency(value: unknown): value is Currency {
+  return value === "USD" || value === "NGN";
+}
+
 /** Default exchange rate used only until the admin sets one (seed: 1 USD = 1,600 NGN). */
 export const DEFAULT_USD_TO_NGN = 1600;
 

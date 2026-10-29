@@ -11,8 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import {
+  DEFAULT_ROUNDING,
   DEFAULT_USD_TO_NGN,
   type Currency,
+  type RoundingSettings,
 } from "@/lib/currency";
 
 const STORAGE_KEY = "sapphire_currency";
@@ -63,6 +65,7 @@ interface CurrencyContextValue {
   currency: Currency;
   usdToNgn: number;
   baseCurrency: Currency;
+  rounding: RoundingSettings;
   setCurrency: (c: Currency) => void;
   /** Bumps on every switch so prices can crossfade (DESIGN.md §7.3). */
   switchCount: number;
@@ -73,6 +76,7 @@ const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 interface CurrencyContextResponse {
   usdToNgn: number;
   baseCurrency: Currency;
+  rounding?: RoundingSettings;
 }
 
 /**
@@ -91,6 +95,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [ctx, setCtx] = useState<CurrencyContextResponse>({
     usdToNgn: DEFAULT_USD_TO_NGN,
     baseCurrency: "USD",
+    rounding: DEFAULT_ROUNDING,
   });
   const [switchCount, setSwitchCount] = useState(0);
 
@@ -125,6 +130,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       currency,
       usdToNgn: ctx.usdToNgn,
       baseCurrency: ctx.baseCurrency,
+      rounding: ctx.rounding ?? DEFAULT_ROUNDING,
       setCurrency,
       switchCount,
     }),

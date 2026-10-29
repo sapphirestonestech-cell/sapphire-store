@@ -8,7 +8,9 @@ import { useCart } from "@/components/cart-provider";
 import { useCurrency } from "@/components/currency-provider";
 import { clearCart, type CartItem } from "@/lib/cart";
 import { computeOrderTotals, fromMinor, type CheckoutItemInput } from "@/lib/checkout";
+import { formatPrice, priceIn } from "@/lib/currency";
 import { SaveForLaterButton } from "@/components/storefront/save-for-later-button";
+import { usePaymentOptions } from "@/components/storefront/use-payment-options";
 
 interface LocationOption {
   id: string;
@@ -57,7 +59,7 @@ export function CheckoutForm({
 }) {
   const router = useRouter();
   const { items } = useCart();
-  const { currency } = useCurrency();
+  const { currency, baseCurrency, usdToNgn, rounding } = useCurrency();
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [locationsError, setLocationsError] = useState<string | null>(null);
@@ -71,31 +73,14 @@ export function CheckoutForm({
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gateway, setGateway] = useState<"paystack" | "bachs" | "">("");
-  const [gatewayOptions, setGatewayOptions] = useState<Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }>>([]);
-  const [chargeCurrency, setChargeCurrency] = useState<"USD" | "NGN" | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    // Send the display currency so the server evaluates gateway support
-    // against the currency each gateway will actually be charged in (which
-    // "Always pay in naira" may convert to NGN).
-    fetch(`/api/payments/available?currency=${currency}`)
-      .then((res) => res.json())
-      .then((data: { gateways?: Array<{ id: "paystack" | "bachs"; enabled: boolean; supports: boolean; note?: string }>; chargeCurrency?: "USD" | "NGN" }) => {
-        if (cancelled) return;
-        if (data.gateways) setGatewayOptions(data.gateways);
-        if (data.chargeCurrency) setChargeCurrency(data.chargeCurrency);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled && !gateway) {
-          const first = gatewayOptions.find((g) => g.enabled && g.supports);
-          if (first) setGateway(first.id);
-        }
-      });
-    return () => { cancelled = true; };
-  }, [currency, gatewayOptions.length, gateway]);
+  const {
+    options,
+    gateway,
+    setGateway,
+    selectCharge,
+    loading: loadingPayments,
+    error: paymentsError,
+  } = usePaymentOptions({ currency });
 
   useEffect(() => {
     let cancelled = false;
@@ -139,6 +124,16 @@ export function CheckoutForm({
     });
   }, [items, location]);
 
+  const nairaDueNow = totals
+    ? priceIn(
+        fromMinor(totals.amountDueNowMinor),
+        baseCurrency,
+        "NGN",
+        usdToNgn,
+        rounding,
+      )
+    : null;
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -174,7 +169,11 @@ export function CheckoutForm({
           const initRes = await fetch("/api/payments/initialize", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderNumber, gateway }),
+            body: JSON.stringify({
+              orderNumber,
+              gateway,
+              chargeCurrency: options?.chargeCurrency,
+            }),
           });
           const initData = (await initRes.json()) as {
             paymentUrl?: string;
@@ -438,43 +437,87 @@ export function CheckoutForm({
             <legend className="px-1 font-sans text-subheading text-primary">
               Payment
             </legend>
+
+            {options?.allowCurrencyChoice ? (
+              <fieldset className="mt-4 rounded-md border border-border-subtle p-4">
+                <legend className="px-1 text-label text-muted">
+                  Charge currency
+                </legend>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  {(["USD", "NGN"] as const).map((option) => (
+                    <label
+                      key={option}
+                      className={`flex cursor-pointer items-center gap-3 rounded-md border p-3 transition-colors ${
+                        options.chargeCurrency === option
+                          ? "border-accent bg-accent-wash/40"
+                          : "border-border-subtle bg-card hover:border-muted"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="charge-currency"
+                        value={option}
+                        checked={options.chargeCurrency === option}
+                        onChange={() => selectCharge(option)}
+                        className="size-4 accent-accent"
+                      />
+                      <span className="text-body font-medium text-primary">
+                        {option === "USD" ? "USD — dollars" : "NGN — naira"}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : null}
+
+            {options?.chargeCurrency === "NGN" && currency === "USD" ? (
+              <p className="mt-4 text-body text-muted">
+                {nairaDueNow !== null
+                  ? `You’ll be charged ${formatPrice(nairaDueNow, "NGN")} now — the naira equivalent at the rate locked on your order.`
+                  : "You’ll be charged in naira at the rate locked on your order."}
+              </p>
+            ) : null}
+
             <div className="mt-4 space-y-2">
-              {gatewayOptions
-                .filter((g) => g.enabled && g.supports)
-                .map((g) => (
-                  <label
-                    key={g.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-md border p-4 transition-colors ${
-                      gateway === g.id
-                        ? "border-accent bg-accent-wash/40"
-                        : "border-border-subtle bg-card hover:border-muted"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="gateway"
-                      value={g.id}
-                      checked={gateway === g.id}
-                      onChange={() => setGateway(g.id)}
-                      className="size-4 accent-accent"
-                    />
-                    <span className="text-body font-medium text-primary">
-                      {g.id === "paystack" ? "Paystack" : "BACHS"}
-                    </span>
-                    {g.note ? (
-                      <span className="text-body text-muted">{g.note}</span>
-                    ) : null}
-                  </label>
-                ))}
-              {gatewayOptions.filter((g) => g.enabled && g.supports).length === 0 ? (
-                <p className="text-body text-muted">
-                  No payment methods available for {currency}.
+              {loadingPayments ? (
+                <p className="text-body text-muted">Loading payment methods…</p>
+              ) : null}
+              {paymentsError ? (
+                <p role="alert" className="text-body text-danger">
+                  {paymentsError}
                 </p>
               ) : null}
-              {chargeCurrency === "NGN" && currency === "USD" ? (
+              {options?.gateways.map((g) => (
+                <label
+                  key={g.id}
+                  className={`flex cursor-pointer items-center gap-3 rounded-md border p-4 transition-colors ${
+                    gateway === g.id
+                      ? "border-accent bg-accent-wash/40"
+                      : "border-border-subtle bg-card hover:border-muted"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="gateway"
+                    value={g.id}
+                    checked={gateway === g.id}
+                    onChange={() => setGateway(g.id)}
+                    className="size-4 accent-accent"
+                  />
+                  <span className="text-body font-medium text-primary">
+                    {g.id === "paystack" ? "Paystack" : "BACHS"}
+                  </span>
+                </label>
+              ))}
+              {!loadingPayments &&
+              !paymentsError &&
+              options?.gateways.length === 0 ? (
                 <p className="text-body text-muted">
-                  You&apos;ll be charged in naira at the exchange rate shown on
-                  your order.
+                  No payment methods are available right now.{" "}
+                  <Link href="/contact" className="underline">
+                    Contact us
+                  </Link>{" "}
+                  to complete your order.
                 </p>
               ) : null}
             </div>
@@ -482,7 +525,13 @@ export function CheckoutForm({
 
           <button
             type="submit"
-            disabled={submitting || !location || items.length === 0 || !gateway}
+            disabled={
+              submitting ||
+              !location ||
+              items.length === 0 ||
+              !gateway ||
+              !options
+            }
             className="inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-accent px-8 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
           >
             {submitting ? "Placing order…" : "Place order"}
