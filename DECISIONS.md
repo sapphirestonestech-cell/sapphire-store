@@ -227,7 +227,7 @@ rework, recorded here retroactively (the code carried them first).
 
 | # | Question | Decision |
 |---|----------|----------|
-| — | How is a new admin added? | **An existing admin sets the email and password** in Admin → Admins, then shares them. No invite email, so the flow does not depend on SMTP being configured. |
+| — | How is a new admin added? | **An existing admin sets the email and password** in **Settings → Admins**, then shares them. No invite email, so the flow does not depend on SMTP being configured. |
 | — | What can additional admins do? | **Everything.** Every admin is a full admin (products, categories, delivery, orders, payments, settings, gateways and other admins). The `staff` role stays in the schema but is unused until limited access is requested. |
 | — | Can admins be removed? | **Yes**, with two server-enforced guards: you cannot remove your own account, and the last remaining admin cannot be removed. |
 | — | Should a signed cookie alone grant admin access? | **No.** Every admin request revalidates the session against `AdminUser`. Removing an admin logs them out immediately; a cookie for a deleted admin is cleared and treated as signed out. |

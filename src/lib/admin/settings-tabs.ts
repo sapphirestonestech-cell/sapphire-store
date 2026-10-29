@@ -2,6 +2,7 @@ export const SETTINGS_TABS = [
   { value: "store", label: "Store" },
   { value: "currency", label: "Currency" },
   { value: "payments", label: "Payments" },
+  { value: "admins", label: "Admins" },
   { value: "data", label: "Data" },
 ] as const;
 

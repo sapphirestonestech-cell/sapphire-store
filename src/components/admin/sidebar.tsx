@@ -13,7 +13,6 @@ const NAV = [
   { href: "/admin/payments", label: "Payments", icon: "payments" },
   { href: "/admin/delivery", label: "Delivery", icon: "delivery" },
   { href: "/admin/settings", label: "Settings", icon: "settings" },
-  { href: "/admin/admins", label: "Admins", icon: "admins" },
 ];
 
 function NavIcon({ name }: { name: string }) {
@@ -73,14 +72,6 @@ function NavIcon({ name }: { name: string }) {
             strokeLinejoin="round"
           />
           <circle cx="12" cy="10" r="2.5" />
-        </svg>
-      );
-    case "admins":
-      return (
-        <svg {...common}>
-          <circle cx="9" cy="8" r="3" />
-          <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" strokeLinecap="round" />
-          <path d="M16 5.5a3 3 0 010 5.8M17.5 19c0-2.2-.8-3.8-2-4.8" strokeLinecap="round" />
         </svg>
       );
     case "settings":

@@ -1114,3 +1114,18 @@ app working at every step.
   succeeds.
 - Browser: the dashboard has no data toggle, Settings → Data shows the control,
   switching to Test persists and switching back to Live clears the badge.
+
+## 2026-10-29 — Admins moved under Settings
+
+### Changed
+
+- Removed **Admins** from the sidebar and added it as a **Settings → Admins**
+  tab. The old `/admin/admins` URL redirects to
+  `/admin/settings?tab=admins`, so existing links keep working.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` clean; `npm test` 92/92; build
+  succeeds.
+- Browser: the sidebar no longer lists Admins, the old URL redirects, and the
+  Settings → Admins tab lists and adds admin accounts.

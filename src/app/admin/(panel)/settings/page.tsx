@@ -14,6 +14,7 @@ import {
 } from "@/components/admin/settings-manager";
 import { GatewaySettings } from "@/components/admin/gateway-settings";
 import { DataScopeToggle } from "@/components/admin/data-scope-toggle";
+import { AdminsSettings } from "@/components/admin/admins-settings";
 import { getAdminDataScope } from "@/lib/admin/data-scope.server";
 
 export const metadata = { title: "Settings" };
@@ -53,7 +54,7 @@ export default async function AdminSettingsPage({
       <div>
         <h1 className="font-sans text-heading-lg">Settings</h1>
         <p className="mt-1 text-body text-muted">
-          Store details, currency rules, payment gateways and back-office data.
+          Store details, currency, payments, admin access and back-office data.
         </p>
       </div>
 
@@ -89,6 +90,8 @@ export default async function AdminSettingsPage({
           keys={keys}
           baseCurrency={settings.baseCurrency}
         />
+      ) : tab === "admins" ? (
+        <AdminsSettings />
       ) : tab === "data" ? (
         <section className="max-w-2xl rounded-md bg-card p-6 shadow-card">
           <h2 className="font-sans text-subheading">Back-office data</h2>
