@@ -1032,7 +1032,8 @@ app working at every step.
 ### Deployment
 
 - Deployed 2026-10-29 (deployment `1355f675`, commit `1230d9f`).
-- Test keys added to Helicarrier; live mode uses the legacy key fallback until
-  explicit `*_LIVE_SECRET_KEY` values are supplied.
+- Test keys added to Helicarrier. Paystack live mode now uses
+  `PAYSTACK_LIVE_SECRET_KEY`; BACHS live mode still uses the legacy
+  `BACHS_SECRET_KEY` fallback until a live BACHS key is supplied.
 - `BACHS_WEBHOOK_SECRET` is still unset on Helicarrier, so BACHS webhooks fail
   closed and BACHS relies on return-page verification; set it when available.
