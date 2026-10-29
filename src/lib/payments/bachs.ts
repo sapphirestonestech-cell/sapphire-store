@@ -1,14 +1,13 @@
 import crypto from 'node:crypto'
 import { Currency } from '@/lib/currency'
+import type { PaymentMode } from '@/lib/payments/keys'
 
 const BACHS_SANDBOX = 'https://sandbox-api.bachs.io'
 const BACHS_PROD = 'https://api.bachs.io'
 
-function getBaseUrl() {
-  const env = process.env.NODE_ENV
-  // If live, use prod; default to sandbox for safety
-  if (env === 'production') return BACHS_PROD
-  return BACHS_SANDBOX
+/** The base URL follows the admin's mode, not NODE_ENV. */
+function getBaseUrl(mode: PaymentMode) {
+  return mode === 'live' ? BACHS_PROD : BACHS_SANDBOX
 }
 
 export async function bachsCreateCheckout(opts: {
@@ -20,9 +19,11 @@ export async function bachsCreateCheckout(opts: {
   customerEmail: string
   customerName?: string
   metadata?: Record<string, unknown>
+  /** Mode-specific secret from ENV (see lib/payments/keys). */
+  secretKey: string
+  mode: PaymentMode
 }) {
-  const secret = process.env.BACHS_SECRET_KEY
-  if (!secret) throw new Error('BACHS_SECRET_KEY is not configured')
+  const secret = opts.secretKey
 
   const payload: {
     pricing: { currency: Currency; amount: string }
@@ -42,7 +43,7 @@ export async function bachsCreateCheckout(opts: {
   }
   if (opts.metadata) payload.metadata = opts.metadata
 
-  const res = await fetch(`${getBaseUrl()}/v1/checkout-sessions`, {
+  const res = await fetch(`${getBaseUrl(opts.mode)}/v1/checkout-sessions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${secret.trim()}`,
@@ -75,11 +76,13 @@ export type BachsCheckoutSession = {
  * fulfil a BACHS order without trusting the redirect (docs: the redirect can
  * be lost or faked — always confirm with a retrieve call).
  */
-export async function bachsGetCheckout(checkoutId: string): Promise<BachsCheckoutSession> {
-  const secret = process.env.BACHS_SECRET_KEY
-  if (!secret) throw new Error('BACHS_SECRET_KEY is not configured')
+export async function bachsGetCheckout(
+  checkoutId: string,
+  opts: { secretKey: string; mode: PaymentMode },
+): Promise<BachsCheckoutSession> {
+  const secret = opts.secretKey
   const res = await fetch(
-    `${getBaseUrl()}/v1/checkout-sessions/${encodeURIComponent(checkoutId)}`,
+    `${getBaseUrl(opts.mode)}/v1/checkout-sessions/${encodeURIComponent(checkoutId)}`,
     {
       headers: { Authorization: `Bearer ${secret.trim()}` },
       cache: 'no-store',

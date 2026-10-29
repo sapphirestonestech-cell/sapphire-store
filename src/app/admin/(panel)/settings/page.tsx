@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { getSettings } from "@/lib/settings";
 import { getEnabledGateways } from "@/lib/payments/gateways";
+import { gatewayKeysStatus } from "@/lib/payments/keys";
 import {
   SettingsManager,
   type SettingsState,
@@ -15,7 +16,10 @@ export default async function AdminSettingsPage() {
     paystack: true,
     bachs: true,
     alwaysPayInNaira: false,
+    paystackMode: "live" as const,
+    bachsMode: "live" as const,
   }));
+  const keys = gatewayKeysStatus();
   const settings = await getSettings();
   const initial: SettingsState = {
     baseCurrency: settings.baseCurrency,
@@ -36,7 +40,7 @@ export default async function AdminSettingsPage() {
         </p>
       </div>
       <SettingsManager initial={initial} />
-      <GatewaySettings initial={gateways} />
+      <GatewaySettings initial={gateways} keys={keys} />
     </div>
   );
 }

@@ -15,6 +15,8 @@ import { fromMinor } from "@/lib/checkout";
 import { PaymentStatusBadge } from "@/components/admin/order-status-badge";
 import { MetricStrip } from "@/components/admin/metric-strip";
 import { loadPaymentMetrics, type Metric } from "@/lib/admin/summaries";
+import { getAdminDataScope } from "@/lib/admin/data-scope.server";
+import { TestBadge } from "@/components/admin/test-badge";
 
 export const metadata = { title: "Payments" };
 
@@ -62,6 +64,7 @@ async function PaymentsSlot({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseOrderFilters(sp);
 
   await connection();
+  filters.scope = await getAdminDataScope();
 
   let payments: OrderDoc[] = [];
   let total = 0;
@@ -90,7 +93,7 @@ async function PaymentsSlot({ searchParams }: { searchParams: SearchParams }) {
         OrderModel.find(query).sort({ createdAt: -1 }).limit(100).lean(),
         OrderModel.countDocuments(query),
       ]),
-      loadPaymentMetrics(),
+      loadPaymentMetrics(filters.scope),
     ]);
     payments = payments as unknown as OrderDoc[];
     metrics = loadedMetrics;
@@ -241,12 +244,15 @@ async function PaymentsSlot({ searchParams }: { searchParams: SearchParams }) {
                       className="border-b border-border-subtle last:border-b-0"
                     >
                       <td className="break-all px-5 py-4">
-                        <Link
-                          href={`/admin/payments/${encodeURIComponent(reference)}`}
-                          className="font-medium hover:text-accent-strong"
-                        >
-                          {reference}
-                        </Link>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            href={`/admin/payments/${encodeURIComponent(reference)}`}
+                            className="font-medium hover:text-accent-strong"
+                          >
+                            {reference}
+                          </Link>
+                          <TestBadge mode={order.paymentMode} />
+                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <Link
@@ -293,12 +299,15 @@ async function PaymentsSlot({ searchParams }: { searchParams: SearchParams }) {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <Link
-                        href={`/admin/payments/${encodeURIComponent(reference)}`}
-                        className="break-all text-body font-medium hover:text-accent-strong"
-                      >
-                        {reference}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/admin/payments/${encodeURIComponent(reference)}`}
+                          className="break-all text-body font-medium hover:text-accent-strong"
+                        >
+                          {reference}
+                        </Link>
+                        <TestBadge mode={order.paymentMode} />
+                      </div>
                       <p className="text-label text-muted">
                         {order.orderNumber} · {order.paymentGateway ?? "—"}
                       </p>

@@ -97,6 +97,11 @@ export interface OrderDoc extends mongoose.Document {
   totalMinor: number;
   amountDueNowMinor: number;
   amountDueLaterMinor: number;
+  /**
+   * Test or live mode captured when payment was initialized. Legacy rows have
+   * no value and are treated as live (DECISIONS 2026-10-29).
+   */
+  paymentMode?: "test" | "live";
   /** Gateway last used to initialize payment (paystack|bachs). */
   paymentGateway?: "paystack" | "bachs";
   /** Unique gateway reference for this order's last payment attempt. */
@@ -216,6 +221,7 @@ const OrderSchema = new Schema<OrderDoc>(
     totalMinor: { type: Number, required: true, min: 0 },
     amountDueNowMinor: { type: Number, required: true, min: 0 },
     amountDueLaterMinor: { type: Number, required: true, min: 0 },
+    paymentMode: { type: String, enum: ["test", "live"] },
     paymentGateway: { type: String, enum: ["paystack", "bachs"] },
     paymentReference: { type: String, index: true },
     paymentCheckoutId: { type: String },

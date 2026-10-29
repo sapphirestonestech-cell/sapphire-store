@@ -5,6 +5,7 @@ import { verifyPaystackSignature } from '@/lib/payments/paystack'
 import { verifyBachsSignature } from '@/lib/payments/bachs'
 import { chargeMatches } from '@/lib/payments'
 import { decimalStringToMinor, fulfilPaidOrder } from '@/lib/payments/fulfil'
+import { paymentModeOrDefault, readGatewayKey } from '@/lib/payments/keys'
 
 export async function POST(req: NextRequest) {
   const raw = await req.text()
@@ -30,15 +31,53 @@ export async function POST(req: NextRequest) {
   await connectDb()
 
   if (gateway === 'paystack') {
-    if (!paystackSig || !verifyPaystackSignature(raw, paystackSig)) {
+    if (!paystackSig) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
-    const body = JSON.parse(raw)
+    let body: {
+      event?: string
+      data?: { reference?: string; amount?: number; currency?: string }
+    }
+    try {
+      body = JSON.parse(raw)
+    } catch {
+      return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
+    }
+
+    // Verify with the key for the mode this order was initialized in. An
+    // unknown reference could belong to either mode, so try both keys.
+    const reference = body?.data?.reference
+    const known = reference
+      ? await OrderModel.findOne({ paymentReference: reference })
+          .select('paymentMode')
+          .lean()
+      : null
+    const mode = paymentModeOrDefault(
+      (known as { paymentMode?: string } | null)?.paymentMode,
+    )
+    let signatureValid = false
+    const modeKey = readGatewayKey('paystack', mode)
+    if (modeKey) {
+      signatureValid = verifyPaystackSignature(raw, paystackSig, modeKey)
+    }
+    if (!signatureValid && !known) {
+      for (const candidate of ['test', 'live'] as const) {
+        if (candidate === mode) continue
+        const key = readGatewayKey('paystack', candidate)
+        if (key && verifyPaystackSignature(raw, paystackSig, key)) {
+          signatureValid = true
+          break
+        }
+      }
+    }
+    if (!signatureValid) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
+    }
+
     if (body?.event !== 'charge.success') {
       return NextResponse.json({ ok: true })
     }
     const data = body?.data || {}
-    const reference = data?.reference as string | undefined
     if (!reference) return NextResponse.json({ ok: true })
     const order = await OrderModel.findOne({ paymentReference: reference })
     if (!order) return NextResponse.json({ ok: true })

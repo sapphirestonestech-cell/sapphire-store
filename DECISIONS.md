@@ -302,3 +302,21 @@ USD orders, and the storefront should default to light mode.
 | — | Why do admin revenue figures change? | `paymentAmountMinor` is now in `paymentCurrency`, not `currency`, so dashboard/summary revenue math reads the source currency from `paymentCurrency ?? currency` (falling back to `baseCurrency` for rows with no payment). Without this a USD order charged in naira would be double-converted. |
 | — | Default theme? | **Light, always** (client instruction). The storefront no longer follows the OS `prefers-color-scheme`; `resolve()` returns `choice ?? 'light'`, the OS-follow effect and the CSS `@media (prefers-color-scheme: dark)` block are removed. Dark applies only from an explicit saved choice. |
 
+
+## 2026-10-29 — Payment test/live modes and admin data scope
+
+Client approval: "ok", "let us move". Resolves how sandbox and live payments
+coexist without keeping gateway keys in the database.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Where do the test and live keys live? | **Server environment only.** The admin UI switches mode and per-gateway settings; it never accepts or displays a key. |
+| — | Env var names? | `PAYSTACK_TEST_SECRET_KEY`, `PAYSTACK_LIVE_SECRET_KEY`, `BACHS_TEST_SECRET_KEY`, `BACHS_LIVE_SECRET_KEY`. The unused `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` is no longer read. **Migration exception (2026-10-29):** because Helicarrier masks existing values, live mode falls back to the legacy `PAYSTACK_SECRET_KEY` / `BACHS_SECRET_KEY` until explicit `*_LIVE_SECRET_KEY` values are set; test mode never uses them. |
+| — | How is a key matched to a mode? | Prefix check: Paystack `sk_test_` / `sk_live_`; BACHS `sk_sandbox_` / `sk_live_`. A wrong-prefix key is treated as missing so a live key can never hit the sandbox (or the reverse). |
+| — | What happens when the selected mode has no key? | That mode is **disabled with a reason** in Settings → Payment gateways; the gateway row stays visible. The API refuses to enable a gateway for a keyless mode. At checkout the gateway is hidden with a neutral "temporarily unavailable" note. |
+| — | Where is the mode fixed for an order? | **At initialize**, stored as `Order.paymentMode` (`test` \| `live`). Later mode switches do not affect pending orders or their webhooks. Existing orders have no value and are treated as live. |
+| — | BACHS base URL? | Follows the selected mode (`sandbox-api.bachs.io` for test, `api.bachs.io` for live), not `NODE_ENV`. |
+| — | BACHS webhook secret? | One `BACHS_WEBHOOK_SECRET` for both modes (client decision). |
+| — | What do test payments do? | They are fulfilled and tagged, but **skip stock decrement and the customer confirmation email**. |
+| — | How does the back office separate test data? | A cookie-backed **Live/Test data toggle** in the admin layout, independent of gateway mode. It scopes dashboard stats/recent orders, Orders list/detail, Payments list/detail and their metric strips and CSV export. Products, categories, delivery, settings and admins are unaffected. Test rows carry a "Test" badge and the layout shows a "Test data" chip. |
+| — | Deployment note? | Production currently has the old key names only. Add the four new variables on Helicarrier **before** deploying this change or both gateways become unavailable. |

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getEnabledGateways, gatewaySupportsCurrency, Gateway } from '@/lib/payments/gateways'
+import { getEnabledGateways, gatewayMode, gatewaySupportsCurrency, Gateway } from '@/lib/payments/gateways'
+import { readGatewayKey } from '@/lib/payments/keys'
 import { Currency } from '@/lib/currency'
 
 export async function GET(req: NextRequest) {
@@ -11,22 +12,32 @@ export async function GET(req: NextRequest) {
   // otherwise the charge currency is the display currency and Paystack is
   // hidden for USD.
   const chargeCurrency: Currency = enabled.alwaysPayInNaira ? 'NGN' : displayCurrency
+  // A gateway flagged on but missing the key for its selected mode is shown as
+  // unavailable, so checkout never offers a method that cannot initialize.
+  const configured: Record<Gateway, boolean> = {
+    paystack: readGatewayKey('paystack', gatewayMode(enabled, 'paystack')) !== null,
+    bachs: readGatewayKey('bachs', gatewayMode(enabled, 'bachs')) !== null,
+  }
   const out: Array<{ id: Gateway; enabled: boolean; supports: boolean; note?: string }> = [
     {
       id: 'paystack',
-      enabled: enabled.paystack,
+      enabled: enabled.paystack && configured.paystack,
       supports: gatewaySupportsCurrency('paystack', chargeCurrency),
-      note: !gatewaySupportsCurrency('paystack', chargeCurrency)
-        ? `Paystack does not support ${chargeCurrency} in this setup.`
-        : undefined,
+      note: !configured.paystack
+        ? 'Paystack is temporarily unavailable.'
+        : !gatewaySupportsCurrency('paystack', chargeCurrency)
+          ? `Paystack does not support ${chargeCurrency} in this setup.`
+          : undefined,
     },
     {
       id: 'bachs',
-      enabled: enabled.bachs,
+      enabled: enabled.bachs && configured.bachs,
       supports: gatewaySupportsCurrency('bachs', chargeCurrency),
-      note: !gatewaySupportsCurrency('bachs', chargeCurrency)
-        ? `BACHS does not support ${chargeCurrency} in this setup.`
-        : undefined,
+      note: !configured.bachs
+        ? 'BACHS is temporarily unavailable.'
+        : !gatewaySupportsCurrency('bachs', chargeCurrency)
+          ? `BACHS does not support ${chargeCurrency} in this setup.`
+          : undefined,
     },
   ]
   return NextResponse.json({ gateways: out, chargeCurrency })

@@ -988,3 +988,47 @@ app working at every step.
   warning in `checkout-form.tsx`).
 - Webhook mismatch logs report the expected charge currency for reconciliation.
 
+
+---
+
+## Phase 3 — Payment test/live modes and admin data scope (2026-10-29)
+
+### Added
+
+- **Per-gateway test/live mode** in Settings → Payment gateways. Each mode
+  reads its own env secret (`PAYSTACK_TEST_SECRET_KEY`,
+  `PAYSTACK_LIVE_SECRET_KEY`, `BACHS_TEST_SECRET_KEY`,
+  `BACHS_LIVE_SECRET_KEY`); keys never enter the admin database, and a
+  wrong-prefix key is rejected. Modes with no usable key are disabled with an
+  inline reason and cannot be saved as enabled.
+- **`Order.paymentMode`** (`test` | `live`) frozen at initialize, plus
+  `src/lib/payments/keys.ts` for key lookup/prefix validation.
+- **Admin Live/Test data toggle** (cookie `admin_data_scope`) in the panel
+  layout, scoping dashboard figures, recent orders, Orders and Payments lists
+  and metric strips, and CSV export. Test orders show a "Test" badge and the
+  panel shows a "Test data" chip while test is selected.
+- **`src/app/api/admin/data-scope`** to persist the scope.
+
+### Changed
+
+- BACHS base URL and webhook key selection follow the payment mode.
+- Paystack webhooks verify with the key for the order's mode (both keys for an
+  unknown reference) before touching the order.
+- `fulfilPaidOrder` skips stock decrement and the customer email for test-mode
+  payments, and the status history says "Test payment verified".
+- Checkout hides a gateway whose selected mode has no configured key.
+- `.env.example` documents the four mode keys. Live mode temporarily falls back
+  to the legacy `PAYSTACK_SECRET_KEY` / `BACHS_SECRET_KEY` so the deploy keeps
+  production working while Helicarrier's masked values are migrated.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` 0 errors (1 pre-existing
+  `checkout-form.tsx` warning); `npm test` 75/75.
+- Manual checks still required: add the new env vars on Helicarrier, run one
+  test payment per gateway, confirm no stock/email side effects, then confirm
+  the Test/Live toggle and CSV scope.
+
+### Not done / blocked
+
+- Deployment waits on the four new env vars being set on Helicarrier.

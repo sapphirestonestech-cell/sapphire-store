@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-export interface GatewayFlags {
-  paystack: boolean;
-  bachs: boolean;
-  alwaysPayInNaira: boolean;
-}
+import type { GatewayFlags } from "@/lib/payments/gateways";
+import type {
+  GatewayKeysStatus,
+  KeyStatus,
+  PaymentMode,
+} from "@/lib/payments/keys";
 
 function Switch({
   id,
@@ -42,13 +42,77 @@ function Switch({
   );
 }
 
+function ModeChoice({
+  label,
+  mode,
+  status,
+  onChange,
+}: {
+  label: string;
+  mode: PaymentMode;
+  status: Record<PaymentMode, KeyStatus>;
+  onChange: (next: PaymentMode) => void;
+}) {
+  const current = status[mode];
+  return (
+    <div className="mt-3">
+      <p className="text-label text-muted">Mode</p>
+      <div
+        role="radiogroup"
+        aria-label={`${label} mode`}
+        className="mt-1 inline-flex rounded-sm border border-border-subtle bg-app p-0.5"
+      >
+        {(["test", "live"] as const).map((option) => {
+          const active = option === mode;
+          const available = status[option].configured;
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              disabled={!available}
+              onClick={() => onChange(option)}
+              className={`inline-flex min-h-8 items-center rounded-sm px-3 text-label font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                active
+                  ? "bg-accent text-primary"
+                  : "text-muted hover:text-primary"
+              }`}
+            >
+              {option === "test" ? "Test" : "Live"}
+            </button>
+          );
+        })}
+      </div>
+      <p
+        className={`mt-1 text-label ${
+          current.configured ? "text-muted" : "text-warning"
+        }`}
+        aria-live="polite"
+      >
+        {current.configured
+          ? `${mode === "test" ? "Test" : "Live"} key is configured.`
+          : current.reason}
+      </p>
+    </div>
+  );
+}
+
 /**
- * Independent gateway switches — ProductReq.md §6.9 / §10.2, DECISIONS
- * 2026-10-18. A disabled gateway disappears from checkout; the other stays
- * available. "Always pay in naira" converts every charge to NGN at the
- * order's frozen exchange rate (DECISIONS 2026-10-21).
+ * Independent gateway switches and per-gateway test/live mode — ProductReq.md
+ * §6.9 / §10.2, DECISIONS 2026-10-18 and 2026-10-29. A disabled gateway
+ * disappears from checkout; the other stays available. "Always pay in naira"
+ * converts every charge to NGN at the order's frozen exchange rate
+ * (DECISIONS 2026-10-21). Keys are never entered here: each mode reads its
+ * secret from the server environment, and a mode with no key cannot be used.
  */
-export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
+export function GatewaySettings({
+  initial,
+  keys,
+}: {
+  initial: GatewayFlags;
+  keys: GatewayKeysStatus;
+}) {
   const router = useRouter();
   const [flags, setFlags] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -90,19 +154,28 @@ export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
     <section className="max-w-2xl rounded-md bg-card p-6 shadow-card">
       <h2 className="font-sans text-subheading">Payment gateways</h2>
       <p className="mt-1 text-body text-muted">
-        Turn a gateway off while it is down. Customers only see enabled
-        gateways that support their currency.
+        Turn a gateway off while it is down, and choose whether it charges test
+        or live payments. Customers only see enabled gateways that support their
+        currency and have a key for the selected mode.
       </p>
 
       <ul className="mt-4 divide-y divide-border-subtle">
-        <li className="flex items-center justify-between gap-4 py-4">
-          <div>
+        <li className="flex items-start justify-between gap-4 py-4">
+          <div className="min-w-0">
             <p id="paystack-label" className="text-body font-medium">
               Paystack
             </p>
             <p className="text-label text-muted">
               Cards and local payments. NGN only.
             </p>
+            <ModeChoice
+              label="Paystack"
+              mode={flags.paystackMode}
+              status={keys.paystack}
+              onChange={(next) =>
+                setFlags((f) => ({ ...f, paystackMode: next }))
+              }
+            />
           </div>
           <Switch
             id="paystack"
@@ -111,14 +184,22 @@ export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
             onChange={(next) => setFlags((f) => ({ ...f, paystack: next }))}
           />
         </li>
-        <li className="flex items-center justify-between gap-4 py-4">
-          <div>
+        <li className="flex items-start justify-between gap-4 py-4">
+          <div className="min-w-0">
             <p id="bachs-label" className="text-body font-medium">
               BACHS
             </p>
             <p className="text-label text-muted">
               International checkout. USD and NGN.
             </p>
+            <ModeChoice
+              label="BACHS"
+              mode={flags.bachsMode}
+              status={keys.bachs}
+              onChange={(next) =>
+                setFlags((f) => ({ ...f, bachsMode: next }))
+              }
+            />
           </div>
           <Switch
             id="bachs"
@@ -161,9 +242,7 @@ export function GatewaySettings({ initial }: { initial: GatewayFlags }) {
         <span
           aria-live="polite"
           className={`text-body ${
-            message?.kind === "error"
-              ? "text-danger"
-              : "text-success"
+            message?.kind === "error" ? "text-danger" : "text-success"
           }`}
         >
           {message?.text ?? ""}

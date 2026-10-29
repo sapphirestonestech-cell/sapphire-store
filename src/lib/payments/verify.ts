@@ -3,6 +3,7 @@ import { paystackVerify } from "@/lib/payments/paystack";
 import { bachsGetCheckout } from "@/lib/payments/bachs";
 import { chargeMatches } from "@/lib/payments";
 import { decimalStringToMinor, fulfilPaidOrder } from "@/lib/payments/fulfil";
+import { paymentModeOrDefault, readGatewayKey } from "@/lib/payments/keys";
 
 export interface VerifyPaymentResult {
   verified: boolean;
@@ -28,12 +29,21 @@ export async function verifyOrderPayment(
     };
   }
 
+  const mode = paymentModeOrDefault(order.paymentMode);
+
   if (order.paymentGateway === "paystack") {
     if (!order.paymentReference) {
       return { verified: false, message: "No Paystack reference on this order." };
     }
+    const secretKey = readGatewayKey("paystack", mode);
+    if (!secretKey) {
+      return {
+        verified: false,
+        message: `Paystack ${mode} mode is not configured on the server.`,
+      };
+    }
     try {
-      const v = await paystackVerify(order.paymentReference);
+      const v = await paystackVerify(order.paymentReference, secretKey);
       if (v.status !== "success") {
         return {
           verified: false,
@@ -68,8 +78,15 @@ export async function verifyOrderPayment(
     if (!checkoutId) {
       return { verified: false, message: "No BACHS checkout on this order." };
     }
+    const secretKey = readGatewayKey("bachs", mode);
+    if (!secretKey) {
+      return {
+        verified: false,
+        message: `BACHS ${mode} mode is not configured on the server.`,
+      };
+    }
     try {
-      const session = await bachsGetCheckout(checkoutId);
+      const session = await bachsGetCheckout(checkoutId, { secretKey, mode });
       const paymentCollected =
         session.payment_status === undefined ||
         session.payment_status === "paid" ||

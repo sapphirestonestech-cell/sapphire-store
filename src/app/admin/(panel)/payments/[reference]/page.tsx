@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
 import { PaymentStatusBadge, OrderStatusBadge } from "@/components/admin/order-status-badge";
 import { VerifyPaymentButton } from "@/components/admin/verify-payment-button";
+import { TestBadge } from "@/components/admin/test-badge";
 
 export const metadata = { title: "Payment" };
 
@@ -68,6 +69,7 @@ export default async function AdminPaymentDetailPage({
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <h1 className="break-all font-sans text-heading-lg">{reference}</h1>
+          <TestBadge mode={order.paymentMode} />
           <PaymentStatusBadge status={order.paymentStatus} />
           <OrderStatusBadge status={order.status} />
         </div>

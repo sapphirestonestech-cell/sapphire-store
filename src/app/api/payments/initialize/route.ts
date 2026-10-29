@@ -5,6 +5,8 @@ import { Currency } from '@/lib/currency'
 import { getEnabledGateways, gatewaySupportsCurrency, formatAmountForGateway, chargeAmountForOrder } from '@/lib/payments'
 import { paystackInitialize } from '@/lib/payments/paystack'
 import { bachsCreateCheckout } from '@/lib/payments/bachs'
+import { gatewayMode } from '@/lib/payments/gateways'
+import { readGatewayKey } from '@/lib/payments/keys'
 import { randomUUID } from 'crypto'
 
 export async function POST(req: NextRequest) {
@@ -22,6 +24,22 @@ export async function POST(req: NextRequest) {
     }
     if (gateway === 'bachs' && !enabled.bachs) {
       return NextResponse.json({ error: 'BACHS is not enabled' }, { status: 400 })
+    }
+    if (gateway !== 'paystack' && gateway !== 'bachs') {
+      return NextResponse.json({ error: 'Unsupported gateway' }, { status: 400 })
+    }
+
+    // The admin chooses test or live per gateway. The mode is frozen on the
+    // order below so later mode switches never affect this payment attempt.
+    const mode = gatewayMode(enabled, gateway)
+    const secretKey = readGatewayKey(gateway, mode)
+    if (!secretKey) {
+      return NextResponse.json(
+        {
+          error: `${gateway === 'paystack' ? 'Paystack' : 'BACHS'} is not available right now. Contact the store owner.`,
+        },
+        { status: 400 },
+      )
     }
 
     await connectDb()
@@ -104,7 +122,9 @@ export async function POST(req: NextRequest) {
         reference: ref,
         callbackUrl: `${returnTo}/checkout/return?order=${order.orderNumber}&ref=${ref}`,
         metadata: { orderNumber: order.orderNumber },
+        secretKey,
       })
+      order.paymentMode = mode
       order.paymentGateway = 'paystack'
       order.paymentReference = ref
       order.paymentStatus = 'initiated'
@@ -123,7 +143,10 @@ export async function POST(req: NextRequest) {
         customerEmail: order.customer.email,
         customerName: order.customer.name,
         metadata: { orderNumber: order.orderNumber },
+        secretKey,
+        mode,
       })
+      order.paymentMode = mode
       order.paymentGateway = 'bachs'
       order.paymentReference = ref
       // Stored so the return-page poller can retrieve the session and verify

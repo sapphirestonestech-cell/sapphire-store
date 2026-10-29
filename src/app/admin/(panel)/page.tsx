@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/dashboard";
 import { formatPrice } from "@/lib/currency";
 import { orderMoney } from "@/lib/admin/orders";
+import { getAdminDataScope } from "@/lib/admin/data-scope.server";
 import type { OrderDoc } from "@/lib/models/order";
 import {
   OrderStatusBadge,
@@ -262,10 +263,11 @@ export default async function AdminDashboardPage({
   const sp = await searchParams;
   const rawRange = Array.isArray(sp.range) ? sp.range[0] : sp.range;
   const range: ChartRange = parseChartRange(rawRange);
+  const scope = await getAdminDataScope();
 
   let data: DashboardData | null = null;
   try {
-    data = await loadDashboard(range);
+    data = await loadDashboard(range, scope);
   } catch {
     data = null;
   }

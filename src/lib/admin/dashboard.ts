@@ -5,7 +5,8 @@ import { CategoryModel } from "@/lib/models/category";
 import { getSettings } from "@/lib/settings";
 import { convertAmount, roundAmount, type Currency } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
-import { queryAdminOrders } from "@/lib/admin/orders";
+import { queryAdminOrders, type OrderFilter } from "@/lib/admin/orders";
+import { dataScopeFilter, type DataScope } from "@/lib/admin/data-scope";
 
 /**
  * Admin dashboard data — ProductReq.md §6.2.
@@ -206,16 +207,26 @@ function sumBy(
   );
 }
 
-export async function loadDashboard(range: ChartRange): Promise<DashboardData> {
+function scoped(base: OrderFilter, scope: DataScope): OrderFilter {
+  return { $and: [base, dataScopeFilter(scope)] };
+}
+
+export async function loadDashboard(
+  range: ChartRange,
+  scope: DataScope,
+): Promise<DashboardData> {
   await connectDb();
   const settings = await getSettings();
   const now = new Date();
   const today = startOfDay(now);
 
-  const paidQuery = {
-    paymentStatus: "paid",
-    status: { $nin: ["cancelled", "refunded"] },
-  } as const;
+  const paidQuery = scoped(
+    {
+      paymentStatus: "paid",
+      status: { $nin: ["cancelled", "refunded"] },
+    },
+    scope,
+  );
 
   const [
     paidOrders,
@@ -234,9 +245,13 @@ export async function loadDashboard(range: ChartRange): Promise<DashboardData> {
         "paymentAmountMinor paymentCurrency amountDueNowMinor baseCurrency currency exchangeRate paidAt createdAt items",
       )
       .lean(),
-    OrderModel.countDocuments({ createdAt: { $gte: today } }),
-    OrderModel.countDocuments({ status: "pending_payment" }),
-    OrderModel.countDocuments({ status: { $in: ["paid", "processing"] } }),
+    OrderModel.countDocuments(
+      scoped({ createdAt: { $gte: today } }, scope),
+    ),
+    OrderModel.countDocuments(scoped({ status: "pending_payment" }, scope)),
+    OrderModel.countDocuments(
+      scoped({ status: { $in: ["paid", "processing"] } }, scope),
+    ),
     ProductModel.countDocuments({
       status: "published",
       availability: "pre_order",
@@ -247,8 +262,9 @@ export async function loadDashboard(range: ChartRange): Promise<DashboardData> {
     })
       .select("sizes")
       .lean(),
-    queryAdminOrders({}, 8),
+    queryAdminOrders({ scope }, 8),
     OrderModel.aggregate<{ _id: string; count: number }>([
+      { $match: dataScopeFilter(scope) },
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]),
     CategoryModel.find().select("name").lean(),

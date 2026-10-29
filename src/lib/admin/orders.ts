@@ -4,6 +4,7 @@ import { formatPrice, priceIn, type Currency } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
 import { chargeAmountForOrder } from "@/lib/payments";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import { dataScopeFilter, type DataScope } from "@/lib/admin/data-scope";
 
 /**
  * Admin order rules — ProductReq.md §6.7, §11.1.
@@ -73,6 +74,8 @@ export interface AdminOrderFilters {
   q?: string;
   from?: string;
   to?: string;
+  /** Back-office data scope; not a URL filter (see lib/admin/data-scope). */
+  scope?: DataScope;
 }
 
 const OBJECT_ID_RE = /^[a-f0-9]{24}$/i;
@@ -125,6 +128,7 @@ export function orderFilterQuery(
 ): OrderFilter {
   const and: OrderFilter[] = [];
 
+  if (filters.scope) and.push(dataScopeFilter(filters.scope));
   if (filters.status) and.push({ status: filters.status });
 
   if (filters.payment === "unpaid") {

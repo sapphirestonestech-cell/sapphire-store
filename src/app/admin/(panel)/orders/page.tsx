@@ -18,6 +18,8 @@ import {
 } from "@/components/admin/order-status-badge";
 import { MetricStrip } from "@/components/admin/metric-strip";
 import { loadOrderMetrics, type Metric } from "@/lib/admin/summaries";
+import { getAdminDataScope } from "@/lib/admin/data-scope.server";
+import { TestBadge } from "@/components/admin/test-badge";
 
 export const metadata = { title: "Orders" };
 
@@ -38,7 +40,7 @@ function itemCount(order: OrderDoc): number {
 function exportHref(filters: AdminOrderFilters): string {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
-    if (value) params.set(key, String(value));
+    if (key !== "scope" && value) params.set(key, String(value));
   }
   const query = params.toString();
   return `/api/admin/orders/export${query ? `?${query}` : ""}`;
@@ -71,6 +73,7 @@ async function OrdersSlot({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseOrderFilters(sp);
 
   await connection();
+  filters.scope = await getAdminDataScope();
 
   let orders: OrderDoc[] = [];
   let total = 0;
@@ -81,7 +84,7 @@ async function OrdersSlot({ searchParams }: { searchParams: SearchParams }) {
     [orders, total, metrics] = await Promise.all([
       queryAdminOrders(filters),
       countAdminOrders(filters),
-      loadOrderMetrics(),
+      loadOrderMetrics(filters.scope),
     ]);
   } catch {
     failed = true;
@@ -280,12 +283,15 @@ async function OrdersSlot({ searchParams }: { searchParams: SearchParams }) {
                     className="border-b border-border-subtle last:border-b-0"
                   >
                     <td className="px-5 py-4">
-                      <Link
-                        href={`/admin/orders/${String(order._id)}`}
-                        className="font-medium hover:text-accent-strong"
-                      >
-                        {order.orderNumber}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/admin/orders/${String(order._id)}`}
+                          className="font-medium hover:text-accent-strong"
+                        >
+                          {order.orderNumber}
+                        </Link>
+                        <TestBadge mode={order.paymentMode} />
+                      </div>
                       <p className="text-label text-muted">
                         {formatDate(order.createdAt)}
                       </p>
@@ -328,12 +334,15 @@ async function OrdersSlot({ searchParams }: { searchParams: SearchParams }) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <Link
-                      href={`/admin/orders/${String(order._id)}`}
-                      className="text-body-lg font-medium hover:text-accent-strong"
-                    >
-                      {order.orderNumber}
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/admin/orders/${String(order._id)}`}
+                        className="text-body-lg font-medium hover:text-accent-strong"
+                      >
+                        {order.orderNumber}
+                      </Link>
+                      <TestBadge mode={order.paymentMode} />
+                    </div>
                     <p className="text-label text-muted">
                       {formatDate(order.createdAt)} · {order.customer.name}
                     </p>

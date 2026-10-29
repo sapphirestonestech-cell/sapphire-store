@@ -24,6 +24,7 @@ export async function fulfilPaidOrder(
   paidAt: Date = new Date(),
 ): Promise<void> {
   if (order.status === "paid") return;
+  const isTest = order.paymentMode === "test";
   order.status = "paid";
   order.paymentStatus = "paid";
   order.paidAt = paidAt;
@@ -33,11 +34,17 @@ export async function fulfilPaidOrder(
       status: "paid",
       at: paidAt,
       note: order.paymentGateway
-        ? `Payment verified with ${order.paymentGateway}`
-        : "Payment verified",
+        ? `${isTest ? "Test payment" : "Payment"} verified with ${order.paymentGateway}`
+        : isTest
+          ? "Test payment verified"
+          : "Payment verified",
     },
   ];
   await order.save();
+
+  // Test-mode payments exist to exercise the flow, not to sell rings: never
+  // touch stock and never email the customer (DECISIONS 2026-10-29).
+  if (isTest) return;
 
   for (const item of order.items) {
     if (item.availability !== "in_stock") continue;

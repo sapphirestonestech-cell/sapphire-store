@@ -20,9 +20,10 @@ export async function paystackInitialize(opts: {
   reference: string
   callbackUrl?: string
   metadata?: Record<string, unknown>
+  /** Mode-specific secret from ENV (see lib/payments/keys). */
+  secretKey: string
 }) {
-  const secret = process.env.PAYSTACK_SECRET_KEY
-  if (!secret) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+  const secret = opts.secretKey
 
   const payload: {
     email: string
@@ -70,9 +71,8 @@ export interface PaystackVerifyRes {
   }
 }
 
-export async function paystackVerify(reference: string) {
-  const secret = process.env.PAYSTACK_SECRET_KEY
-  if (!secret) throw new Error('PAYSTACK_SECRET_KEY is not configured')
+export async function paystackVerify(reference: string, secretKey: string) {
+  const secret = secretKey
 
   const res = await fetch(`${PAYSTACK_BASE}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: { Authorization: `Bearer ${secret}` },
@@ -87,9 +87,13 @@ export async function paystackVerify(reference: string) {
   return json.data
 }
 
-export function verifyPaystackSignature(rawBody: string, signatureHeader: string | null) {
-  const secret = process.env.PAYSTACK_SECRET_KEY
-  if (!secret || !signatureHeader) return false
+export function verifyPaystackSignature(
+  rawBody: string,
+  signatureHeader: string | null,
+  secretKey: string,
+) {
+  if (!secretKey || !signatureHeader) return false
+  const secret = secretKey
   const hash = crypto.createHmac('sha512', secret).update(rawBody).digest('hex')
   try {
     return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(signatureHeader))

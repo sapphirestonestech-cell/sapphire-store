@@ -21,6 +21,7 @@ import {
   PaymentStatusBadge,
 } from "@/components/admin/order-status-badge";
 import { OrderActions } from "@/components/admin/order-actions";
+import { TestBadge } from "@/components/admin/test-badge";
 
 export const metadata = { title: "Order" };
 
@@ -105,6 +106,7 @@ export default async function AdminOrderDetailPage({
         </Link>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <h1 className="font-sans text-heading-lg">{order.orderNumber}</h1>
+          <TestBadge mode={order.paymentMode} />
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.paymentStatus} />
         </div>

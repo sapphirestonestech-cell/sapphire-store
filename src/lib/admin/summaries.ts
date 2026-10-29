@@ -3,12 +3,19 @@ import { OrderModel } from "@/lib/models/order";
 import { getSettings } from "@/lib/settings";
 import { convertAmount, formatPrice, roundAmount, type Currency } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
+import { dataScopeFilter, type DataScope } from "@/lib/admin/data-scope";
+import type { OrderFilter } from "@/lib/admin/orders";
 
 /**
  * Compact metric strips shown above the Orders and Payments tables. These are
  * deliberately small and cheap (counts + one sum) so the list pages stay fast;
  * the full analytics live on the dashboard (ProductReq.md §6.2).
  */
+
+/** Keep two conditions independent even when both use `$or`. */
+function scoped(base: OrderFilter, scope: DataScope): OrderFilter {
+  return { $and: [base, dataScopeFilter(scope)] };
+}
 
 export interface Metric {
   label: string;
@@ -18,20 +25,27 @@ export interface Metric {
 }
 
 /** Headline figures for the Orders list. */
-export async function loadOrderMetrics(): Promise<Metric[]> {
+export async function loadOrderMetrics(scope: DataScope): Promise<Metric[]> {
   await connectDb();
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
   const [total, pendingPayment, awaitingShipment, deliveredToday] =
     await Promise.all([
-      OrderModel.countDocuments(),
-      OrderModel.countDocuments({ status: "pending_payment" }),
-      OrderModel.countDocuments({ status: { $in: ["paid", "processing"] } }),
-      OrderModel.countDocuments({
-        status: "delivered",
-        updatedAt: { $gte: startOfToday },
-      }),
+      OrderModel.countDocuments(scoped({}, scope)),
+      OrderModel.countDocuments(scoped({ status: "pending_payment" }, scope)),
+      OrderModel.countDocuments(
+        scoped({ status: { $in: ["paid", "processing"] } }, scope),
+      ),
+      OrderModel.countDocuments(
+        scoped(
+          {
+            status: "delivered",
+            updatedAt: { $gte: startOfToday },
+          },
+          scope,
+        ),
+      ),
     ]);
 
   return [
@@ -57,27 +71,37 @@ export async function loadOrderMetrics(): Promise<Metric[]> {
 }
 
 /** Headline figures for the Payments list. */
-export async function loadPaymentMetrics(): Promise<Metric[]> {
+export async function loadPaymentMetrics(scope: DataScope): Promise<Metric[]> {
   await connectDb();
   const settings = await getSettings();
 
   const [paid, awaiting, needsReview, collected] = await Promise.all([
-    OrderModel.countDocuments({ paymentStatus: "paid" }),
-    OrderModel.countDocuments({
-      paymentReference: { $nin: [null, ""] },
-      $or: [
-        { paymentStatus: "initiated" },
-        { paymentStatus: { $exists: false } },
-        { paymentStatus: null },
-      ],
-    }),
-    OrderModel.countDocuments({
-      paymentStatus: { $in: ["failed", "mismatch"] },
-    }),
-    OrderModel.find({
-      paymentStatus: "paid",
-      status: { $nin: ["cancelled", "refunded"] },
-    })
+    OrderModel.countDocuments(scoped({ paymentStatus: "paid" }, scope)),
+    OrderModel.countDocuments(
+      scoped(
+        {
+          paymentReference: { $nin: [null, ""] },
+          $or: [
+            { paymentStatus: "initiated" },
+            { paymentStatus: { $exists: false } },
+            { paymentStatus: null },
+          ],
+        },
+        scope,
+      ),
+    ),
+    OrderModel.countDocuments(
+      scoped({ paymentStatus: { $in: ["failed", "mismatch"] } }, scope),
+    ),
+    OrderModel.find(
+      scoped(
+        {
+          paymentStatus: "paid",
+          status: { $nin: ["cancelled", "refunded"] },
+        },
+        scope,
+      ),
+    )
       .select("paymentAmountMinor paymentCurrency amountDueNowMinor baseCurrency currency exchangeRate")
       .lean(),
   ]);

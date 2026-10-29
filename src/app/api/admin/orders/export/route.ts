@@ -5,6 +5,7 @@ import {
   parseOrderFilters,
   queryAdminOrders,
 } from "@/lib/admin/orders";
+import { getAdminDataScope } from "@/lib/admin/data-scope.server";
 
 /** GET /api/admin/orders/export — the filtered orders as CSV (§6.7). */
 export async function GET(request: Request) {
@@ -15,6 +16,7 @@ export async function GET(request: Request) {
   const filters = parseOrderFilters(
     Object.fromEntries(url.searchParams.entries()),
   );
+  filters.scope = await getAdminDataScope();
 
   try {
     await connectDb();
