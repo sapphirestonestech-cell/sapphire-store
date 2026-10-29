@@ -13,6 +13,8 @@ import {
   type SettingsState,
 } from "@/components/admin/settings-manager";
 import { GatewaySettings } from "@/components/admin/gateway-settings";
+import { DataScopeToggle } from "@/components/admin/data-scope-toggle";
+import { getAdminDataScope } from "@/lib/admin/data-scope.server";
 
 export const metadata = { title: "Settings" };
 
@@ -36,6 +38,7 @@ export default async function AdminSettingsPage({
   }));
   const keys = gatewayKeysStatus();
   const settings = await getSettings();
+  const scope = await getAdminDataScope();
   const initial: SettingsState = {
     baseCurrency: settings.baseCurrency,
     usdToNgn: settings.usdToNgn,
@@ -50,7 +53,7 @@ export default async function AdminSettingsPage({
       <div>
         <h1 className="font-sans text-heading-lg">Settings</h1>
         <p className="mt-1 text-body text-muted">
-          Store details, currency rules and payment gateways.
+          Store details, currency rules, payment gateways and back-office data.
         </p>
       </div>
 
@@ -86,6 +89,17 @@ export default async function AdminSettingsPage({
           keys={keys}
           baseCurrency={settings.baseCurrency}
         />
+      ) : tab === "data" ? (
+        <section className="max-w-2xl rounded-md bg-card p-6 shadow-card">
+          <h2 className="font-sans text-subheading">Back-office data</h2>
+          <p className="mt-1 text-body text-muted">
+            Choose whether the dashboard, orders and payments show live or test
+            data. This is separate from each gateway&apos;s test or live mode.
+          </p>
+          <div className="mt-4">
+            <DataScopeToggle scope={scope} />
+          </div>
+        </section>
       ) : (
         <SettingsManager initial={initial} section={tab} />
       )}

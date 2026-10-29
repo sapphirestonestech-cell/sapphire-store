@@ -7,12 +7,14 @@ describe("settings tabs", () => {
       "store",
       "currency",
       "payments",
+      "data",
     ]);
   });
 
   it("accepts a known tab", () => {
     expect(parseSettingsTab("currency")).toBe("currency");
     expect(parseSettingsTab(["payments"])).toBe("payments");
+    expect(parseSettingsTab("data")).toBe("data");
   });
 
   it("falls back to the store tab", () => {

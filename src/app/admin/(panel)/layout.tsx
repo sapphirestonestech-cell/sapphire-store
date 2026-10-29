@@ -2,9 +2,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { Sidebar } from "@/components/admin/sidebar";
-import { DataScopeToggle } from "@/components/admin/data-scope-toggle";
 import { getAdminIdentity } from "@/lib/admin/auth";
-import { getAdminDataScope } from "@/lib/admin/data-scope.server";
 
 /**
  * Admin panel — protected by session cookie (§6.1). The whole area is a
@@ -23,15 +21,11 @@ export default async function AdminLayout({
   await connection();
   const admin = await getAdminIdentity();
   if (!admin) redirect("/admin/login");
-  const scope = await getAdminDataScope();
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8 xl:px-10 xl:py-10">
-        <div className="mb-5">
-          <DataScopeToggle scope={scope} />
-        </div>
         {children}
       </main>
     </div>

@@ -43,7 +43,7 @@ export function DataScopeToggle({ scope }: { scope: DataScope }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3">
+    <div className="flex flex-wrap items-center gap-3">
       {scope === "test" ? (
         <span className="inline-flex items-center rounded-pill border border-warning/40 bg-warning/10 px-3 py-1 text-label font-medium text-warning">
           Test data

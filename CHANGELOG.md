@@ -1099,3 +1099,18 @@ app working at every step.
   confirm the retired `alwaysPayInNaira` field is ignored.
 - Browser check: with Paystack available and BACHS keyless locally, checkout
   showed Paystack only, no currency question, and the naira charge notice.
+
+## 2026-10-29 — Data scope moved into Settings
+
+### Changed
+
+- Moved the Live/Test back-office data toggle out of the global admin header
+  and into **Settings → Data**. The header no longer reserves space for it, and
+  the Data tab shows the "Test data" badge while test scope is active.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` clean; `npm test` 92/92; build
+  succeeds.
+- Browser: the dashboard has no data toggle, Settings → Data shows the control,
+  switching to Test persists and switching back to Live clears the badge.

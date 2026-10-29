@@ -2,6 +2,7 @@ export const SETTINGS_TABS = [
   { value: "store", label: "Store" },
   { value: "currency", label: "Currency" },
   { value: "payments", label: "Payments" },
+  { value: "data", label: "Data" },
 ] as const;
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number]["value"];
