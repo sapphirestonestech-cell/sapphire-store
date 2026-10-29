@@ -12,12 +12,20 @@ export interface SettingsState {
   storeName: string;
 }
 
+export type SettingsSection = "store" | "currency";
+
 /**
  * Store settings — ProductReq.md §6.5, §12.1. Prices are entered once in
  * the base currency; the other currency is derived from the exchange rate.
  * Saving a new rate appends to history so past orders keep their rate.
  */
-export function SettingsManager({ initial }: { initial: SettingsState }) {
+export function SettingsManager({
+  initial,
+  section,
+}: {
+  initial: SettingsState;
+  section: SettingsSection;
+}) {
   const router = useRouter();
   const [usdToNgn, setUsdToNgn] = useState(String(initial.usdToNgn));
   const [baseCurrency, setBaseCurrency] = useState(initial.baseCurrency);
@@ -39,14 +47,16 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
       const res = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usdToNgn: Number(usdToNgn),
-          baseCurrency,
-          usdDecimals: Number(usdDecimals),
-          ngnNearest: Number(ngnNearest),
-          tagline,
-          storeName,
-        }),
+        body: JSON.stringify(
+          section === "currency"
+            ? {
+                usdToNgn: Number(usdToNgn),
+                baseCurrency,
+                usdDecimals: Number(usdDecimals),
+                ngnNearest: Number(ngnNearest),
+              }
+            : { tagline, storeName },
+        ),
       });
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
@@ -64,88 +74,95 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
 
   return (
     <form onSubmit={submit} className="max-w-2xl space-y-6">
-      <section className="rounded-md bg-card p-6 shadow-card">
-        <h2 className="font-sans text-subheading">Currency &amp; exchange</h2>
-        <p className="mt-1 text-body text-muted">
-          Enter prices once in your base currency. The other currency is
-          calculated from this rate.
-        </p>
+      {section === "currency" ? (
+        <section className="rounded-md bg-card p-6 shadow-card">
+          <h2 className="font-sans text-subheading">Currency &amp; exchange</h2>
+          <p className="mt-1 text-body text-muted">
+            Enter prices once in your base currency. The other currency is
+            calculated from this rate.
+          </p>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">Base currency</span>
-            <select
-              value={baseCurrency}
-              onChange={(e) => setBaseCurrency(e.target.value as "USD" | "NGN")}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            >
-              <option value="USD">USD — US Dollar</option>
-              <option value="NGN">NGN — Nigerian Naira</option>
-            </select>
-          </label>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">Base currency</span>
+              <select
+                value={baseCurrency}
+                onChange={(e) =>
+                  setBaseCurrency(e.target.value as "USD" | "NGN")
+                }
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              >
+                <option value="USD">USD — US Dollar</option>
+                <option value="NGN">NGN — Nigerian Naira</option>
+              </select>
+            </label>
 
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">1 USD equals (NGN)</span>
-            <input
-              type="number"
-              min={1}
-              step="0.01"
-              required
-              value={usdToNgn}
-              onChange={(e) => setUsdToNgn(e.target.value)}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            />
-          </label>
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">1 USD equals (NGN)</span>
+              <input
+                type="number"
+                min={1}
+                step="0.01"
+                required
+                value={usdToNgn}
+                onChange={(e) => setUsdToNgn(e.target.value)}
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              />
+            </label>
 
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">USD decimal places</span>
-            <input
-              type="number"
-              min={0}
-              max={4}
-              required
-              value={usdDecimals}
-              onChange={(e) => setUsdDecimals(e.target.value)}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            />
-          </label>
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">USD decimal places</span>
+              <input
+                type="number"
+                min={0}
+                max={4}
+                required
+                value={usdDecimals}
+                onChange={(e) => setUsdDecimals(e.target.value)}
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              />
+            </label>
 
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">Round NGN to nearest</span>
-            <input
-              type="number"
-              min={0}
-              required
-              value={ngnNearest}
-              onChange={(e) => setNgnNearest(e.target.value)}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            />
-          </label>
-        </div>
-      </section>
-
-      <section className="rounded-md bg-card p-6 shadow-card">
-        <h2 className="font-sans text-subheading">Store</h2>
-        <div className="mt-4 space-y-4">
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">Store name</span>
-            <input
-              required
-              value={storeName}
-              onChange={(e) => setStoreName(e.target.value)}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            />
-          </label>
-          <label className="block space-y-1.5">
-            <span className="text-body font-medium">Tagline</span>
-            <input
-              value={tagline}
-              onChange={(e) => setTagline(e.target.value)}
-              className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
-            />
-          </label>
-        </div>
-      </section>
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">Round NGN to nearest</span>
+              <input
+                type="number"
+                min={0}
+                required
+                value={ngnNearest}
+                onChange={(e) => setNgnNearest(e.target.value)}
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              />
+            </label>
+          </div>
+        </section>
+      ) : (
+        <section className="rounded-md bg-card p-6 shadow-card">
+          <h2 className="font-sans text-subheading">Store</h2>
+          <p className="mt-1 text-body text-muted">
+            The name and tagline shown across the storefront.
+          </p>
+          <div className="mt-4 space-y-4">
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">Store name</span>
+              <input
+                required
+                value={storeName}
+                onChange={(e) => setStoreName(e.target.value)}
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              />
+            </label>
+            <label className="block space-y-1.5">
+              <span className="text-body font-medium">Tagline</span>
+              <input
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+                className="h-12 w-full rounded-pill border border-border-subtle bg-card px-5 text-body-lg"
+              />
+            </label>
+          </div>
+        </section>
+      )}
 
       <div className="flex items-center gap-4">
         <button
@@ -153,7 +170,11 @@ export function SettingsManager({ initial }: { initial: SettingsState }) {
           disabled={busy}
           className="inline-flex min-h-12 items-center rounded-pill bg-accent px-6 text-body-lg font-medium text-primary shadow-gold-glow disabled:bg-border-default disabled:text-muted disabled:shadow-none"
         >
-          {busy ? "Saving…" : "Save settings"}
+          {busy
+            ? "Saving…"
+            : section === "currency"
+              ? "Save currency settings"
+              : "Save store details"}
         </button>
         <span aria-live="polite" className="text-body text-success">
           {saved ? "Saved." : ""}

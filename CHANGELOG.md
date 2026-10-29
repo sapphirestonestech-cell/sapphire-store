@@ -1037,3 +1037,28 @@ app working at every step.
   `BACHS_SECRET_KEY` fallback until a live BACHS key is supplied.
 - `BACHS_WEBHOOK_SECRET` is still unset on Helicarrier, so BACHS webhooks fail
   closed and BACHS relies on return-page verification; set it when available.
+
+## 2026-10-29 — Settings grouped into tabs
+
+### Added
+
+- **Settings tabs** — Store, Currency and Payments are now separate groups at
+  `/admin/settings?tab=…`, so new settings can be added without one long page.
+  Unknown or missing tabs open Store, and the active tab is marked with
+  `aria-current` plus a gold underline.
+- **`src/lib/admin/settings-tabs.ts`** for the tab list and safe `?tab=`
+  parsing, with unit tests.
+
+### Changed
+
+- Store details and currency settings now save independently; each form only
+  sends its own fields to `PATCH /api/admin/settings`.
+- Payment gateways render only on the Payments tab.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` 0 errors (1 pre-existing
+  `checkout-form.tsx` warning); `npm test` 80/80; production build succeeds.
+- Browser check in `next dev`: all three tabs load the right panel, deep links
+  keep the selected tab, an invalid tab falls back to Store, and each tab link
+  exposes `aria-current="page"`.
