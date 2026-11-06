@@ -1,4 +1,5 @@
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { Logo } from "@/components/brand/logo";
 import { TAGLINE } from "@/lib/tagline";
 
 export const metadata = { title: "Forgot password" };
@@ -8,7 +9,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
-        <p className="font-sans text-heading-lg">Sapphire</p>
+        <Logo variant="full" className="h-11" />
         <p className="mt-1 text-body text-muted">{TAGLINE}</p>
         <h1 className="mb-2 mt-8 text-subheading font-semibold">
           Forgot your password?

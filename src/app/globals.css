@@ -271,6 +271,26 @@
   }
 }
 
+:root {
+  /* Brand logo plate (§13.1 resolved 2026-11-06): the supplied artwork is
+     navy + gold, so on dark surfaces it needs a light ground to stay
+     legible. `plate-dark` follows the theme, `plate-always` is for
+     fixed-dark bands (footer). */
+  --brand-logo-plate: #fbf8f3;
+}
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+  border-radius: var(--radius-md);
+}
+.brand-logo--plate-always,
+[data-theme="dark"] .brand-logo--plate-dark {
+  background-color: var(--brand-logo-plate);
+  padding: 5px 10px;
+}
+
 /*
  * Rich-text description (client instruction, 2026-10-19). The admin editor
  * produces a small tag subset (p, strong, em, ul/ol/li, h2/h3, a); these

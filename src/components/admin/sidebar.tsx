@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Logo } from "@/components/brand/logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
@@ -108,8 +109,8 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 z-30 flex h-screen w-16 shrink-0 flex-col border-r border-border-subtle bg-card md:w-56">
       <div className="hidden px-6 pb-2 pt-6 md:block">
-        <Link href="/" className="font-sans text-heading">
-          Sapphire
+        <Link href="/" aria-label="Sapphire Stones — storefront">
+          <Logo variant="wordmark" className="h-5" />
         </Link>
         <p className="text-label text-muted">Admin</p>
       </div>

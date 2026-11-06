@@ -10,6 +10,7 @@ import { connectDb } from "@/lib/db";
 import { CategoryModel } from "@/lib/models/category";
 import { AdminUserModel } from "@/lib/models/settings";
 import { getSession } from "@/lib/session";
+import { Logo } from "@/components/brand/logo";
 
 async function loadNavCategories(): Promise<NavCategory[]> {
   try {
@@ -66,7 +67,8 @@ function HeaderSlot() {
       fallback={
         <header className="sticky top-0 z-40 bg-card">
           <div className="page-width flex h-16 items-center md:h-20">
-            <span className="font-sans text-heading-lg">Sapphire</span>
+            <span className="sr-only">Sapphire Stones</span>
+            <Logo variant="wordmark" priority className="h-5 sm:h-6 md:h-7" />
           </div>
         </header>
       }

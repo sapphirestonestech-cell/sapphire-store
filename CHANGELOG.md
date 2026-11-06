@@ -1129,3 +1129,56 @@ app working at every step.
   succeeds.
 - Browser: the sidebar no longer lists Admins, the old URL redirects, and the
   Settings → Admins tab lists and adds admin accounts.
+
+## 2026-10-29 — Brand copy refresh from the client charter
+
+### Changed
+
+- Added `BRAND_NAME`, `HERO_LINE` and `MOTTO` to `src/lib/tagline.ts`.
+  **Sapphire Stones** replaces the visible "Sapphire" wordmark; the
+  affordable-luxury promise remains `TAGLINE` for ProductReq.md §1.2.
+- Hero leads with **"Timeless Elegance, Exceptional Craftsmanship."** and keeps
+  the affordable-luxury promise in the sub-headline.
+- Homepage "Why us" strip rewritten as the four client pillars: timeless
+  elegance, exceptional craftsmanship, trust and integrity, personalized
+  service.
+- Footer carries the brand name, promise and motto. Product page, checkout and
+  order confirmation carry the motto/promise reassurance lines.
+- Root metadata template, auth pages, admin login/sidebar, transactional
+  emails, settings defaults and seed data now use **Sapphire Stones**.
+- Contact, FAQ, shipping and pre-order policy blurbs refreshed in the client's
+  voice; policy text is still marked as being prepared, nothing invented.
+
+### Verified
+
+- `npm run typecheck` clean; `npm run lint` clean; `npm test` 92/92.
+
+## 2026-11-06 — Client logo artwork
+
+### Added
+
+- `public/brand/` — client-supplied master (`image.png`) plus derived
+  `logo-full.png/.webp` (1380×256) and `logo-wordmark.png/.webp` (1380×165),
+  white background knocked out to transparency with colour un-premultiplied so
+  there is no white halo on dark surfaces.
+- `public/brand/s-monogram.svg` — purpose-drawn variable-width "S" monogram
+  (gold `#C9A24B` on ink `#211D19`), legible at 16px. Not yet used as the
+  favicon.
+- `src/components/brand/logo.tsx` — `<Logo variant="wordmark" | "full">` with
+  `plate="dark" | "always" | "never"` for the ivory plate the navy artwork
+  needs on dark surfaces.
+
+### Changed
+
+- Header, header Suspense fallback, footer, admin sidebar, admin login and the
+  four auth cards now render the logo image instead of the `BRAND_NAME` text.
+  `BRAND_NAME` stays for metadata, prose and the copyright line.
+- `globals.css`: `--brand-logo-plate` token and `.brand-logo--plate-*` rules.
+- `DESIGN.md` §13.1 marked resolved (navy confined to the artwork).
+
+### Verified
+
+- `npm run lint` clean on every touched file; touched files typecheck clean
+  (two pre-existing errors remain in `email-ckeditor-inner.tsx` and
+  `lib/email/audience.ts`, untouched by this change).
+- Dev server: `/`, `/shop`, `/sign-in` return 200 and emit the logo image.

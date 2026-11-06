@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { LoginForm } from "@/components/admin/login-form";
 import { googleEnabled } from "@/auth";
+import { Logo } from "@/components/brand/logo";
 import { TAGLINE } from "@/lib/tagline";
 
 export const metadata = { title: "Admin sign in" };
@@ -30,7 +31,7 @@ export default function AdminLoginPage({
   return (
     <div className="flex min-h-full flex-1 items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
-        <p className="font-sans text-heading-lg">Sapphire</p>
+        <Logo variant="full" className="h-11" />
         <h1 className="mt-1 text-body text-muted">{TAGLINE}</h1>
         <h2 className="mb-6 mt-8 text-subheading font-semibold">Sign in</h2>
         <Suspense fallback={<LoginForm googleEnabled={googleEnabled} />}>

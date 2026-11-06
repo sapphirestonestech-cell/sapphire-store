@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { TAGLINE, POSITIONING_LINE } from "@/lib/tagline";
+import { Logo } from "@/components/brand/logo";
+import { BRAND_NAME, MOTTO, TAGLINE } from "@/lib/tagline";
 
 const FOOTER_LINKS: { heading: string; links: { label: string; href: string }[] }[] =
   [
@@ -47,9 +48,9 @@ export async function Footer() {
     <footer className="mt-auto bg-[#151210] text-white">
       <div className="page-width grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="space-y-3">
-          <p className="font-sans text-heading-lg text-white">Sapphire</p>
+          <Logo variant="full" plate="always" className="h-14" />
           <p className="max-w-60 text-body text-white/80">{TAGLINE}</p>
-          <p className="max-w-60 text-body text-white/80">{POSITIONING_LINE}</p>
+          <p className="max-w-60 text-body text-white/80">{MOTTO}</p>
         </div>
         {FOOTER_LINKS.map((group) => (
           <nav key={group.heading} aria-label={group.heading}>
@@ -71,7 +72,7 @@ export async function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="page-width flex flex-col gap-2 py-6 text-label text-white/70 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} Sapphire. All rights reserved.</p>
+          <p>© {year} {BRAND_NAME}. All rights reserved.</p>
           <p>Payments secured by BACHS and Paystack.</p>
         </div>
       </div>

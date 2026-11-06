@@ -500,7 +500,10 @@ Tailwind (v4) exposes these through `@theme` using `--color-*`, `--radius-*`, `-
 
 ## 13. Open Design Questions
 
-1. **Brand name and logo** — final wordmark and logo? (Placeholder in use.)
+1. ~~**Brand name and logo**~~ — **Resolved 2026-11-06**: the client supplied the
+   final lockup (`public/brand/`, "SAPPHIRE STONES" navy + "FINE JEWELRY" gold).
+   Navy (`#092049`) is confined to the artwork and is **not** a UI token; gold
+   stays the only accent. On dark surfaces the logo sits on an ivory plate.
 2. **Exact gold** — `#C9A24B` / `#D9B45F` correct, or a brand gold?
 3. **Light canvas warmth** — is `#F6F6F4` right, or a warmer ivory?
 4. **Product image ratio** — 4:5 for cards confirmed?

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { Logo } from "@/components/brand/logo";
 import { TAGLINE } from "@/lib/tagline";
 
 export const metadata = { title: "Reset password" };
@@ -9,7 +10,7 @@ function CardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm rounded-md bg-card p-8 shadow-card">
-        <p className="font-sans text-heading-lg">Sapphire</p>
+        <Logo variant="full" className="h-11" />
         <p className="mt-1 text-body text-muted">{TAGLINE}</p>
         {children}
       </div>

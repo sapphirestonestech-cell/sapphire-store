@@ -334,3 +334,31 @@ choose currency first, then gateways; show the due-now NGN equivalent.
 | — | What if BACHS is off or USD is not allowed? | Force NGN, hide the currency question, and show the shopper the **due-now** naira equivalent at the order's locked rate. Paystack-only checkout works this way. |
 | — | Can a disabled gateway still surface? | **No.** Checkout, the order-page Pay-now card and `POST /api/payments/initialize` all use the same server-side resolver; a disabled gateway is omitted and initialize rejects it. |
 | — | Is the customer's currency choice trusted? | **No.** Initialize re-runs the resolver against the stored order and the current settings, then charges the frozen amount in the resulting currency. |
+
+## 2026-10-29 — Client brand charter copy
+
+Client supplied a brand charter (vision, mission, pillars, positioning). Scope
+kept to storefront copy and the pillars; no new About page.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Which brand name appears on site? | **Sapphire Stones.** "Maison Sapphire" is used in the charter prose but not as the wordmark. |
+| — | How does the new tagline relate to ProductReq.md §1.2? | The hero leads with **"Timeless Elegance, Exceptional Craftsmanship."** The existing affordable-luxury promise stays as `TAGLINE` and remains in the announcement bar, listing header, checkout, order confirmation, emails and SEO metadata. |
+| — | Where does the motto go? | **"Crafted for Love. Created to Last."** appears in the footer, product closing card, checkout reassurance and order confirmation. |
+| — | What replaces the "Why us" strip? | The four client pillars: timeless elegance, exceptional craftsmanship, trust and integrity, personalized service. "Lasting Legacy" is carried by the motto instead of a fifth column, preserving the four-column layout in ProductReq.md §5.1. |
+| — | Scope of the copy refresh | Existing copy + brand pillars only. An About page was offered and declined in favour of not expanding ProductReq.md scope. |
+
+## 2026-11-06 — Supplied logo artwork
+
+The client supplied the final lockup (`public/brand/image.png`, 1600×474:
+"SAPPHIRE STONES" in navy, "FINE JEWELRY" in gold, on white) and asked for it
+to be used as the app logo.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Is this the final wordmark? | **Yes.** It resolves `DESIGN.md` §13.1; the placeholder text wordmark is retired. Artwork is the client's own, so no licensing question arises. |
+| — | Navy is not in `DESIGN.md` §2.4 (gold is the only accent). | **Navy is confined to the logo artwork** — measured `#092049`. It does not become a UI token and is not used on chrome, buttons or text. Gold remains the only accent colour in the interface. |
+| — | Logo on dark surfaces? The navy disappears on `#202020`. | **Ivory plate** (`--brand-logo-plate: #fbf8f3`, the artwork's own ground) behind the logo on dark surfaces. `plate="dark"` follows the theme; `plate="always"` for the footer's fixed-dark band. |
+| — | Which crop where? | **Wordmark only** in the header and admin sidebar (the "FINE JEWELRY" subline is illegible below ~40px). **Full lockup** in the footer, auth cards and admin login, where there is room for the subline. |
+| — | Transparency? | The supplied file has a white background. White was knocked out to alpha and the colour un-premultiplied, so no white halo appears on dark. Masters kept: `logo-full.png` / `logo-wordmark.png` + WebP. |
+| — | Monogram? | `public/brand/s-monogram.svg` — a purpose-drawn variable-width "S" (gold on ink), supplied as the favicon. **Not yet wired** as the live favicon. |
