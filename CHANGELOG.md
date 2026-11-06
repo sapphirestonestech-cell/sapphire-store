@@ -1182,3 +1182,24 @@ app working at every step.
   (two pre-existing errors remain in `email-ckeditor-inner.tsx` and
   `lib/email/audience.ts`, untouched by this change).
 - Dev server: `/`, `/shop`, `/sign-in` return 200 and emit the logo image.
+
+## 2026-11-06 — Monogram favicon and mobile mark
+
+### Changed
+
+- `src/app/icon.svg` — the drawn "S" monogram is now the live favicon
+  (`/icon.svg`, `image/svg+xml`). The Next.js default `src/app/favicon.ico` was
+  removed so the monogram is what browsers actually show; it is recoverable
+  from git history if needed.
+- Header and header fallback: `<Logo compact>` shows the monogram below `sm`
+  and the wordmark above it, freeing ~140px for the currency, cart and menu
+  buttons on phones. Below `sm` the wordmark would need 200px.
+- `globals.css`: `.brand-logo` now only carries the plate; display/alignment
+  moved to utilities so `sm:hidden` / `max-sm:hidden` win the cascade (an
+  unlayered rule would have beaten the layered utilities).
+
+### Verified
+
+- `/icon.svg` returns 200 `image/svg+xml`; `/favicon.ico` returns 404.
+- Homepage markup emits both lockups with `sm:hidden` / `max-sm:hidden`.
+- eslint clean on touched files; no new type errors.

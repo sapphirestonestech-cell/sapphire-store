@@ -279,10 +279,9 @@
   --brand-logo-plate: #fbf8f3;
 }
 
+/* Layout (display, alignment) comes from utilities in the component so that
+   responsive `sm:hidden` / `max-sm:hidden` still win; only the plate is CSS. */
 .brand-logo {
-  display: inline-flex;
-  align-items: center;
-  line-height: 0;
   border-radius: var(--radius-md);
 }
 .brand-logo--plate-always,
