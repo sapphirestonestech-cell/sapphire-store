@@ -1203,3 +1203,11 @@ app working at every step.
 - `/icon.svg` returns 200 `image/svg+xml`; `/favicon.ico` returns 404.
 - Homepage markup emits both lockups with `sm:hidden` / `max-sm:hidden`.
 - eslint clean on touched files; no new type errors.
+
+### Changed (same day)
+
+- Header and header fallback use the wordmark at every width, at the client's
+  request. It is sized down on phones (`h-5`, ~167px) instead of swapping to
+  the monogram, so the logo image is visible on mobile. The `compact` prop was
+  dropped from `<Logo>` rather than left unused. The monogram remains the
+  favicon (`src/app/icon.svg`).

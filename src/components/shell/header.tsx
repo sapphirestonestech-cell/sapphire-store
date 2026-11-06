@@ -516,7 +516,7 @@ export function Header({
     >
       <div className="page-width flex h-16 items-center gap-2 sm:gap-3 md:h-20 md:gap-6">
         <Link href="/" className="shrink-0" aria-label="Sapphire Stones — home">
-          <Logo variant="wordmark" priority compact className="h-6 md:h-7" />
+          <Logo variant="wordmark" priority className="h-5 sm:h-6 md:h-7" />
         </Link>
 
         <nav aria-label="Main" className="hidden flex-1 justify-center lg:flex">
