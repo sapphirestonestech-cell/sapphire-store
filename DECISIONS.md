@@ -419,3 +419,19 @@ a total concept change.
 | — | Headline shape | "Sapphire" / "Stones" on two stacked lines (`<span class="block">` per word), weight 600, white, line-height 1.04. |
 | — | Everything else | Gold "Fine jewelry" (subheading role), tagline, and both calls to action unchanged; CTAs stack below `sm`. Band `min-h-[540px]` / `md:min-h-[640px]`. |
 | — | Verification | Chrome CDP at true 390/768/1024/1440: no horizontal overflow, zero box styling (transparent bg, no border/radius/shadow/backdrop), h1 44→92px, copy flush to the page gutter, CTAs responsive. Note: found and fixed a wedged dev server (running since Nov 1) that was serving stale `globals.css` — custom CSS changes were invisible until restart; JSX utilities were unaffected. |
+
+## 2026-11-10 — Hero name lockup + section spacing
+
+The client asked why "Sapphire Stones" cannot stay on one line, with "Fine
+jewelry" on the next line much bigger — it is part of the business name — and
+for breathing room between the hero and the next section.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Name lockup | **"Sapphire Stones" on a single line** with **"Fine jewelry" beneath it in gold at display size** — name treatment, not a caption. Both live inside the h1: `.hero-display` at `clamp(32px, 9vw, 96px)` and `.hero-descriptor` at `clamp(22px, 4vw, 44px)` (weight 600). Viewport-unit scaling guarantees the one-line fit at every width; verified in Chrome at 320/390/768/1024/1440 (worst case 237px of text in a 289px block). |
+| — | Why not bigger on phones? | At 390px a single line caps around 35px before risking wrap; larger requires stacking, which the client explicitly moved away from. |
+| — | Section spacing | A `h-12 md:h-16` spacer between the hero band and the browse section (matches the existing spacer pattern before WhyUs). Measured gap: 45px mobile / 60px desktop. |
+
+Note: the 320px horizontal overflow seen in verification is **pre-existing**
+(header icon row and a browse pill overflow at very narrow widths) — proven by
+testing committed HEAD with the hero stashed; not introduced by the hero work.

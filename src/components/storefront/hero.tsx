@@ -3,11 +3,11 @@ import Link from "next/link";
 import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
 
 /**
- * Homepage hero — the one bold moment (DESIGN.md §5). Editorial concept:
- * the client's photograph runs crisp and full-bleed under a left-weighted
- * navy scrim; the brand name sits large and left in stacked display type,
- * so the type anchors the left half while the ring holds the right. No
- * panel, no box — type on image.
+ * Homepage hero — the one bold moment (DESIGN.md §5). Editorial type-on-image:
+ * the client's photograph runs crisp under a left-weighted navy scrim, and the
+ * business name is a display lockup — "Sapphire Stones" on one line with
+ * "Fine jewelry" beneath it in gold (it is part of the name, not a caption).
+ * The name is sized in viewport units so it always fits on a single line.
  */
 export function Hero() {
   return (
@@ -23,15 +23,13 @@ export function Hero() {
       <div aria-hidden="true" className="hero-scrim absolute inset-0 -z-10" />
 
       <div className="page-width relative flex min-h-[540px] items-center py-16 md:min-h-[640px] md:py-24">
-        <div className="hero-enter max-w-2xl">
-          <h1 className="hero-display font-sans font-semibold text-white">
-            {BRAND_NAME.split(" ").map((word) => (
-              <span key={word} className="block">
-                {word}
-              </span>
-            ))}
+        <div className="hero-enter w-full max-w-4xl">
+          <h1 className="font-sans font-semibold text-white">
+            <span className="hero-display block">{BRAND_NAME}</span>
+            <span className="hero-descriptor block text-accent">
+              Fine jewelry
+            </span>
           </h1>
-          <p className="mt-4 text-subheading text-accent">Fine jewelry</p>
           <p className="mt-6 max-w-sm text-body-lg text-white/85">
             {TAGLINE}
           </p>

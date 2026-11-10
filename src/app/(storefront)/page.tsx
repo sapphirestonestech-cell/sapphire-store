@@ -123,6 +123,11 @@ export default function HomePage({
     <>
       <Hero />
 
+      {/* Breathing room between the hero band and the browse section
+          (client instruction, 2026-11-10); matches the spacer pattern used
+          before WhyUs below. */}
+      <div className="h-12 md:h-16" />
+
       <Suspense
         fallback={
           <div className="page-width pb-16 md:pb-20">

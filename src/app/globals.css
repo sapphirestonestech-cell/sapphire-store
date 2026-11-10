@@ -156,13 +156,22 @@
   );
 }
 
-/* Oversized hero display type (client instruction, 2026-11-10: "make it
-   big"). Supersedes the 48px --text-display cap for the hero h1 only; the
-   fluid clamp keeps one size in step with the viewport at every width. */
+/* Hero name lockup (client instruction, 2026-11-10: "Sapphire Stones" on one
+   line with "Fine jewelry" beneath it — it is part of the business name, not
+   a caption). Both lines are display-sized; the name is scaled in viewport
+   units so it always fits on a single line at every width. Supersedes the
+   48px --text-display cap for the hero h1 only. */
 .hero-display {
-  font-size: clamp(44px, 7vw, 92px);
-  line-height: 1.04;
+  font-size: clamp(32px, 9vw, 96px);
+  line-height: 1.02;
   letter-spacing: -0.02em;
+}
+
+.hero-descriptor {
+  margin-top: 0.3em;
+  font-size: clamp(22px, 4vw, 44px);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
 }
 
 /*

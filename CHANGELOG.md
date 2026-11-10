@@ -1328,3 +1328,17 @@ app working at every step.
 - The dev server on :3000 had been running since Nov 1 and its CSS watcher
   was wedged, silently serving stale `globals.css` while JSX changes flowed.
   Restarted; hero styles now compile through.
+
+## 2026-11-10 — Hero name lockup + section spacing
+
+### Changed
+
+- **Hero name is a one-line lockup.** "Sapphire Stones" on a single line
+  (`clamp(32px, 9vw, 96px)`) with "Fine jewelry" beneath it in gold at display
+  size (`clamp(22px, 4vw, 44px)`, weight 600) — the client confirmed it is part
+  of the business name, so it gets name treatment rather than a small caption.
+  Viewport-unit sizing guarantees the single-line fit at every width.
+- **Breathing room after the hero:** an `h-12 md:h-16` spacer between the hero
+  band and the browse section (same spacer pattern as before WhyUs), giving a
+  45px mobile / 60px desktop gap. Applies to loading, error and success states
+  alike.
