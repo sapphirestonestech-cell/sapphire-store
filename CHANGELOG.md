@@ -1342,3 +1342,16 @@ app working at every step.
   band and the browse section (same spacer pattern as before WhyUs), giving a
   45px mobile / 60px desktop gap. Applies to loading, error and success states
   alike.
+
+## 2026-11-10 — Mobile hero scrim
+
+### Fixed
+
+- **Mobile hero legibility** — the background no longer interferes with the
+  hero text on phones. The scrim was horizontal (dense left, transparent by
+  76% across), which left the tail of the one-line "Sapphire Stones" lockup
+  over the raw photograph on mobile widths. Below `md` the scrim is now a
+  vertical veil covering the band edge to edge (92% → 84% → 93% navy), the
+  same treatment the first photographic hero used on phones; desktop is
+  unchanged. Verified at true 320/390/767/768/1440 in Chrome CDP; white type
+  keeps ≈11:1 contrast over the photo's brightest area.

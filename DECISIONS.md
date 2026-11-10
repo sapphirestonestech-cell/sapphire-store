@@ -435,3 +435,20 @@ for breathing room between the hero and the next section.
 Note: the 320px horizontal overflow seen in verification is **pre-existing**
 (header icon row and a browse pill overflow at very narrow widths) — proven by
 testing committed HEAD with the hero stashed; not introduced by the hero work.
+
+## 2026-11-10 — Mobile hero scrim (background vs text)
+
+The client reported that on mobile the background photograph interferes with
+the hero text.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Cause | The scrim was left-weighted and horizontal by design (dense navy left, transparent by 76% across) for the desktop layout. On phones the one-line name lockup spans ~70% of the width, so the tail of "Sapphire Stones" sat over the raw photograph where the scrim had already faded. |
+| — | Fix | **Below `md` the scrim turns vertical and covers the band edge to edge**: 92% navy at the top, 84% at the middle, 93% at the bottom — the same treatment the first photographic hero used on phones. Desktop (≥768px) is unchanged. |
+| — | Contrast | 84% navy over the photo's brightest cream blends to ≈ rgb(46,57,75): white type ≈ 11:1, gold "Fine jewelry" ≈ 4.7:1 (large bold text needs 3:1). Both pass. |
+| — | Verification | Chrome CDP at true 320/390/767/768/1440: mobile widths serve the vertical gradient (stops 0.92/0.84/0.93 confirmed in computed style), desktop serves the unchanged 90deg gradient, name stays one line at every width. |
+
+Note: the dev server's CSS watcher wedged twice more during this task (serving
+stale `globals.css` after edits); each was resolved by restarting `next dev`.
+If hero styles ever look wrong in development, restart the dev server before
+judging the code.

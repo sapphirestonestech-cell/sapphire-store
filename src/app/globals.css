@@ -156,6 +156,22 @@
   );
 }
 
+/* Mobile: the name lockup spans nearly the full width, so the left-weighted
+   gradient leaves the tail of the name over the raw photograph (client
+   report, 2026-11-10: "the background interferes with the text"). Below md
+   the scrim turns vertical and covers the band edge to edge instead. At 84%
+   navy even over the photo's brightest cream, white type keeps ~11:1. */
+@media (max-width: 767px) {
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--hero-scrim) 92%, transparent) 0%,
+      color-mix(in srgb, var(--hero-scrim) 84%, transparent) 50%,
+      color-mix(in srgb, var(--hero-scrim) 93%, transparent) 100%
+    );
+  }
+}
+
 /* Hero name lockup (client instruction, 2026-11-10: "Sapphire Stones" on one
    line with "Fine jewelry" beneath it — it is part of the business name, not
    a caption). Both lines are display-sized; the name is scaled in viewport
