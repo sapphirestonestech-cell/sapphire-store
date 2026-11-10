@@ -389,3 +389,19 @@ for the brand block on the left of it.
 | — | Legibility over photography | **A navy scrim, `--hero-scrim: #0B1A33`**, sampled from the photograph's own velvet, with fixed white type in both themes. `DESIGN.md` has no overlay/scrim token, so this is a recorded deviation, not a new brand colour; the hero band is always dark because the image is. Contrast: white on the scrim ≈15:1, gold `--accent` ≈6:1. |
 | — | Mobile behaviour | The scrim turns vertical, the image is anchored `object-[72%_50%]` so the ring stays in frame, and the two calls to action stack instead of sitting side by side. |
 | — | Image resolution | 1080×608 is **below** what a full-width hero wants; it is shipped as supplied and will soften on wide screens. Replace `public/hero/hero-background.jpg` when a 2400px+ original exists. |
+
+## 2026-11-10 — Hero overlay rebuild (frosted glass)
+
+The client rejected the flat overlay look ("I already don't like the way it is
+doing it") and re-asked for text on an overlay with the background blurred a
+bit. The first pass had blurred the whole photograph 5px under a 45% wash,
+which washed the photo into anonymous navy mush, and the panel was a flat
+translucent box.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | How much blur? | **2px on the image** under a **35% navy wash** (was 5px / 45%), so the velvet, gold bokeh and ring stay legible. The real text blurring happens on the panel itself. |
+| — | What is the overlay? | A **frosted-glass panel**: `backdrop-blur-md` over a 60% `--hero-scrim` tint, a **champagne-gold hairline** (`ring-accent/40`) and `shadow-float`. `max-w-xl`, centred at every size. Without backdrop-filter support the 60% tint alone keeps white text ≈13:1. |
+| — | Heading | Stays white at **600** (heaviest weight DESIGN.md defines), `text-display` 48px desktop / 32px mobile. |
+| — | Band height | `min-h-[540px]` mobile / `md:min-h-[600px]` desktop so the panel breathes. |
+| — | Verification | Chrome CDP at true 390/768/1440: no horizontal overflow, panel centred (offset 0px), frost `blur(12px)` applied, CTAs stacked below `sm` and side-by-side from `sm` up. The 542px panel measurement is `max-w-xl` (36rem) under the project's deliberate global `font-size: 97.087%` + `zoom: 0.97` scale-down — not a bug. |

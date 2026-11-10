@@ -143,29 +143,9 @@
 }
 
 /* Hero photograph band (DECISIONS.md, 2026-11-10). The image is dark in both
-   themes, so the band carries its own navy scrim and fixed light type. The
-   gradient mirrors the photo — dense on the left where the copy sits — and
-   turns vertical on phones, where the copy overlaps the ring. */
-.hero-scrim {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--hero-scrim) 96%, transparent) 0%,
-    color-mix(in srgb, var(--hero-scrim) 90%, transparent) 45%,
-    color-mix(in srgb, var(--hero-scrim) 52%, transparent) 68%,
-    transparent 88%
-  );
-}
-
-@media (max-width: 767px) {
-  .hero-scrim {
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--hero-scrim) 92%, transparent) 0%,
-      color-mix(in srgb, var(--hero-scrim) 82%, transparent) 55%,
-      color-mix(in srgb, var(--hero-scrim) 94%, transparent) 100%
-    );
-  }
-}
+   themes, so the band keeps its own navy wash and fixed light type. The copy
+   rides a frosted-glass panel (backdrop-blur) with a gold hairline; no
+   gradient is needed. */
 
 /*
  * Theme colours (DESIGN.md §2, §10, §11). Plain custom properties, not

@@ -1290,3 +1290,18 @@ app working at every step.
   its keyframes were removed. Reduced-motion still disables it.
 - Calls to action stack on phones; the image is anchored right on narrow crops
   so the ring stays in frame.
+
+## 2026-11-10 — Hero overlay rebuild (frosted glass)
+
+### Changed
+
+- **The hero overlay is now frosted glass instead of a flat box.**
+  `src/components/storefront/hero.tsx`: the photograph keeps only a gentle 2px
+  blur under a lighter 35% navy wash (was 5px / 45%), so the ring, velvet and
+  gold bokeh stay legible. The copy sits on a `backdrop-blur-md` glass panel
+  with a champagne-gold hairline and a soft float shadow — centred at every
+  size, `max-w-xl`, stacked calls to action on phones. Heading stays white 600;
+  "Fine jewelry" gold; tagline and both calls to action unchanged.
+- `globals.css`: the `.hero-scrim` gradient rules are gone (the band is a flat
+  wash + glass panel now); band comment updated. Desktop band is taller
+  (`md:min-h-[600px]`).
