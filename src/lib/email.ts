@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
 
 /**
  * Transactional email — Gmail SMTP when GMAIL_USER and GMAIL_APP_PASSWORD are
@@ -10,16 +11,16 @@ import nodemailer from "nodemailer";
 const FROM =
   process.env.EMAIL_FROM ??
   (process.env.GMAIL_USER
-    ? `Sapphire <${process.env.GMAIL_USER}>`
-    : "Sapphire <no-reply@localhost>");
+    ? `${BRAND_NAME} <${process.env.GMAIL_USER}>`
+    : `${BRAND_NAME} <no-reply@localhost>`);
 
 function shell(title: string, bodyHtml: string): string {
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:32px;background:#FBF8F3;font-family:Georgia,serif;color:#211D19;">
     <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;">
-      <p style="font-size:22px;margin:0 0 4px;">Sapphire</p>
-      <p style="font-size:13px;color:#8A8178;margin:0 0 24px;">Luxurious rings at an affordable price.</p>
+      <p style="font-size:22px;margin:0 0 4px;">${BRAND_NAME}</p>
+      <p style="font-size:13px;color:#8A8178;margin:0 0 24px;">${TAGLINE}</p>
       <h1 style="font-size:20px;font-weight:600;margin:0 0 12px;">${title}</h1>
       ${bodyHtml}
     </div>
@@ -57,6 +58,7 @@ async function send(
   text: string,
   html: string,
   logLabel: string,
+  headers?: Record<string, string>,
 ): Promise<void> {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     console.info(
@@ -64,7 +66,14 @@ async function send(
     );
     return;
   }
-  await getTransporter().sendMail({ from: FROM, to, subject, text, html });
+  await getTransporter().sendMail({
+    from: FROM,
+    to,
+    subject,
+    text,
+    html,
+    headers,
+  });
   console.info(`[email] ${logLabel} sent to ${to}`);
 }
 
@@ -77,13 +86,13 @@ export async function sendWelcomeEmail(
   email: string,
   name: string,
 ): Promise<void> {
-  const subject = "Welcome to Sapphire";
-  const text = `Hi ${name},\n\nYour Sapphire account is ready — sign in any time to track orders, save addresses and keep your currency preference.\n\nLuxurious rings at an affordable price.`;
+  const subject = `Welcome to ${BRAND_NAME}`;
+  const text = `Hi ${name},\n\nYour ${BRAND_NAME} account is ready — sign in any time to track orders, save addresses and keep your currency preference.\n\n${TAGLINE}`;
   const html = shell(
     `Welcome, ${name}`,
-    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Your Sapphire account is ready — sign in any time to track orders, save addresses and keep your currency preference.</p>
+    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Your ${BRAND_NAME} account is ready — sign in any time to track orders, save addresses and keep your currency preference.</p>
      <a href="${process.env.APP_URL ?? "http://localhost:3000"}/sign-in" style="display:inline-block;background:#C9A24B;color:#211D19;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:999px;">Sign in</a>
-     <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:20px 0 0;">Luxurious rings at an affordable price.</p>`,
+     <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:20px 0 0;">${TAGLINE}</p>`,
   );
   try {
     await send(email, subject, text, html, "welcome email");
@@ -98,11 +107,11 @@ export async function sendPasswordResetEmail(
   email: string,
   resetUrl: string,
 ): Promise<void> {
-  const subject = "Reset your Sapphire password";
-  const text = `Someone asked to reset the password for this Sapphire account.\n\nOpen this link within the next hour to choose a new password:\n${resetUrl}\n\nIf you didn't request this, you can ignore this email — your password stays unchanged.`;
+  const subject = `Reset your ${BRAND_NAME} password`;
+  const text = `Someone asked to reset the password for this ${BRAND_NAME} account.\n\nOpen this link within the next hour to choose a new password:\n${resetUrl}\n\nIf you didn't request this, you can ignore this email — your password stays unchanged.`;
   const html = shell(
     "Reset your password",
-    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Someone asked to reset the password for this Sapphire account. This link works once and expires in one hour.</p>
+    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Someone asked to reset the password for this ${BRAND_NAME} account. This link works once and expires in one hour.</p>
      <a href="${resetUrl}" style="display:inline-block;background:#C9A24B;color:#211D19;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:999px;">Choose a new password</a>
      <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:20px 0 0;">If you didn't request this, you can ignore this email — your password stays unchanged.</p>`,
   );
@@ -147,7 +156,7 @@ export async function sendOrderConfirmationEmail(
     return `${symbol}${major.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const subject = `Order ${order.orderNumber} confirmed — Sapphire`;
+  const subject = `Order ${order.orderNumber} confirmed — ${BRAND_NAME}`;
   const dateStr = order.createdAt.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -174,7 +183,7 @@ export async function sendOrderConfirmationEmail(
     )
     .join("\n");
 
-  const text = `Hi ${order.customer.name},\n\nYour payment for order ${order.orderNumber} has been verified and your order is confirmed.\n\nItems:\n${textLines}\n\nTotal: ${fmtMinor(order.totalMinor)}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}\n\nPlaced: ${dateStr}\n\nLuxurious rings at an affordable price.`;
+  const text = `Hi ${order.customer.name},\n\nYour payment for order ${order.orderNumber} has been verified and your order is confirmed.\n\nItems:\n${textLines}\n\nTotal: ${fmtMinor(order.totalMinor)}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}\n\nPlaced: ${dateStr}\n\n${TAGLINE}`;
 
   const html = shell(
     `Order ${order.orderNumber} confirmed`,
@@ -183,7 +192,7 @@ export async function sendOrderConfirmationEmail(
      <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Total: ${fmtMinor(order.totalMinor)}</p>
      <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}</p>
      <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">Order ${order.orderNumber} · ${dateStr}</p>
-     <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:0;">Luxurious rings at an affordable price.</p>`,
+     <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:0;">${TAGLINE}</p>`,
   );
 
   try {
@@ -193,4 +202,34 @@ export async function sendOrderConfirmationEmail(
       `[email] order confirmation to ${email} failed: ${err instanceof Error ? err.message : err}`,
     );
   }
+}
+
+/**
+ * Marketing email — sent through the same Gmail SMTP account, but with the
+ * unsubscribe headers required by mailbox providers. The body is already
+ * sanitized and wrapped by `buildMarketingEmail`.
+ */
+export async function sendMarketingEmail(
+  email: string,
+  subject: string,
+  text: string,
+  html: string,
+  unsubscribeUrl: string,
+  isTest = false,
+): Promise<void> {
+  const headers = isTest
+    ? undefined
+    : {
+        "List-Unsubscribe": `<${unsubscribeUrl}>`,
+        "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        Precedence: "bulk",
+      };
+  await send(
+    email,
+    subject,
+    text,
+    html,
+    isTest ? "marketing test email" : "marketing email",
+    headers,
+  );
 }

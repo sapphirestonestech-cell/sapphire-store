@@ -10,6 +10,7 @@ import {
   ExchangeRateModel,
   SettingModel,
 } from "@/lib/models/settings";
+import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
 
 export interface StoreSettings {
   baseCurrency: Currency;
@@ -24,9 +25,9 @@ const DEFAULTS: StoreSettings = {
   baseCurrency: "USD",
   usdToNgn: DEFAULT_USD_TO_NGN,
   rounding: DEFAULT_ROUNDING,
-  tagline: "Luxurious rings at an affordable price.",
+  tagline: TAGLINE,
   announcementExtra: "",
-  storeName: "Sapphire",
+  storeName: BRAND_NAME,
 };
 
 function parseRounding(raw?: string): RoundingSettings {

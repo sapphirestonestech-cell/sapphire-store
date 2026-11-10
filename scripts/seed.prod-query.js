@@ -24,7 +24,7 @@
 
   var SETTINGS = [
     { key: "base_currency", value: "USD" },
-    { key: "tagline", value: "Luxurious rings at an affordable price." },
+    { key: "tagline", value: "Timeless Elegance, Exceptional Craftsmanship." },
     { key: "store_name", value: "Sapphire" },
     { key: "rounding", value: JSON.stringify({ usdDecimals: 2, ngnNearest: 50 }) },
   ];

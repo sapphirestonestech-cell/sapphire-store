@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { RingPlaceholder } from "@/components/ui/ring-placeholder";
-import { TAGLINE } from "@/lib/tagline";
+import { HERO_LINE } from "@/lib/tagline";
 import type { ProductSummary } from "@/lib/products";
 
 function ConstellationCard({
@@ -99,10 +99,11 @@ export function Hero({ featured }: { featured: ProductSummary[] }) {
       ) : null}
 
       <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <h1 className="font-sans text-display text-primary">{TAGLINE}</h1>
+        <h1 className="font-sans text-display text-primary">{HERO_LINE}</h1>
         <p className="mx-auto mt-5 max-w-md text-body-lg text-muted">
-          Get affordable yet luxurious rings — ready to ship or available to
-          pre-order, with clear prices in dollars or naira.
+          Discover rings for engagements, weddings and personal
+          milestones — ready to ship or available to pre-order, with clear
+          prices in dollars or naira.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
           <Link

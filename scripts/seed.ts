@@ -238,8 +238,8 @@ async function main() {
   // Settings -------------------------------------------------------------
   const settings: [string, string][] = [
     ["base_currency", "USD"],
-    ["tagline", "Luxurious rings at an affordable price."],
-    ["store_name", "Sapphire"],
+    ["tagline", "Timeless Elegance, Exceptional Craftsmanship."],
+    ["store_name", "Sapphire Stones"],
     ["rounding", JSON.stringify({ usdDecimals: 2, ngnNearest: 50 })],
   ];
   for (const [key, value] of settings) {

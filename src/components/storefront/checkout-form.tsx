@@ -11,6 +11,7 @@ import { computeOrderTotals, fromMinor, type CheckoutItemInput } from "@/lib/che
 import { formatPrice, priceIn } from "@/lib/currency";
 import { SaveForLaterButton } from "@/components/storefront/save-for-later-button";
 import { usePaymentOptions } from "@/components/storefront/use-payment-options";
+import { MOTTO, TAGLINE } from "@/lib/tagline";
 
 interface LocationOption {
   id: string;
@@ -432,6 +433,10 @@ export function CheckoutForm({
               Total shown once you choose a location.
             </p>
           )}
+
+          <p className="border-t border-border-subtle pt-4 text-body text-muted">
+            {MOTTO} {TAGLINE}
+          </p>
 
           <fieldset className="rounded-md bg-card p-6 shadow-card">
             <legend className="px-1 font-sans text-subheading text-primary">

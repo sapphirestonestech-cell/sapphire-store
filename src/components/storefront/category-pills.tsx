@@ -1,28 +1,28 @@
 const REASONS: { title: string; body: string }[] = [
   {
-    title: "Affordable luxury",
-    body: "Beautiful rings priced to be worn, not saved for.",
+    title: "Timeless Elegance",
+    body: "We create jewelry that transcends trends and remains beautiful for generations.",
   },
   {
-    title: "Secure payment",
-    body: "Pay safely with BACHS or Paystack.",
+    title: "Exceptional Craftsmanship",
+    body: "Every piece is selected or created with meticulous attention to quality and detail.",
   },
   {
-    title: "Clear delivery costs",
-    body: "See the fee and days for your area before you pay.",
+    title: "Trust & Integrity",
+    body: "Clear information on materials, pricing and care, so you decide with confidence.",
   },
   {
-    title: "Pre-order available",
-    body: "Reserve upcoming designs with a confirmed arrival date.",
+    title: "Personalized Service",
+    body: "Attentive guidance for your occasion, from first message to delivery.",
   },
 ];
 
-/** Why us strip — ProductReq.md §5.1. Quiet, no second accent. */
+/** Brand pillars strip — ProductReq.md §5.1. Quiet, no second accent. */
 export function WhyUs() {
   return (
     <section aria-labelledby="why-us-heading" className="page-width">
       <h2 id="why-us-heading" className="sr-only">
-        Why shop with us
+        Our brand pillars
       </h2>
       <div className="grid gap-8 rounded-md bg-card p-8 shadow-card sm:grid-cols-2 lg:grid-cols-4 lg:gap-6 lg:p-10">
         {REASONS.map((reason) => (

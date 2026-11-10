@@ -22,10 +22,11 @@ import {
   type ProductSummary,
 } from "@/lib/products";
 import { shopHeadingFor } from "@/lib/shop-heading";
+import { TAGLINE } from "@/lib/tagline";
 import type { ShopParams } from "@/components/storefront/shop-explorer";
 
 export const metadata = {
-  title: "Luxurious rings at an affordable price",
+  title: TAGLINE,
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

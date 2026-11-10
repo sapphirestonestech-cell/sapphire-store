@@ -9,6 +9,7 @@ import { formatPrice, priceIn } from "@/lib/currency";
 import { fromMinor } from "@/lib/checkout";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import type { OrderDoc } from "@/lib/models/order";
+import { MOTTO, TAGLINE } from "@/lib/tagline";
 
 export const metadata = {
   title: "Order confirmation",
@@ -249,6 +250,10 @@ async function OrderDetail({ params }: PageProps) {
             Continue shopping
           </Link>
         </div>
+
+        <p className="text-center text-body text-muted">
+          {MOTTO} {TAGLINE}
+        </p>
       </div>
     </div>
   );

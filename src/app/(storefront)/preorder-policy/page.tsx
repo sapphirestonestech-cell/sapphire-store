@@ -6,7 +6,7 @@ export default function Page() {
   return (
     <StaticPageShell
       title="Pre-order policy"
-      blurb="Pre-order rings are made or sourced after you order, with a confirmed arrival date shown on every product page. The full pre-order policy, including delay and refund conditions, is being prepared."
+      blurb="Pre-order rings are made or sourced after you order, with a confirmed arrival date shown on every product page. The full pre-order policy, including delay and refund conditions, is being prepared. If you need help choosing, contact us and we will guide you."
     />
   );
 }

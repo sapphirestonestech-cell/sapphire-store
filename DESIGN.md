@@ -4,7 +4,7 @@
 
 **Theme:** light (default) + dark (manual toggle)
 **Product:** Luxury ring e-commerce store (storefront and admin dashboard)
-**Brand promise:** Luxurious rings at an affordable price.
+**Brand promise:** Timeless Elegance, Exceptional Craftsmanship.
 **Brand feel:** Sleek, a little cute, luxurious, gold, elegant.
 
 ---
@@ -347,7 +347,7 @@ Chart axis labels are 13px `--text-secondary`; legends are 12px `--text-muted`.
 - Buttons are verbs and say exactly what happens; the same action keeps its name across the flow.
 - Errors explain what went wrong and how to fix it; never apologize, never vague.
 - Examples: "Pre-order: arriving 12 Dec." "Delivery to Lekki: ₦8,000, 2 to 4 days." "We don't deliver here yet."
-- The tagline wording (`Luxurious rings at an affordable price.`) is a product decision. Do not rewrite it, and do not invent claims (materials, certifications, guarantees, discounts) that have not been provided.
+- The tagline wording (`Timeless Elegance, Exceptional Craftsmanship.`) is a product decision. Do not rewrite it, and do not invent claims (materials, certifications, guarantees, discounts) that have not been provided.
 
 ---
 

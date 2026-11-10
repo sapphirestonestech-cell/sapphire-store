@@ -1,10 +1,9 @@
 /**
  * Brand strings — client brand charter, 2026-10-29. ProductReq.md §1.2.
- * The affordable-luxury promise stays; the charter line leads the hero and
- * the motto closes the footer.
+ * The tagline leads the hero and closes the footer; the motto sits under it.
  */
 export const BRAND_NAME = "Sapphire Stones";
-export const HERO_LINE = "Timeless Elegance, Exceptional Craftsmanship.";
+export const TAGLINE = "Timeless Elegance, Exceptional Craftsmanship.";
+/** The hero headline is the tagline; kept as a named alias for the hero. */
+export const HERO_LINE = TAGLINE;
 export const MOTTO = "Crafted for Love. Created to Last.";
-export const TAGLINE = "Luxurious rings at an affordable price.";
-export const POSITIONING_LINE = "Get affordable yet luxurious rings.";

@@ -1211,3 +1211,40 @@ app working at every step.
   the monogram, so the logo image is visible on mobile. The `compact` prop was
   dropped from `<Logo>` rather than left unused. The monogram remains the
   favicon (`src/app/icon.svg`).
+
+## 2026-11-10 — New tagline and brand pillars
+
+### Changed
+
+- **Tagline is now "Timeless Elegance, Exceptional Craftsmanship."** It replaces
+  "Luxurious rings at an affordable price." (`ProductReq.md` §1.2).
+  - `src/lib/tagline.ts`: `TAGLINE` carries the new line and `HERO_LINE` is an
+    alias of it, so there is one source of truth. `POSITIONING_LINE`
+    ("Get affordable yet luxurious rings.") was **removed** — it was exported
+    but never rendered.
+  - `src/components/storefront/hero.tsx`: the sub-line no longer repeats the
+    tagline (the `<h1>` already states it); it opens with "Discover rings for
+    engagements, weddings and personal milestones…".
+  - `src/app/layout.tsx`: the SEO description names the tagline once instead of
+    printing hero line and tagline back to back.
+  - `src/app/(storefront)/page.tsx`: homepage title uses `TAGLINE` instead of a
+    hard-coded copy of the old string.
+  - `scripts/seed.ts`, `scripts/seed.prod-query.js`: settings default updated.
+- **Affordable-luxury messaging removed sitewide.** The "Why us" strip
+  (`src/components/storefront/category-pills.tsx`) now uses the client's pillar
+  titles verbatim — Timeless Elegance, Exceptional Craftsmanship, Trust &
+  Integrity, Personalized Service — with the client's own sentences for the
+  first two and the existing site sentences for the other two. The four-column
+  layout is unchanged; Lasting Legacy stays carried by the motto.
+- **Docs:** `ProductReq.md` §1.2 now lists the tagline and the five pillars and
+  §5.1 no longer says "affordable luxury"; `DESIGN.md` (brand promise, §8 tone
+  note) and `AGENTS.md` §1/§5 record the new tagline and pillars.
+
+### Not done
+
+- The live `settings.tagline` document in MongoDB is untouched: update it once
+  in **admin → Settings → tagline** (or re-run the prod query on a fresh
+  database) so email footers and the settings screen show the new line.
+- The market/positioning text in `ProductReq.md` §1.1, §1.3 and goal G1 still
+  describes an "approachable price point". That is background context, not
+  on-site copy, so it was left as written — tell me if it should change too.

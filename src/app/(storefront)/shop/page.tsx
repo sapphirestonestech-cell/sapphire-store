@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { TAGLINE, POSITIONING_LINE } from "@/lib/tagline";
+import { TAGLINE } from "@/lib/tagline";
 import {
   ShopExplorer,
   type FacetOptions,
@@ -114,7 +114,7 @@ async function ShopSlot({ searchParams }: { searchParams: SearchParams }) {
           ? `Results for “${params.q}”`
           : (categoryName ?? shopHeadingFor(params))
       }
-      tagline={POSITIONING_LINE}
+      tagline={TAGLINE}
     />
   );
 }

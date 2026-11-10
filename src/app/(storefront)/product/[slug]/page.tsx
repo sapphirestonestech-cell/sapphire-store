@@ -14,7 +14,7 @@ import { ProductModel, type ProductDoc } from "@/lib/models/product";
 import { CategoryModel } from "@/lib/models/category";
 import { queryProducts, toSummary, type ProductSummary } from "@/lib/products";
 import { formatArrivalLong } from "@/lib/format";
-import { TAGLINE } from "@/lib/tagline";
+import { MOTTO, TAGLINE } from "@/lib/tagline";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -212,9 +212,9 @@ async function ProductDetail({ params }: PageProps) {
           </section>
 
           <div className="rounded-md bg-accent-wash/60 p-5">
-            <p className="text-body-lg text-primary">{TAGLINE}</p>
+            <p className="text-body-lg text-primary">{MOTTO}</p>
             <p className="mt-1 text-body text-muted">
-              Secure payment · Clear delivery costs · Pre-order welcome
+              {TAGLINE} Secure payment · Clear delivery costs · Pre-order welcome
             </p>
           </div>
         </div>

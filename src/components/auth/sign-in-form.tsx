@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { signIn } from "next-auth/react";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { BRAND_NAME } from "@/lib/tagline";
 
 export function SignInForm({
   googleEnabled,
@@ -112,7 +113,7 @@ export function SignInForm({
       </form>
 
       <p className="text-center text-body text-muted">
-        New to Sapphire?{" "}
+        New to {BRAND_NAME}?{" "}
         <Link
           href={`/sign-up${callbackUrl !== "/account" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`}
           className="text-primary underline underline-offset-4"

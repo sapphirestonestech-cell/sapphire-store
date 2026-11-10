@@ -5,7 +5,7 @@ import "./globals.css";
 import { CurrencyProvider } from "@/components/currency-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SitePattern } from "@/components/shell/site-pattern";
-import { TAGLINE } from "@/lib/tagline";
+import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -16,9 +16,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: TAGLINE,
-    template: `%s · Sapphire`,
+    template: `%s · ${BRAND_NAME}`,
   },
-  description: `${TAGLINE} Get affordable yet luxurious rings.`,
+  description: `${TAGLINE} Shop fine rings for engagements, weddings and everyday elegance — in stock or available to pre-order, priced in USD or NGN.`,
 };
 
 /**

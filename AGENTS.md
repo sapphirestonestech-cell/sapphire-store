@@ -10,7 +10,9 @@ Instructions for the AI coding agent building the luxury ring e-commerce store. 
 
 **What we are building:** A responsive e-commerce web application (storefront plus admin dashboard) that sells rings.
 
-**Brand promise:** Luxurious rings at an affordable price. ("Get affordable yet luxurious rings.") This tagline must be clearly visible across the platform.
+**Brand promise:** Timeless Elegance, Exceptional Craftsmanship. This tagline must be clearly visible across the platform.
+
+**Brand pillars:** Timeless Elegance, Exceptional Craftsmanship, Trust & Integrity, Personalized Service, Lasting Legacy.
 
 **Brand feel:** Sleek, a little cute, and communicating luxury, gold and elegance.
 
@@ -120,7 +122,7 @@ Do not start implementation until the answers that block the current phase are s
 
 Adopt the working approach in the `frontend-design` skill for all UI work:
 
-- **Ground the design in the subject.** This is a luxury-but-affordable ring store. Choices about layout, imagery and type should come from that world. If you are unsure of the audience or primary job of a page, ask me.
+- **Ground the design in the subject.** This is a luxury ring store. Choices about layout, imagery and type should come from that world. If you are unsure of the audience or primary job of a page, ask me.
 - **Plan before you build.** For each page or major component, write a short design plan first: color (named hex values), type (faces and roles), layout concept (short prose and ASCII wireframes, including alignment), and principles.
 - **Check the plan against `DESIGN.md`.** The plan must use the design system's tokens, not new ones. If the design system lacks something, ask me instead of inventing it.
 - **Check the plan against the brief for generic defaults.** The skill lists common "templated" tells (for example the same card style everywhere, tracked-out all-caps eyebrow labels, decorative numbering, scattered entrance animations). Avoid them unless `DESIGN.md` or I explicitly call for them. Where `DESIGN.md` pins down a look, follow it exactly, even if it resembles one of those defaults.

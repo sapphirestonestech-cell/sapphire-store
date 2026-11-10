@@ -362,3 +362,16 @@ to be used as the app logo.
 | — | Which crop where? | **Wordmark only** in the header and admin sidebar (the "FINE JEWELRY" subline is illegible below ~40px). **Full lockup** in the footer, auth cards and admin login, where there is room for the subline. |
 | — | Transparency? | The supplied file has a white background. White was knocked out to alpha and the colour un-premultiplied, so no white halo appears on dark. Masters kept: `logo-full.png` / `logo-wordmark.png` + WebP. |
 | — | Monogram? | `public/brand/s-monogram.svg` — a purpose-drawn variable-width "S" (gold on ink), supplied as the favicon. **Not yet wired** as the live favicon. |
+
+## 2026-11-10 — Tagline changed
+
+The client replaced the tagline. The new wording was already in the code as the
+hero headline (`HERO_LINE`), so the two strings were merged into one.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | What is the tagline now? | **"Timeless Elegance, Exceptional Craftsmanship."** It replaces "Luxurious rings at an affordable price." everywhere: announcement bar, footer, listing header, auth screens, admin login, product/checkout/order pages, SEO metadata and transactional email footers. Supersedes the 2026-10-17 tagline decision and the 2026-10-29 note that the affordable line stayed as `TAGLINE`. |
+| — | Hero headline vs tagline | They are the same string. `HERO_LINE` is kept as an alias of `TAGLINE`; the hero's sub-line no longer repeats it, and the root metadata description names it once. |
+| — | Does the affordable-luxury promise go away? | **Yes — removed from the site.** `POSITIONING_LINE` ("Get affordable yet luxurious rings.") is deleted; it was exported but never rendered. The "Why us" strip carries the client's pillars instead, and `ProductReq.md` §1.2 and §5.1, `DESIGN.md` and `AGENTS.md` no longer mention affordability. The brand pillars are **Timeless Elegance, Exceptional Craftsmanship, Trust & Integrity, Personalized Service, Lasting Legacy**. |
+| — | Pillar copy and layout | **Titles and bodies exactly as the client supplied them** for Timeless Elegance ("We create jewelry that transcends trends and remains beautiful for generations.") and Exceptional Craftsmanship ("Every piece is selected or created with meticulous attention to quality and detail."). Trust & Integrity and Personalized Service keep the sentences already on the site. The strip **stays four columns** (ProductReq.md §5.1); Lasting Legacy remains carried by the motto "Crafted for Love. Created to Last." |
+| — | Live database value | Only the constant and seed defaults changed. `scripts/seed.ts` / `scripts/seed.prod-query.js` write the new value on a fresh seed; an existing `settings.tagline` document is updated once by the client in **admin → Settings → tagline**. |

@@ -47,8 +47,10 @@ The store owner (admin) manages the entire business from a dashboard: uploading 
 
 ### 1.2 Brand Promise and Tagline
 
-> **Luxurious rings at an affordable price.**
-> (Positioning line: "Get affordable yet luxurious rings.")
+> **Timeless Elegance, Exceptional Craftsmanship.**
+
+Brand pillars: Timeless Elegance, Exceptional Craftsmanship, Trust & Integrity,
+Personalized Service and Lasting Legacy.
 
 This promise must be spelled out clearly and repeatedly throughout the platform, not hidden in the footer. Required placements:
 
@@ -227,7 +229,7 @@ Category links are generated from the categories the admin creates.
 - **New arrivals** row, sorted by publish date.
 - **Pre-order highlight:** a dedicated strip showing upcoming rings with arrival dates.
 - **Category tiles** pulled from active categories.
-- **Why us** strip: affordable luxury, secure payment, fast delivery, pre-order available.
+- **Why us** strip: the four brand pillars (timeless elegance, exceptional craftsmanship, trust & integrity, personalized service), with secure payment, fast delivery and pre-order availability stated elsewhere on the page.
 - **Footer** with links, social handles, contact, and payment method badges.
 
 ### 5.2 Product Listing Page
