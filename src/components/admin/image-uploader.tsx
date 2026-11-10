@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { RingPlaceholder } from "@/components/ui/ring-placeholder";
+import {
+  getCloudinarySignature,
+  uploadFileToCloudinary,
+} from "@/lib/cloudinary-client";
 
 const MAX_IMAGES = 4;
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -11,47 +15,6 @@ export interface SlotValue {
   url: string;
   publicId?: string;
   label: string;
-}
-
-interface UploadSignature {
-  cloudName: string;
-  apiKey: string;
-  timestamp: number;
-  folder: string;
-  signature: string;
-}
-
-async function getSignature(): Promise<UploadSignature> {
-  const res = await fetch("/api/admin/upload-signature");
-  const data = (await res.json()) as UploadSignature & { error?: string };
-  if (!res.ok) throw new Error(data.error ?? "Uploads are unavailable.");
-  return data;
-}
-
-async function uploadToCloudinary(
-  file: File,
-  sig: UploadSignature,
-): Promise<{ url: string; publicId: string }> {
-  const form = new FormData();
-  form.append("file", file);
-  form.append("api_key", sig.apiKey);
-  form.append("timestamp", String(sig.timestamp));
-  form.append("folder", sig.folder);
-  form.append("signature", sig.signature);
-
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`,
-    { method: "POST", body: form },
-  );
-  const data = (await res.json()) as {
-    secure_url?: string;
-    public_id?: string;
-    error?: { message?: string };
-  };
-  if (!res.ok || !data.secure_url) {
-    throw new Error(data.error?.message ?? "The upload failed. Try again.");
-  }
-  return { url: data.secure_url, publicId: data.public_id ?? "" };
 }
 
 /**
@@ -103,8 +66,8 @@ export function ImageUploader({
 
     setBusyIndex(index);
     try {
-      const sig = await getSignature();
-      const uploaded = await uploadToCloudinary(file, sig);
+      const sig = await getCloudinarySignature("products");
+      const uploaded = await uploadFileToCloudinary(file, sig);
       setSlot(index, { url: uploaded.url, publicId: uploaded.publicId });
     } catch (err) {
       const message =
@@ -140,10 +103,13 @@ export function ImageUploader({
         </p>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {slots.map((slot, i) => (
-          <div key={i} className="space-y-2">
-            <div className="relative aspect-square overflow-hidden rounded-sm border border-border-subtle bg-card">
+          <div
+            key={i}
+            className="flex gap-3 rounded-md border border-border-subtle bg-card p-3"
+          >
+            <div className="relative size-20 shrink-0 overflow-hidden rounded-sm border border-border-subtle bg-card">
               {slot.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -155,7 +121,7 @@ export function ImageUploader({
                 <RingPlaceholder label={i === 0 ? "Cover" : `Image ${i + 1}`} />
               )}
               {i === 0 ? (
-                <span className="absolute left-2 top-2 rounded-sm bg-card/90 px-2 py-0.5 text-label font-medium">
+                <span className="absolute left-1 top-1 rounded-sm bg-card/90 px-1.5 py-0.5 text-label font-medium">
                   Cover
                 </span>
               ) : null}
@@ -166,43 +132,45 @@ export function ImageUploader({
               ) : null}
             </div>
 
-            <label className="block">
-              <span className="sr-only">Image {i + 1} label</span>
-              <input
-                type="text"
-                value={slot.label}
-                onChange={(e) => setSlot(i, { label: e.target.value })}
-                placeholder={
-                  i === 0 ? "Cover (optional label)" : "e.g. Left hand"
-                }
-                className="h-10 w-full rounded-pill border border-border-subtle bg-card px-3 text-body"
-              />
-            </label>
-
-            <div className="flex gap-2">
-              <label className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-pill border border-border-subtle bg-card px-3 text-label font-medium">
-                {slot.url ? "Replace" : "Upload"}
+            <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+              <label className="block">
+                <span className="sr-only">Image {i + 1} label</span>
                 <input
-                  type="file"
-                  accept={ACCEPTED.join(",")}
-                  className="sr-only"
-                  disabled={busyIndex !== null}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) pickFile(i, file);
-                    e.target.value = "";
-                  }}
+                  type="text"
+                  value={slot.label}
+                  onChange={(e) => setSlot(i, { label: e.target.value })}
+                  placeholder={
+                    i === 0 ? "Cover (optional label)" : "e.g. Left hand"
+                  }
+                  className="h-10 w-full rounded-sm border border-border-subtle bg-card px-3 text-body"
                 />
               </label>
-              {slot.url ? (
-                <button
-                  type="button"
-                  onClick={() => setSlot(i, { url: "", publicId: "" })}
-                  className="inline-flex min-h-9 items-center rounded-pill px-3 text-label font-medium text-danger"
-                >
-                  Remove
-                </button>
-              ) : null}
+
+              <div className="flex gap-2">
+                <label className="inline-flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-sm border border-border-subtle bg-card px-3 text-label font-medium">
+                  {slot.url ? "Replace" : "Upload"}
+                  <input
+                    type="file"
+                    accept={ACCEPTED.join(",")}
+                    className="sr-only"
+                    disabled={busyIndex !== null}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) pickFile(i, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {slot.url ? (
+                  <button
+                    type="button"
+                    onClick={() => setSlot(i, { url: "", publicId: "" })}
+                    className="inline-flex min-h-9 items-center rounded-sm px-3 text-label font-medium text-danger"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
         ))}

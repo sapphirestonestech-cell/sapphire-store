@@ -1,3 +1,4 @@
+import "ckeditor5/ckeditor5.css";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import type { ReactNode } from "react";

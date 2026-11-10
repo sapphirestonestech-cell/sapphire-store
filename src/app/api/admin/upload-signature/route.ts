@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/admin/auth";
  * The browser uploads directly to Cloudinary; only signed uploads are
  * allowed (file validation is also enforced on the product schema).
  */
-export async function GET() {
+export async function GET(request: Request) {
   const auth = await requireAdmin();
   if (!auth.ok) return auth.response;
 
@@ -25,8 +25,9 @@ export async function GET() {
     );
   }
 
+  const requested = new URL(request.url).searchParams.get("folder");
   const timestamp = Math.round(Date.now() / 1000);
-  const folder = "sapphire/products";
+  const folder = requested === "email" ? "sapphire/email" : "sapphire/products";
   const signature = cloudinary.utils.api_sign_request(
     { timestamp, folder },
     apiSecret,
