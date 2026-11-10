@@ -48,17 +48,6 @@ async function loadCategories() {
   }
 }
 
-async function loadFeatured(): Promise<ProductSummary[]> {
-  try {
-    await connection();
-    const { products } = await queryProducts({}, { limit: 8 });
-    const featured = products.filter((p) => p.isFeatured);
-    return (featured.length > 0 ? featured : products).slice(0, 4);
-  } catch {
-    return [];
-  }
-}
-
 function EmptyCatalogNotice() {
   return (
     <div className="rounded-md bg-card p-10 text-center shadow-card">
@@ -130,19 +119,9 @@ export default function HomePage({
 }: {
   searchParams: SearchParams;
 }) {
-  const featuredPromise = loadFeatured();
-
   return (
     <>
-      <Suspense
-        fallback={
-          <div className="page-width py-20">
-            <div className="mx-auto h-12 w-2/3 animate-pulse rounded bg-border-default/60" />
-          </div>
-        }
-      >
-        <HeroSlot featuredPromise={featuredPromise} />
-      </Suspense>
+      <Hero />
 
       <Suspense
         fallback={
@@ -159,15 +138,6 @@ export default function HomePage({
       <div className="h-16 md:h-20" />
     </>
   );
-}
-
-async function HeroSlot({
-  featuredPromise,
-}: {
-  featuredPromise: Promise<ProductSummary[]>;
-}) {
-  const featured = await featuredPromise;
-  return <Hero featured={featured} />;
 }
 
 async function lookupCategoryName(slug: string): Promise<string | null> {

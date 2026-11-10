@@ -375,3 +375,17 @@ hero headline (`HERO_LINE`), so the two strings were merged into one.
 | — | Does the affordable-luxury promise go away? | **Yes — removed from the site.** `POSITIONING_LINE` ("Get affordable yet luxurious rings.") is deleted; it was exported but never rendered. The "Why us" strip carries the client's pillars instead, and `ProductReq.md` §1.2 and §5.1, `DESIGN.md` and `AGENTS.md` no longer mention affordability. The brand pillars are **Timeless Elegance, Exceptional Craftsmanship, Trust & Integrity, Personalized Service, Lasting Legacy**. |
 | — | Pillar copy and layout | **Titles and bodies exactly as the client supplied them** for Timeless Elegance ("We create jewelry that transcends trends and remains beautiful for generations.") and Exceptional Craftsmanship ("Every piece is selected or created with meticulous attention to quality and detail."). Trust & Integrity and Personalized Service keep the sentences already on the site. The strip **stays four columns** (ProductReq.md §5.1); Lasting Legacy remains carried by the motto "Crafted for Love. Created to Last." |
 | — | Live database value | Only the constant and seed defaults changed. `scripts/seed.ts` / `scripts/seed.prod-query.js` write the new value on a fresh seed; an existing `settings.tagline` document is updated once by the client in **admin → Settings → tagline**. |
+
+## 2026-11-10 — Photography hero
+
+The client supplied `background.JPG` (1080×608) for the homepage hero and asked
+for the brand block on the left of it.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Which image and where does it live? | **`public/hero/hero-background.jpg`**, copied from the client's `background.JPG` at the repo root (the original is left in place). Served through `next/image`, which emits the responsive widths and WebP/AVIF variants; no hand-made derivatives. |
+| — | Hero copy | **"Sapphire Stones"** (h1), **"Fine jewelry"** in gold, then the official tagline **"Timeless Elegance, Exceptional Craftsmanship."** The client's typed "Timeless, Elegance, exceptional craftsmanship" was confirmed to be a typo. |
+| — | What happens to the old hero? | The floating product cards, the descriptive paragraph and the `featured` prop are **removed**; `Hero` takes no props again and `loadFeatured` is deleted. The **"Shop rings"** and **"See the pre-order collection"** calls to action stay. |
+| — | Legibility over photography | **A navy scrim, `--hero-scrim: #0B1A33`**, sampled from the photograph's own velvet, with fixed white type in both themes. `DESIGN.md` has no overlay/scrim token, so this is a recorded deviation, not a new brand colour; the hero band is always dark because the image is. Contrast: white on the scrim ≈15:1, gold `--accent` ≈6:1. |
+| — | Mobile behaviour | The scrim turns vertical, the image is anchored `object-[72%_50%]` so the ring stays in frame, and the two calls to action stack instead of sitting side by side. |
+| — | Image resolution | 1080×608 is **below** what a full-width hero wants; it is shipped as supplied and will soften on wide screens. Replace `public/hero/hero-background.jpg` when a 2400px+ original exists. |

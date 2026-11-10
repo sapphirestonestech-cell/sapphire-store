@@ -1270,3 +1270,23 @@ app working at every step.
 - `APP_URL` must be set on the Helicarrier service to
   `https://sapphire-store.on.helicarrier.xyz` (or the final domain). Without it
   the fallback has nothing correct to use.
+
+## 2026-11-10 — Photographic hero
+
+### Changed
+
+- **Homepage hero is now a full-bleed photograph.** `src/components/storefront/hero.tsx`
+  rebuilt around the client's `background.JPG` (copied to
+  `public/hero/hero-background.jpg`, served through `next/image`). Copy sits on
+  the left: "Sapphire Stones" (h1), "Fine jewelry" in gold, then the tagline.
+  The "Shop rings" and "See the pre-order collection" calls to action remain;
+  the floating product cards, descriptive paragraph and `featured` prop are
+  gone, so `Hero` takes no props and `loadFeatured` was deleted from
+  `(storefront)/page.tsx`.
+- `globals.css`: new `--hero-scrim: #0B1A33` (sampled from the photo) and a
+  `.hero-scrim` gradient — horizontal on desktop, vertical below `md`, dense
+  where the copy sits so the cream bokeh cannot fight the type. The single
+  orchestrated entrance now animates `.hero-enter`; `.constellation-card` and
+  its keyframes were removed. Reduced-motion still disables it.
+- Calls to action stack on phones; the image is anchored right on narrow crops
+  so the ring stays in frame.

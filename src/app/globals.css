@@ -142,6 +142,31 @@
   }
 }
 
+/* Hero photograph band (DECISIONS.md, 2026-11-10). The image is dark in both
+   themes, so the band carries its own navy scrim and fixed light type. The
+   gradient mirrors the photo — dense on the left where the copy sits — and
+   turns vertical on phones, where the copy overlaps the ring. */
+.hero-scrim {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--hero-scrim) 96%, transparent) 0%,
+    color-mix(in srgb, var(--hero-scrim) 90%, transparent) 45%,
+    color-mix(in srgb, var(--hero-scrim) 52%, transparent) 68%,
+    transparent 88%
+  );
+}
+
+@media (max-width: 767px) {
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--hero-scrim) 92%, transparent) 0%,
+      color-mix(in srgb, var(--hero-scrim) 82%, transparent) 55%,
+      color-mix(in srgb, var(--hero-scrim) 94%, transparent) 100%
+    );
+  }
+}
+
 /*
  * Theme colours (DESIGN.md §2, §10, §11). Plain custom properties, not
  * `@theme`, so `[data-theme="dark"]` can override them at runtime. The
@@ -186,6 +211,11 @@
     --success: #1f9d4f;
     --warning: #a8741a;
     --info: #2255d6;
+
+    /* Hero photograph scrim. Sampled from the supplied hero image's own navy
+       velvet, so it is not a second brand colour; fixed in both themes because
+       the photograph underneath is always dark (DECISIONS.md, 2026-11-10). */
+    --hero-scrim: #0b1a33;
 
     /* Layout (§2.7) */
     --sidebar-w: 224px;
@@ -413,8 +443,8 @@ button:disabled,
   }
 }
 
-/* The single orchestrated entrance: hero constellation drift (§6) */
-@keyframes constellation-drift {
+/* The single orchestrated entrance: hero copy drifts in once on load (§6) */
+@keyframes hero-drift {
   from {
     opacity: 0;
     transform: translateY(16px);
@@ -425,12 +455,12 @@ button:disabled,
   }
 }
 
-.constellation-card {
-  animation: constellation-drift 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+.hero-enter {
+  animation: hero-drift 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .constellation-card {
+  .hero-enter {
     animation: none;
   }
 }
