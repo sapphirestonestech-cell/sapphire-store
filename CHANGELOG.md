@@ -1248,3 +1248,25 @@ app working at every step.
 - The market/positioning text in `ProductReq.md` §1.1, §1.3 and goal G1 still
   describes an "approachable price point". That is background context, not
   on-site copy, so it was left as written — tell me if it should change too.
+
+## 2026-11-10 — Paystack return URL behind the proxy
+
+### Fixed
+
+- **Paystack sent customers to `https://0.0.0.0:8080` after paying.**
+  `src/app/api/payments/initialize/route.ts` built Paystack's `callback_url`
+  from `req.nextUrl.origin`. Behind Helicarrier's reverse proxy that origin is
+  the container's own binding, so the browser was redirected to an address that
+  does not exist. Paystack now uses that origin only when it is a real public
+  address; any host-internal origin (`0.0.0.0`, `127.0.0.1`, `localhost`,
+  `[::1]`, empty or unparseable) falls back to `APP_URL`. BACHS behaviour is
+  unchanged, and the loopback `&app=` bounce is now applied to Paystack too so a
+  local customer behind a tunnel is returned to their own origin. The bounce
+  only ever carries a loopback origin, which is what the return page accepts, so
+  there is still no open redirect.
+
+### Note
+
+- `APP_URL` must be set on the Helicarrier service to
+  `https://sapphire-store.on.helicarrier.xyz` (or the final domain). Without it
+  the fallback has nothing correct to use.

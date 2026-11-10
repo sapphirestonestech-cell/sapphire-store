@@ -10,6 +10,31 @@ import { resolveCheckoutOptions } from '@/lib/payments/checkout-options'
 import { readGatewayKey } from '@/lib/payments/keys'
 import { randomUUID } from 'crypto'
 
+/** Addresses that only resolve inside the host/container, never on the internet. */
+const INTERNAL_HOSTNAMES = ['0.0.0.0', '127.0.0.1', 'localhost', '[::1]', '::1']
+
+/** Origins a customer can actually be browsing from on their own machine. */
+const LOOPBACK_HOSTNAMES = ['127.0.0.1', 'localhost', '[::1]', '::1']
+
+/** Empty or host-internal origin — unusable in a gateway redirect. */
+function isInternalOrigin(origin: string): boolean {
+  try {
+    const { hostname } = new URL(origin)
+    return !hostname || INTERNAL_HOSTNAMES.includes(hostname)
+  } catch {
+    return true
+  }
+}
+
+/** Origins the checkout return page may bounce a browser back to. */
+function isLoopbackOrigin(origin: string): boolean {
+  try {
+    return LOOPBACK_HOSTNAMES.includes(new URL(origin).hostname)
+  } catch {
+    return false
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}))
@@ -96,19 +121,26 @@ export async function POST(req: NextRequest) {
     // Two origins, deliberately different:
     //
     //  * `appOrigin` — the site the customer is actually browsing (localhost in
-    //    dev). Paystack's `callback_url` is a plain browser redirect, so it can
-    //    point straight here: the customer lands back on localhost:3000.
+    //    dev). A gateway `callback_url` is a plain browser redirect, so it is
+    //    fine to send the customer straight back here.
     //  * `publicOrigin` — a public URL, because BACHS rejects localhost in
     //    `success_url` (verified against the sandbox: "success_url must be a
     //    publicly accessible URL (localhost is not allowed)"). BACHS therefore
     //    returns to `publicOrigin` with `&app=<appOrigin>`, and the return page
     //    server-redirects the browser back to the customer's own origin.
+    //
+    // Behind a reverse proxy `req.nextUrl.origin` is not the site's public
+    // address: Helicarrier serves the app on https://0.0.0.0:8080, so a
+    // Paystack callback built from it sends the customer to an address that
+    // does not exist. Any host-internal origin falls back to `publicOrigin`.
     const appOrigin = (req.nextUrl.origin || '').replace(/\/+$/, '')
     const publicOrigin = (
       process.env.APP_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
       appOrigin
     ).replace(/\/+$/, '')
+    const loopbackAppOrigin =
+      appOrigin && isLoopbackOrigin(appOrigin) ? appOrigin : ''
     const isLocalOrigin = (() => {
       try {
         const u = new URL(publicOrigin)
@@ -131,12 +163,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Send the browser back to the origin it came from; only BACHS needs the
-    // public hop.
-    const returnTo = gateway === 'bachs' ? publicOrigin : appOrigin
+    // BACHS always needs the public origin. Paystack can use the customer's own
+    // origin, but only when it is a real public address.
+    const returnTo =
+      gateway === 'bachs' || isInternalOrigin(appOrigin)
+        ? publicOrigin
+        : appOrigin
     const bounce =
-      gateway === 'bachs' && appOrigin && appOrigin !== publicOrigin
-        ? `&app=${encodeURIComponent(appOrigin)}`
+      loopbackAppOrigin && loopbackAppOrigin !== publicOrigin
+        ? `&app=${encodeURIComponent(loopbackAppOrigin)}`
         : ''
 
     if (gateway === 'paystack') {
@@ -146,7 +181,7 @@ export async function POST(req: NextRequest) {
         amountSubunit,
         currency: charge.currency,
         reference: ref,
-        callbackUrl: `${returnTo}/checkout/return?order=${order.orderNumber}&ref=${ref}`,
+        callbackUrl: `${returnTo}/checkout/return?order=${order.orderNumber}&ref=${ref}${bounce}`,
         metadata: { orderNumber: order.orderNumber },
         secretKey,
       })
