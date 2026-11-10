@@ -3,11 +3,11 @@ import Link from "next/link";
 import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
 
 /**
- * Homepage hero — the one bold moment (DESIGN.md §5). The client's
- * photograph stays legible under a light navy wash and a gentle blur; the
- * copy rides a frosted-glass panel, so the type is always readable while
- * the ring and gold bokeh keep their sparkle around it. Centred at every
- * size; the calls to action stack on phones.
+ * Homepage hero — the one bold moment (DESIGN.md §5). Editorial concept:
+ * the client's photograph runs crisp and full-bleed under a left-weighted
+ * navy scrim; the brand name sits large and left in stacked display type,
+ * so the type anchors the left half while the ring holds the right. No
+ * panel, no box — type on image.
  */
 export function Hero() {
   return (
@@ -18,23 +18,24 @@ export function Hero() {
         fill
         priority
         sizes="100vw"
-        className="-z-10 scale-[1.04] object-cover object-[72%_50%] blur-[2px] md:object-center"
+        className="-z-10 object-cover object-[72%_50%] md:object-center"
       />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[var(--hero-scrim)]/35"
-      />
+      <div aria-hidden="true" className="hero-scrim absolute inset-0 -z-10" />
 
-      <div className="page-width relative flex min-h-[540px] items-center justify-center py-16 md:min-h-[600px] md:py-24">
-        <div className="hero-enter w-full max-w-xl rounded-md bg-[var(--hero-scrim)]/60 px-6 py-10 text-center shadow-float ring-1 ring-accent/40 backdrop-blur-md md:px-12 md:py-14">
-          <h1 className="font-sans text-display font-semibold text-white">
-            {BRAND_NAME}
+      <div className="page-width relative flex min-h-[540px] items-center py-16 md:min-h-[640px] md:py-24">
+        <div className="hero-enter max-w-2xl">
+          <h1 className="hero-display font-sans font-semibold text-white">
+            {BRAND_NAME.split(" ").map((word) => (
+              <span key={word} className="block">
+                {word}
+              </span>
+            ))}
           </h1>
-          <p className="mt-1 text-body-lg text-accent">Fine jewelry</p>
-          <p className="mx-auto mt-6 max-w-md text-body-lg text-white/90">
+          <p className="mt-4 text-subheading text-accent">Fine jewelry</p>
+          <p className="mt-6 max-w-sm text-body-lg text-white/85">
             {TAGLINE}
           </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-6 sm:gap-y-3">
+          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3">
             <Link
               href="/shop"
               className="inline-flex min-h-12 items-center rounded-pill bg-accent px-8 text-body-lg font-medium text-accent-contrast shadow-gold-glow transition-transform duration-fast hover:scale-[1.03]"

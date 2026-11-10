@@ -143,9 +143,27 @@
 }
 
 /* Hero photograph band (DECISIONS.md, 2026-11-10). The image is dark in both
-   themes, so the band keeps its own navy wash and fixed light type. The copy
-   rides a frosted-glass panel (backdrop-blur) with a gold hairline; no
-   gradient is needed. */
+   themes, so the band carries its own navy scrim and fixed light type. The
+   gradient is dense on the left where the copy sits and gives up before the
+   ring on the right, so the stone keeps its sparkle. */
+.hero-scrim {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--hero-scrim) 93%, transparent) 0%,
+    color-mix(in srgb, var(--hero-scrim) 85%, transparent) 38%,
+    color-mix(in srgb, var(--hero-scrim) 45%, transparent) 60%,
+    transparent 76%
+  );
+}
+
+/* Oversized hero display type (client instruction, 2026-11-10: "make it
+   big"). Supersedes the 48px --text-display cap for the hero h1 only; the
+   fluid clamp keeps one size in step with the viewport at every width. */
+.hero-display {
+  font-size: clamp(44px, 7vw, 92px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
 
 /*
  * Theme colours (DESIGN.md §2, §10, §11). Plain custom properties, not

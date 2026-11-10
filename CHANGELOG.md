@@ -1305,3 +1305,26 @@ app working at every step.
 - `globals.css`: the `.hero-scrim` gradient rules are gone (the band is a flat
   wash + glass panel now); band comment updated. Desktop band is taller
   (`md:min-h-[600px]`).
+
+## 2026-11-10 — Hero rebuilt as editorial type-on-image
+
+### Changed
+
+- **The overlay panel is gone.** `src/components/storefront/hero.tsx` is now
+  an editorial hero: the client's photograph runs crisp and full-bleed (no
+  blur, no box) under a left-weighted navy scrim that fades out before the
+  ring. The brand name sits large on the left in stacked display type —
+  "Sapphire" over "Stones" — anchoring the left half against the ring on the
+  right. Gold "Fine jewelry", tagline and both calls to action unchanged;
+  CTAs stack on phones.
+- `globals.css`: `.hero-display` — `clamp(44px, 7vw, 92px)`, line-height 1.04,
+  tracking -0.02em — supersedes the 48px display cap for the hero h1 only
+  (client instruction "make it big"; recorded in DECISIONS.md). `.hero-scrim`
+  gradient returns: 93% navy on the left, transparent by 76% so the stone
+  keeps its sparkle. Band height `min-h-[540px]` / `md:min-h-[640px]`.
+
+### Fixed
+
+- The dev server on :3000 had been running since Nov 1 and its CSS watcher
+  was wedged, silently serving stale `globals.css` while JSX changes flowed.
+  Restarted; hero styles now compile through.

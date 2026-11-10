@@ -405,3 +405,17 @@ translucent box.
 | — | Heading | Stays white at **600** (heaviest weight DESIGN.md defines), `text-display` 48px desktop / 32px mobile. |
 | — | Band height | `min-h-[540px]` mobile / `md:min-h-[600px]` desktop so the panel breathes. |
 | — | Verification | Chrome CDP at true 390/768/1440: no horizontal overflow, panel centred (offset 0px), frost `blur(12px)` applied, CTAs stacked below `sm` and side-by-side from `sm` up. The 542px panel measurement is `max-w-xl` (36rem) under the project's deliberate global `font-size: 97.087%` + `zoom: 0.97` scale-down — not a bug. |
+
+## 2026-11-10 — Hero rebuilt as editorial type-on-image (no panel)
+
+The client rejected the overlay panel outright ("I don't want the stupid
+rectangular box on the hero") and asked for the text moved left, made big, and
+a total concept change.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Concept | **Editorial type-on-image.** No panel, no box, no blur: the photograph runs crisp and full-bleed under a left-weighted navy scrim (dense where the copy sits, transparent before the ring at ~76%), so the ring and gold bokeh stay visible on the right. The oversized stacked brand name anchors the left half while the ring holds the right — that balance is what fixes the "tilted" feeling. |
+| — | Headline size | **`clamp(44px, 7vw, 92px)`** via a `.hero-display` class. This supersedes the 48px `--text-display` cap from DESIGN.md §3 for the hero h1 only (client instruction: "make it big"). Documented deviation; all other type roles unchanged. |
+| — | Headline shape | "Sapphire" / "Stones" on two stacked lines (`<span class="block">` per word), weight 600, white, line-height 1.04. |
+| — | Everything else | Gold "Fine jewelry" (subheading role), tagline, and both calls to action unchanged; CTAs stack below `sm`. Band `min-h-[540px]` / `md:min-h-[640px]`. |
+| — | Verification | Chrome CDP at true 390/768/1024/1440: no horizontal overflow, zero box styling (transparent bg, no border/radius/shadow/backdrop), h1 44→92px, copy flush to the page gutter, CTAs responsive. Note: found and fixed a wedged dev server (running since Nov 1) that was serving stale `globals.css` — custom CSS changes were invisible until restart; JSX utilities were unaffected. |
