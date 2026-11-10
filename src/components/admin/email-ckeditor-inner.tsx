@@ -20,6 +20,7 @@ import {
   LinkImage,
   List,
   Paragraph,
+  Plugin,
   Table,
   TableToolbar,
   Underline,
@@ -53,12 +54,14 @@ class CloudinaryUploadAdapter {
   abort(): void {}
 }
 
-function uploadAdapterPlugin(editor: ClassicEditor): void {
-  const repository = editor.plugins.get("FileRepository") as unknown as {
-    createUploadAdapter: (loader: FileLoaderLike) => CloudinaryUploadAdapter;
-  };
-  repository.createUploadAdapter = (loader) =>
-    new CloudinaryUploadAdapter(loader);
+class UploadAdapterPlugin extends Plugin {
+  init(): void {
+    const repository = this.editor.plugins.get("FileRepository") as unknown as {
+      createUploadAdapter: (loader: FileLoaderLike) => CloudinaryUploadAdapter;
+    };
+    repository.createUploadAdapter = (loader) =>
+      new CloudinaryUploadAdapter(loader);
+  }
 }
 
 export default function EmailCkeditorInner({
@@ -101,7 +104,7 @@ export default function EmailCkeditorInner({
             Table,
             TableToolbar,
           ],
-          extraPlugins: [uploadAdapterPlugin],
+          extraPlugins: [UploadAdapterPlugin],
           toolbar: [
             "undo",
             "redo",

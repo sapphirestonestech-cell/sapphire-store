@@ -1,7 +1,8 @@
-import mongoose, { type FilterQuery } from "mongoose";
+import mongoose from "mongoose";
+import { type OrderFilter } from "@/lib/admin/orders";
 import { connectDb } from "@/lib/db";
 import { CustomerModel } from "@/lib/models/customer";
-import { OrderModel, type OrderDoc } from "@/lib/models/order";
+import { OrderModel } from "@/lib/models/order";
 import { ProductModel } from "@/lib/models/product";
 import { CategoryModel } from "@/lib/models/category";
 import { MarketingSuppressionModel } from "@/lib/models/email";
@@ -54,7 +55,7 @@ interface BuyerRow {
   orders: number;
 }
 
-function paidFilter(extra: FilterQuery<OrderDoc> = {}): FilterQuery<OrderDoc> {
+function paidFilter(extra: OrderFilter = {}): OrderFilter {
   return {
     status: { $in: PAID_ORDER_STATUSES },
     paymentMode: { $ne: "test" },
@@ -63,7 +64,7 @@ function paidFilter(extra: FilterQuery<OrderDoc> = {}): FilterQuery<OrderDoc> {
 }
 
 async function buyerRows(
-  extra: FilterQuery<OrderDoc> = {},
+  extra: OrderFilter = {},
 ): Promise<BuyerRow[]> {
   return OrderModel.aggregate<BuyerRow>([
     { $match: paidFilter(extra) },

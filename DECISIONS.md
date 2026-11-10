@@ -452,3 +452,19 @@ Note: the dev server's CSS watcher wedged twice more during this task (serving
 stale `globals.css` after edits); each was resolved by restarting `next dev`.
 If hero styles ever look wrong in development, restart the dev server before
 judging the code.
+
+## 2026-11-10 — Unblocking the Helicarrier production deploy
+
+The client asked me to deploy the latest commit; four production deploys were
+failing on Helicarrier. Root causes, all from the email-marketing WIP commit
+(9fbd554), and fixes:
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Cause 1 | `npm run build` (what Helicarrier runs) failed type-check on `audience.ts(1,25)`: `FilterQuery` is not exported by the installed mongoose 9.11.2 — it was removed/renamed (`QueryFilter`). Dev server runs fine because it skips type-checking. |
+| — | Fix 1 | Reuse the repo's own `OrderFilter` type (`Parameters<typeof sanitizeFilter<OrderDoc>>[0]` = mongoose 9's `QueryFilter<OrderDoc>`, already proven in `src/lib/admin/orders.ts`) instead of importing an internal mongoose type name. Type-only change, no behavior change. |
+| — | Cause 2 | `email-ckeditor-inner.tsx(104,26)`: a plain function `(editor: ClassicEditor) => void` is not assignable to CKEditor's `PluginConstructor<Editor>`. |
+| — | Fix 2 | Convert it to a class extending CKEditor's `Plugin` with an `init()` that registers the Cloudinary upload adapter — the canonical CKEditor 5 shape (exactly how SimpleUploadAdapter registers). Same runtime behavior, type-correct. |
+| — | Cause 3 | With types fixed, the build's static generation failed on `/unsubscribe`: the page awaits `searchParams` (URL token) at top level, so Next.js 16 refuses to prerender it ("uncached or runtime data during prerendering"). |
+| — | Fix 3 | `export const instant = false` on the unsubscribe page — the codebase's established convention for inherently dynamic pages (checkout/return, sign-in, account, admin panel). The page now renders on demand (ƒ), correct for a token page. |
+| — | Verification | `npm run build` passes fully: compiled successfully, all 71 routes generated. `tsc --noEmit` and `eslint` clean on all three changed files. |

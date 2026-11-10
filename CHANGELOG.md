@@ -1355,3 +1355,24 @@ app working at every step.
   same treatment the first photographic hero used on phones; desktop is
   unchanged. Verified at true 320/390/767/768/1440 in Chrome CDP; white type
   keeps ≈11:1 contrast over the photo's brightest area.
+
+## 2026-11-10 — Fix the email-marketing build errors so production can deploy
+
+### Fixed
+
+- **`FilterQuery` type import (audience.ts)** — mongoose 9.11.2 does not export
+  `FilterQuery` (it is now `QueryFilter`); the email-marketing WIP imported it,
+  which failed `npm run build`'s type-check and broke every production deploy
+  since. Now reuses the repo's `OrderFilter` type (identical type, already
+  proven in the orders code). Type-only, no behavior change.
+- **CKEditor upload adapter plugin (email-ckeditor-inner.tsx)** — the Cloudinary
+  upload adapter was a plain function, which CKEditor's types reject as an
+  `extraPlugins` entry. Converted to a class extending `Plugin` (canonical
+  CKEditor 5 shape, same runtime behavior).
+- **`/unsubscribe` prerender failure** — the page reads a URL token at top
+  level, so Next.js 16 refused to prerender it. Marked it
+  `export const instant = false`, matching the convention used by
+  checkout/return and the auth pages; it now renders on demand.
+
+`npm run build` now passes fully (all 71 routes); `tsc --noEmit` and `eslint`
+clean on all three files.

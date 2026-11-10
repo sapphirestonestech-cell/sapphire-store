@@ -6,6 +6,10 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+/* The whole page depends on the URL token, so it can never be prerendered
+   — same treatment as checkout/return and the auth pages (see DECISIONS.md). */
+export const instant = false;
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function UnsubscribePage({
