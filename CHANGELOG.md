@@ -1376,3 +1376,10 @@ app working at every step.
 
 `npm run build` now passes fully (all 71 routes); `tsc --noEmit` and `eslint`
 clean on all three files.
+
+### Deployed
+
+- Production deploy `b9124f06` on Helicarrier is **active** (build ~5 min;
+  an earlier attempt died to a transient builder-connection EOF, retried
+  clean). Live HTML verified: one-line hero lockup, mobile scrim, and
+  section spacing all serving from sapphirestone.on.helicarrier.xyz.
