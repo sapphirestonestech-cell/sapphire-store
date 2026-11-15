@@ -214,7 +214,7 @@ async function ProductDetail({ params }: PageProps) {
           <div className="rounded-md bg-accent-wash/60 p-5">
             <p className="text-body-lg text-primary">{MOTTO}</p>
             <p className="mt-1 text-body text-muted">
-              {TAGLINE} Secure payment · Clear delivery costs · Pre-order welcome
+              {TAGLINE} Secure payment · Delivery estimate before checkout · Pre-order welcome
             </p>
           </div>
         </div>

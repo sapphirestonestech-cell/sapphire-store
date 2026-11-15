@@ -11,6 +11,7 @@ import { CategoryModel } from "@/lib/models/category";
 import { AdminUserModel } from "@/lib/models/settings";
 import { getSession } from "@/lib/session";
 import { Logo } from "@/components/brand/logo";
+import { WhatsAppFab } from "@/components/support/whatsapp-fab";
 
 async function loadNavCategories(): Promise<NavCategory[]> {
   try {
@@ -108,6 +109,7 @@ function StorefrontShell({ children }: { children: ReactNode }) {
       <HeaderSlot />
       <main className="flex-1">{children}</main>
       <Footer />
+      <WhatsAppFab />
     </div>
   );
 }

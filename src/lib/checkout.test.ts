@@ -67,9 +67,10 @@ describe("computeOrderTotals", () => {
   it("charges one in-stock shipment fee and totals correctly", () => {
     const totals = computeOrderTotals([item({ quantity: 2 })], LOCATION);
     expect(totals.subtotalMinor).toBe(13600);
+    // The fee is recorded for the back office but never charged online.
     expect(totals.deliveryTotalMinor).toBe(800);
-    expect(totals.totalMinor).toBe(14400);
-    expect(totals.amountDueNowMinor).toBe(14400);
+    expect(totals.totalMinor).toBe(13600);
+    expect(totals.amountDueNowMinor).toBe(13600);
     expect(totals.amountDueLaterMinor).toBe(0);
     expect(totals.shipments).toHaveLength(1);
     expect(totals.shipments[0].kind).toBe("in_stock");
@@ -146,8 +147,9 @@ describe("computeOrderTotals", () => {
     // 110.00 → 11000; deposit 30% = 3300 now, 7700 later
     expect(totals.subtotalMinor).toBe(11000);
     expect(totals.amountDueLaterMinor).toBe(7700);
-    // due now = deposit (3300) + pre-order delivery fee (1200)
-    expect(totals.amountDueNowMinor).toBe(3300 + 1200);
+    // Due now is the item deposit only; the pre-order delivery fee is recorded
+    // but not charged online.
+    expect(totals.amountDueNowMinor).toBe(3300);
   });
 
   it("charges an in-stock line in full even if the store also has deposits", () => {
@@ -165,10 +167,20 @@ describe("computeOrderTotals", () => {
       ],
       LOCATION,
     );
-    // in-stock 6800 now + pre-order deposit 5000 now = 11800, + fees 800 + 1200
-    expect(totals.amountDueNowMinor).toBe(6800 + 5000 + 800 + 1200);
+    // in-stock 6800 now + pre-order deposit 5000 now = 11800; no delivery.
+    expect(totals.amountDueNowMinor).toBe(6800 + 5000);
     expect(totals.amountDueLaterMinor).toBe(5000);
-    expect(totals.totalMinor).toBe(6800 + 10000 + 800 + 1200);
+    expect(totals.totalMinor).toBe(6800 + 10000);
+  });
+
+  it("never adds delivery to the total or the amount collected", () => {
+    const totals = computeOrderTotals([item({ quantity: 1 })], LOCATION);
+    expect(totals.deliveryTotalMinor).toBeGreaterThan(0);
+    expect(totals.totalMinor).toBe(totals.subtotalMinor);
+    expect(totals.amountDueNowMinor).toBe(totals.subtotalMinor);
+    expect(totals.amountDueNowMinor + totals.amountDueLaterMinor).toBe(
+      totals.totalMinor,
+    );
   });
 
   it("returns zero totals for an empty cart", () => {

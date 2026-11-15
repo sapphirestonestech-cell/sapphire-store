@@ -1477,3 +1477,40 @@ clean on all three files.
   rejection. Not the login cause; fixing it needs a service config change
   (writable rootfs) or self-hosted image CDN settings — raised for a decision.
 
+
+---
+
+## 2026-11-16 — Items-only checkout, accurate emails, WhatsApp support
+
+### Changed
+
+- **Delivery is no longer collected online.** `computeOrderTotals` now sets
+  `totalMinor` and `amountDueNowMinor` to goods only; `deliveryTotalMinor` is
+  still computed and stored on the order for the back office
+  (`src/lib/checkout.ts`). Pre-order deposits are unchanged: deposit now, item
+  balance later.
+- **Customers never see a delivery fee.** Removed from checkout, the customer
+  order page, the product delivery estimator, the shipping/addresses copy and
+  the product tagline strip. The public delivery endpoints no longer return fee
+  fields at all, so the fee is not visible in the page or its network calls;
+  the server still computes and stores it for the back office. Admin totals are
+  relabelled "Items subtotal" / "Delivery fee (not charged online)" / "Items
+  total" so the recorded fee is clear without implying it was charged.
+- **Order emails now match the gateway.** The customer and admin emails report
+  the exact `paymentAmountMinor` in `paymentCurrency` as "Paid now", with the
+  item lines, items total, any balance due later, the delivery estimate,
+  gateway and reference. Amounts stored in the base currency are converted with
+  the order's frozen exchange rate before formatting, fixing a symbol/amount
+  mismatch (`src/lib/email.ts`, `src/lib/payments/fulfil.ts`).
+- **WhatsApp support.** New `src/lib/whatsapp.ts` (number normalisation +
+  `wa.me` builder) and `src/components/support/whatsapp-fab.tsx` (right-side
+  floating button) mounted in the storefront layout. Checkout and the order
+  page carry an inline "Chat with support on WhatsApp" link. Configured via
+  `NEXT_PUBLIC_WHATSAPP_NUMBER`.
+
+### Verified
+
+- `npm run typecheck` clean; `npm test` 117/117 (new WhatsApp and email
+  formatting tests, new "never adds delivery" regression test); `npx eslint src`
+  clean apart from the pre-existing `email/queue.ts` warning; `npm run build`
+  succeeds.

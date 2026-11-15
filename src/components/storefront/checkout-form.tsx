@@ -12,6 +12,7 @@ import { formatPrice, priceIn } from "@/lib/currency";
 import { SaveForLaterButton } from "@/components/storefront/save-for-later-button";
 import { usePaymentOptions } from "@/components/storefront/use-payment-options";
 import { MOTTO, TAGLINE } from "@/lib/tagline";
+import { SUPPORT_WHATSAPP_MESSAGE, whatsAppUrl } from "@/lib/whatsapp";
 
 interface LocationOption {
   id: string;
@@ -19,8 +20,6 @@ interface LocationOption {
   country: string;
   region: string | null;
   cityArea: string;
-  instockFee: number;
-  preorderFee: number;
   minDays: number;
   maxDays: number;
 }
@@ -61,6 +60,9 @@ export function CheckoutForm({
   const router = useRouter();
   const { items } = useCart();
   const { currency, baseCurrency, usdToNgn, rounding } = useCurrency();
+  const supportHref = whatsAppUrl(SUPPORT_WHATSAPP_MESSAGE, {
+    NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
+  });
 
   const [locations, setLocations] = useState<LocationOption[]>([]);
   const [locationsError, setLocationsError] = useState<string | null>(null);
@@ -118,8 +120,11 @@ export function CheckoutForm({
       country: location.country,
       region: location.region ?? undefined,
       cityArea: location.cityArea,
-      instockFee: location.instockFee,
-      preorderFee: location.preorderFee,
+      // Fees are not sent to the browser and never contribute to what the
+      // customer sees or pays online (DECISIONS 2026-11-16). The server
+      // recomputes and records them from the admin's rules.
+      instockFee: 0,
+      preorderFee: 0,
       minDays: location.minDays,
       maxDays: location.maxDays,
     });
@@ -340,21 +345,12 @@ export function CheckoutForm({
                         {s.minDays}–{s.maxDays} days
                       </p>
                     </div>
-                    <p className="text-body font-medium">
-                      {s.freeDelivery ? (
-                        "Free"
-                      ) : (
-                        <Price amount={fromMinor(s.deliveryFeeMinor)} />
-                      )}
-                    </p>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="mt-3 text-body text-muted">
-                {location
-                  ? "Delivery fee is included below."
-                  : "Choose your location to see delivery time and fees."}
+                Choose your location to see the delivery estimate.
               </p>
             )}
           </fieldset>
@@ -389,23 +385,7 @@ export function CheckoutForm({
 
           {totals ? (
             <dl className="space-y-2 border-t border-border-subtle pt-4 text-body">
-              <div className="flex justify-between">
-                <dt className="text-muted">Subtotal</dt>
-                <dd className="font-medium">
-                  <Price amount={fromMinor(totals.subtotalMinor)} />
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">Delivery</dt>
-                <dd className="font-medium">
-                  {totals.deliveryTotalMinor === 0 ? (
-                    "Free"
-                  ) : (
-                    <Price amount={fromMinor(totals.deliveryTotalMinor)} />
-                  )}
-                </dd>
-              </div>
-              <div className="flex justify-between border-t border-border-subtle pt-2 text-body-lg">
+              <div className="flex justify-between text-body-lg">
                 <dt className="font-medium">Total</dt>
                 <dd className="font-semibold">
                   <Price amount={fromMinor(totals.totalMinor)} />
@@ -527,6 +507,21 @@ export function CheckoutForm({
               ) : null}
             </div>
           </fieldset>
+
+          {supportHref ? (
+            <p className="text-body text-muted">
+              Questions about delivery or this order before you pay?{" "}
+              <a
+                href={supportHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-accent-strong underline underline-offset-2"
+              >
+                Chat with support on WhatsApp
+              </a>
+              .
+            </p>
+          ) : null}
 
           <button
             type="submit"

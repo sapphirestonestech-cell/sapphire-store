@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Price } from "@/components/price";
-import type { Currency } from "@/lib/currency";
 
 export interface LocationOption {
   id: string;
@@ -14,16 +12,14 @@ interface EstimateResult {
   kind: "in_stock" | "preorder" | "not_served";
   message?: string;
   locationLabel?: string;
-  feeBase?: number;
-  freeDelivery?: boolean;
-  baseCurrency?: Currency;
   daysLabel?: string;
   arrivalLabel?: string | null;
 }
 
 /**
  * Delivery estimator — DESIGN.md §7.12. Choose a location from the
- * admin-defined list and see the fee and days before checkout.
+ * admin-defined list and see how long delivery takes before checkout.
+ * Fees are not shown: customers pay for items only (DECISIONS 2026-11-16).
  */
 export function DeliveryEstimator({
   locations,
@@ -122,24 +118,14 @@ export function DeliveryEstimator({
                 {result.arrivalLabel ? (
                   <>Arrives {result.arrivalLabel}. </>
                 ) : null}
-                Shipping to {result.locationLabel}:{" "}
+                Shipping to {result.locationLabel}: {result.daysLabel} after
+                arrival.
               </>
             ) : (
-              <>Delivery to {result.locationLabel}: </>
+              <>
+                Delivery to {result.locationLabel}: {result.daysLabel}.
+              </>
             )}
-            <span className="font-semibold">
-              <Price
-                amount={result.feeBase ?? 0}
-                baseCurrency={result.baseCurrency}
-              />
-            </span>
-            {result.freeDelivery ? <> — free delivery</> : null}
-            {result.kind === "preorder" ? (
-              <>, then {result.daysLabel} after arrival</>
-            ) : (
-              <> · {result.daysLabel}</>
-            )}
-            .
           </p>
         ) : null}
 

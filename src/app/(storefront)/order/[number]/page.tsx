@@ -10,6 +10,7 @@ import { fromMinor } from "@/lib/checkout";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
 import type { OrderDoc } from "@/lib/models/order";
 import { MOTTO, TAGLINE } from "@/lib/tagline";
+import { SUPPORT_WHATSAPP_MESSAGE, whatsAppUrl } from "@/lib/whatsapp";
 
 export const metadata = {
   title: "Order confirmation",
@@ -56,6 +57,9 @@ async function OrderDetail({ params }: PageProps) {
 
   const pending = order.status === "pending_payment";
   const location = order.location;
+  const supportHref = whatsAppUrl(SUPPORT_WHATSAPP_MESSAGE, {
+    NEXT_PUBLIC_WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER,
+  });
 
   return (
     <div className="page-width py-8 md:py-12">
@@ -180,26 +184,11 @@ async function OrderDetail({ params }: PageProps) {
                       {s.minDays}–{s.maxDays} days
                     </p>
                   </div>
-                  <p className="text-body font-medium">
-                    {s.freeDelivery ? "Free" : money(s.deliveryFeeMinor, order)}
-                  </p>
                 </li>
               ))}
             </ul>
             <dl className="space-y-2 border-t border-border-subtle pt-4 text-body">
-              <div className="flex justify-between">
-                <dt className="text-muted">Subtotal</dt>
-                <dd>{money(order.subtotalMinor, order)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted">Delivery</dt>
-                <dd>
-                  {order.deliveryTotalMinor === 0
-                    ? "Free"
-                    : money(order.deliveryTotalMinor, order)}
-                </dd>
-              </div>
-              <div className="flex justify-between border-t border-border-subtle pt-2 text-body-lg">
+              <div className="flex justify-between text-body-lg">
                 <dt className="font-medium">Total</dt>
                 <dd className="font-semibold">{money(order.totalMinor, order)}</dd>
               </div>
@@ -216,6 +205,20 @@ async function OrderDetail({ params }: PageProps) {
                     <dd>{money(order.amountDueLaterMinor, order)}</dd>
                   </div>
                 </>
+              ) : null}
+              {order.paymentStatus === "paid" &&
+              order.paymentAmountMinor != null &&
+              ((order.paymentCurrency ?? order.currency) !== order.currency ||
+                order.paymentAmountMinor !== order.amountDueNowMinor) ? (
+                <div className="flex justify-between text-muted">
+                  <dt>Paid</dt>
+                  <dd>
+                    {formatPrice(
+                      fromMinor(order.paymentAmountMinor),
+                      order.paymentCurrency ?? order.currency,
+                    )}
+                  </dd>
+                </div>
               ) : null}
             </dl>
           </div>
@@ -239,6 +242,16 @@ async function OrderDetail({ params }: PageProps) {
               Keep your order number handy and reach out — we&apos;ll take care of
               the rest.
             </p>
+            {supportHref ? (
+              <a
+                href={supportHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex min-h-12 items-center text-body font-medium text-accent-strong underline underline-offset-2"
+              >
+                Chat with support on WhatsApp
+              </a>
+            ) : null}
           </div>
         </section>
 

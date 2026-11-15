@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { BRAND_NAME, TAGLINE } from "@/lib/tagline";
+import { fromMinor, toMinor } from "@/lib/checkout";
+import { priceIn } from "@/lib/currency";
 
 /**
  * Transactional email — Gmail SMTP when GMAIL_USER and GMAIL_APP_PASSWORD are
@@ -128,11 +130,91 @@ export async function sendPasswordResetEmail(
   await send(email, subject, text, html, `password reset link ${resetUrl}`);
 }
 
+/** Currency-aware money formatting for the transactional emails. */
+export function formatEmailMoney(
+  minor: number,
+  currency: "USD" | "NGN",
+): string {
+  const symbol = currency === "NGN" ? "₦" : "$";
+  const major = minor / 100;
+  // Naira is normally whole; keep kobo visible when an amount has them.
+  const showFraction = currency === "USD" || minor % 100 !== 0;
+  return `${symbol}${major.toLocaleString(
+    currency === "NGN" ? "en-NG" : "en-US",
+    {
+      minimumFractionDigits: showFraction ? 2 : 0,
+      maximumFractionDigits: showFraction ? 2 : 0,
+    },
+  )}`;
+}
+
+interface OrderEmailItem {
+  name: string;
+  sizeLabel: string;
+  quantity: number;
+  availability: "in_stock" | "pre_order";
+  preorderArrivalDate?: Date | null;
+  unitPriceMinor: number;
+  lineTotalMinor: number;
+  dueNowMinor: number;
+  dueLaterMinor: number;
+  paymentMode?: "full" | "deposit";
+  depositPercent?: number;
+}
+
+/**
+ * The exact payment figure. `paymentAmountMinor` is what was sent to the
+ * gateway at initialize, in `paymentCurrency`; older rows fall back to the
+ * items due now in the order's display currency. Emails use this — never a
+ * recomputation from `totalMinor` — so the receipt always matches the
+ * gateway (DECISIONS 2026-11-16).
+ */
+export function paidAmount(order: {
+  paymentAmountMinor?: number | null;
+  paymentCurrency?: "USD" | "NGN" | null;
+  amountDueNowMinor: number;
+  currency: "USD" | "NGN";
+}): { minor: number; currency: "USD" | "NGN" } {
+  return {
+    minor: order.paymentAmountMinor ?? order.amountDueNowMinor,
+    currency: order.paymentCurrency ?? order.currency,
+  };
+}
+
+/**
+ * Format a base-currency `*Minor` value in the currency the customer browsed
+ * in, at the rate frozen on the order — the same conversion the order page
+ * uses. Order fields are always stored in `baseCurrency`, so printing them
+ * with the display currency's symbol (the old behaviour) could be wrong by
+ * the whole exchange rate.
+ */
+export function displayMoney(
+  minor: number,
+  order: {
+    baseCurrency: "USD" | "NGN";
+    currency: "USD" | "NGN";
+    exchangeRate: number;
+  },
+): string {
+  return formatEmailMoney(
+    toMinor(
+      priceIn(
+        fromMinor(minor),
+        order.baseCurrency,
+        order.currency,
+        order.exchangeRate,
+      ),
+    ),
+    order.currency,
+  );
+}
+
 /**
  * Order confirmation email — sent after payment is verified (ProductReq.md
  * §11.2). Shows order number, item lines with quantity/size, delivery to
- * location, and the total charged. Failure is logged but never thrown:
- * payment verification must not roll back because an email failed.
+ * location, and **the amount actually charged** in the currency the gateway
+ * charged it in, plus any pre-order balance. Failure is logged but never
+ * thrown: payment verification must not roll back because an email failed.
  */
 export async function sendOrderConfirmationEmail(
   email: string,
@@ -140,30 +222,40 @@ export async function sendOrderConfirmationEmail(
     orderNumber: string;
     customer: { name: string };
     currency: "USD" | "NGN";
-    items: {
-      name: string;
-      sizeLabel: string;
-      quantity: number;
-      availability: "in_stock" | "pre_order";
-      preorderArrivalDate?: Date | null;
-    }[];
+    baseCurrency: "USD" | "NGN";
+    exchangeRate: number;
+    items: OrderEmailItem[];
     location: {
       cityArea: string;
       region?: string;
       country: string;
     };
+    subtotalMinor: number;
     totalMinor: number;
+    amountDueNowMinor: number;
+    amountDueLaterMinor: number;
+    paymentAmountMinor?: number | null;
+    paymentCurrency?: "USD" | "NGN" | null;
+    paymentGateway?: "paystack" | "bachs";
+    paymentReference?: string;
+    shipments?: {
+      kind: "in_stock" | "pre_order";
+      minDays: number;
+      maxDays: number;
+      arrivalDate?: Date | null;
+    }[];
     createdAt: Date;
   },
 ): Promise<void> {
-  const fmtMinor = (minor: number): string => {
-    const symbol = order.currency === "NGN" ? "₦" : "$";
-    const major = minor / 100;
-    if (order.currency === "NGN") {
-      return `${symbol}${major.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-    }
-    return `${symbol}${major.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
+  const fmt = formatEmailMoney;
+  const display = (minor: number) => displayMoney(minor, order);
+  const charged = paidAmount(order);
+  const converted = charged.currency !== order.currency;
+  const gateway = order.paymentGateway
+    ? order.paymentGateway === "paystack"
+      ? "Paystack"
+      : "BACHS"
+    : null;
 
   const subject = `Order ${order.orderNumber} confirmed — ${BRAND_NAME}`;
   const dateStr = order.createdAt.toLocaleDateString("en-US", {
@@ -178,9 +270,13 @@ export async function sendOrderConfirmationEmail(
         item.availability === "pre_order" && item.preorderArrivalDate
           ? `<br/><span style="color:#8A8178;font-size:13px;">Arriving ${new Date(item.preorderArrivalDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>`
           : "";
+      const deposit =
+        item.paymentMode === "deposit" && item.dueLaterMinor > 0
+          ? `<br/><span style="color:#8A8178;font-size:13px;">${item.depositPercent ?? 0}% deposit · ${display(item.dueNowMinor)} now, ${display(item.dueLaterMinor)} before shipping</span>`
+          : "";
       return `<li style="padding:8px 0;border-bottom:1px solid #EEE6DA;">
-        <span style="font-weight:600;">${item.name}</span>
-        <span style="color:#8A8178;"> · Size ${item.sizeLabel} · Qty ${item.quantity}${item.availability === "pre_order" ? " · Pre-order" : ""}</span>${arrival}
+        <span style="font-weight:600;">${escapeHtml(item.name)}</span>
+        <span style="color:#8A8178;"> · Size ${escapeHtml(item.sizeLabel)} · Qty ${item.quantity}${item.availability === "pre_order" ? " · Pre-order" : ""} · ${display(item.lineTotalMinor)}</span>${arrival}${deposit}
       </li>`;
     })
     .join("");
@@ -188,19 +284,54 @@ export async function sendOrderConfirmationEmail(
   const textLines = order.items
     .map(
       (i) =>
-        `  ${i.name} — Size ${i.sizeLabel} × ${i.quantity}${i.availability === "pre_order" ? " (Pre-order)" : ""}`,
+        `  ${i.name} — Size ${i.sizeLabel} × ${i.quantity}${i.availability === "pre_order" ? " (Pre-order)" : ""} — ${display(i.lineTotalMinor)}`,
     )
     .join("\n");
 
-  const text = `Hi ${order.customer.name},\n\nYour payment for order ${order.orderNumber} has been verified and your order is confirmed.\n\nItems:\n${textLines}\n\nTotal: ${fmtMinor(order.totalMinor)}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}\n\nPlaced: ${dateStr}\n\n${TAGLINE}`;
+  const balance =
+    order.amountDueLaterMinor > 0
+      ? `\nBalance due before shipping: ${display(order.amountDueLaterMinor)}`
+      : "";
+  const balanceHtml =
+    order.amountDueLaterMinor > 0
+      ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Balance due before shipping: ${display(order.amountDueLaterMinor)}</p>`
+      : "";
+  const conversionNote = converted
+    ? `\nCharged in ${charged.currency === "NGN" ? "naira" : "US dollars"} at the rate locked on your order.`
+    : "";
+  const conversionHtml = converted
+    ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Charged in ${charged.currency === "NGN" ? "naira" : "US dollars"} at the rate locked on your order.</p>`
+    : "";
+  const reference = order.paymentReference
+    ? `\nReference: ${order.paymentReference}`
+    : "";
+  const referenceHtml = order.paymentReference
+    ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Reference: ${escapeHtml(order.paymentReference)}</p>`
+    : "";
+  const estimate =
+    order.shipments && order.shipments.length > 0
+      ? order.shipments
+          .map(
+            (s) =>
+              `${s.kind === "in_stock" ? "In-stock" : "Pre-order"} ${s.minDays}–${s.maxDays} days`,
+          )
+          .join(" · ")
+      : null;
+
+  const text = `Hi ${order.customer.name},\n\nYour payment for order ${order.orderNumber} has been verified and your order is confirmed.\n\nItems:\n${textLines}\n\nItems total: ${display(order.subtotalMinor)}\nPaid now: ${fmt(charged.minor, charged.currency)}${conversionNote}${balance}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}${estimate ? ` (${estimate})` : ""}\n${gateway ? `Paid with: ${gateway}${reference}\n` : ""}\nPlaced: ${dateStr}\n\n${TAGLINE}`;
 
   const html = shell(
     `Order ${order.orderNumber} confirmed`,
-    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Hi ${order.customer.name}, your payment has been verified and your order is confirmed.</p>
+    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Hi ${escapeHtml(order.customer.name)}, your payment has been verified and your order is confirmed.</p>
      <ul style="list-style:none;padding:0;margin:0 0 20px;">${itemRows}</ul>
-     <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Total: ${fmtMinor(order.totalMinor)}</p>
-     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}</p>
-     <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">Order ${order.orderNumber} · ${dateStr}</p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Items total: ${display(order.subtotalMinor)}</p>
+     <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Paid now: ${fmt(charged.minor, charged.currency)}</p>
+     ${conversionHtml}
+     ${balanceHtml}
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${escapeHtml(order.location.cityArea)}${order.location.region ? `, ${escapeHtml(order.location.region)}` : ""}, ${escapeHtml(order.location.country)}${estimate ? ` · ${escapeHtml(estimate)}` : ""}</p>
+     ${gateway ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Paid with ${gateway}</p>` : ""}
+     ${referenceHtml}
+     <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">Order ${escapeHtml(order.orderNumber)} · ${dateStr}</p>
      <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:0;">${TAGLINE}</p>`,
   );
 
@@ -215,7 +346,9 @@ export async function sendOrderConfirmationEmail(
 
 /**
  * New paid-order alert for the store admins — ProductReq.md §11.3. Sent after
- * a payment is verified, once per admin. Delivery failure is logged per
+ * a payment is verified, once per admin. Reports the exact charged amount and
+ * currency, the item total, any pre-order balance, and the recorded delivery
+ * fee (which is not collected online). Delivery failure is logged per
  * recipient and never thrown: fulfilment must not depend on email.
  */
 export async function sendAdminNewOrderEmail(
@@ -225,31 +358,34 @@ export async function sendAdminNewOrderEmail(
     orderNumber: string;
     customer: { name: string; email: string; phone: string };
     currency: "USD" | "NGN";
-    items: {
-      name: string;
-      sizeLabel: string;
-      quantity: number;
-      availability: "in_stock" | "pre_order";
-    }[];
+    baseCurrency: "USD" | "NGN";
+    exchangeRate: number;
+    items: OrderEmailItem[];
     location: { cityArea: string; region?: string; country: string };
+    subtotalMinor: number;
     totalMinor: number;
+    amountDueNowMinor: number;
     amountDueLaterMinor: number;
+    deliveryTotalMinor?: number;
+    paymentAmountMinor?: number | null;
+    paymentCurrency?: "USD" | "NGN" | null;
     paymentGateway?: "paystack" | "bachs";
     paymentReference?: string;
+    shipments?: {
+      kind: "in_stock" | "pre_order";
+      minDays: number;
+      maxDays: number;
+      arrivalDate?: Date | null;
+    }[];
     createdAt: Date;
   },
 ): Promise<void> {
   if (recipients.length === 0) return;
 
-  const fmtMinor = (minor: number): string => {
-    const symbol = order.currency === "NGN" ? "₦" : "$";
-    const major = minor / 100;
-    if (order.currency === "NGN") {
-      return `${symbol}${major.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-    }
-    return `${symbol}${major.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  };
-
+  const fmt = formatEmailMoney;
+  const display = (minor: number) => displayMoney(minor, order);
+  const charged = paidAmount(order);
+  const converted = charged.currency !== order.currency;
   const base = (process.env.APP_URL ?? "http://localhost:3000").replace(
     /\/$/,
     "",
@@ -271,7 +407,7 @@ export async function sendAdminNewOrderEmail(
       (item) =>
         `<li style="padding:8px 0;border-bottom:1px solid #EEE6DA;">
           <span style="font-weight:600;">${escapeHtml(item.name)}</span>
-          <span style="color:#8A8178;"> · Size ${escapeHtml(item.sizeLabel)} · Qty ${item.quantity}${item.availability === "pre_order" ? " · Pre-order" : ""}</span>
+          <span style="color:#8A8178;"> · Size ${escapeHtml(item.sizeLabel)} · Qty ${item.quantity}${item.availability === "pre_order" ? " · Pre-order" : ""} · ${display(item.lineTotalMinor)}</span>
         </li>`,
     )
     .join("");
@@ -279,24 +415,49 @@ export async function sendAdminNewOrderEmail(
   const textLines = order.items
     .map(
       (item) =>
-        `  ${item.name} — Size ${item.sizeLabel} × ${item.quantity}${item.availability === "pre_order" ? " (Pre-order)" : ""}`,
+        `  ${item.name} — Size ${item.sizeLabel} × ${item.quantity}${item.availability === "pre_order" ? " (Pre-order)" : ""} — ${display(item.lineTotalMinor)}`,
     )
     .join("\n");
 
+  const conversionNote = converted
+    ? `\nCharged in ${charged.currency === "NGN" ? "naira" : "US dollars"} at the order's frozen rate.`
+    : "";
+  const conversionHtml = converted
+    ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Charged in ${charged.currency === "NGN" ? "naira" : "US dollars"} at the order's frozen rate.</p>`
+    : "";
   const dueLater =
     order.amountDueLaterMinor > 0
-      ? `\nDue later: ${fmtMinor(order.amountDueLaterMinor)}`
+      ? `\nBalance due before shipping: ${display(order.amountDueLaterMinor)}`
+      : "";
+  const dueLaterHtml =
+    order.amountDueLaterMinor > 0
+      ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Balance due before shipping: ${display(order.amountDueLaterMinor)}</p>`
+      : "";
+  const deliveryFee =
+    (order.deliveryTotalMinor ?? 0) > 0
+      ? `\nDelivery fee recorded (not charged online): ${display(order.deliveryTotalMinor ?? 0)}`
+      : "";
+  const deliveryFeeHtml =
+    (order.deliveryTotalMinor ?? 0) > 0
+      ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery fee recorded (not charged online): ${display(order.deliveryTotalMinor ?? 0)}</p>`
       : "";
   const reference = order.paymentReference
     ? `\nReference: ${order.paymentReference}`
     : "";
+  const referenceHtml = order.paymentReference
+    ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Reference: ${escapeHtml(order.paymentReference)}</p>`
+    : "";
+  const estimate =
+    order.shipments && order.shipments.length > 0
+      ? order.shipments
+          .map(
+            (s) =>
+              `${s.kind === "in_stock" ? "In-stock" : "Pre-order"} ${s.minDays}–${s.maxDays} days`,
+          )
+          .join(" · ")
+      : null;
 
-  const text = `New paid order ${order.orderNumber}.\n\nCustomer: ${order.customer.name}\nEmail: ${order.customer.email}\nPhone: ${order.customer.phone}\n\nItems:\n${textLines}\n\nTotal: ${fmtMinor(order.totalMinor)}${dueLater}\nPaid with: ${gateway}${reference}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}\nPlaced: ${dateStr}\n\nOpen the order: ${orderUrl}`;
-
-  const dueLaterHtml =
-    order.amountDueLaterMinor > 0
-      ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Due later: ${fmtMinor(order.amountDueLaterMinor)}</p>`
-      : "";
+  const text = `New paid order ${order.orderNumber}.\n\nCustomer: ${order.customer.name}\nEmail: ${order.customer.email}\nPhone: ${order.customer.phone}\n\nItems:\n${textLines}\n\nItems total: ${display(order.subtotalMinor)}\nPaid now: ${fmt(charged.minor, charged.currency)}${conversionNote}${dueLater}${deliveryFee}\nPaid with: ${gateway}${reference}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}${estimate ? ` (${estimate})` : ""}\nPlaced: ${dateStr}\n\nOpen the order: ${orderUrl}`;
 
   const html = shell(
     `New paid order ${escapeHtml(order.orderNumber)}`,
@@ -305,10 +466,14 @@ export async function sendAdminNewOrderEmail(
      <p style="font-size:13px;color:#8A8178;margin:0 0 2px;">${escapeHtml(order.customer.email)}</p>
      <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">${escapeHtml(order.customer.phone)}</p>
      <ul style="list-style:none;padding:0;margin:0 0 20px;">${itemRows}</ul>
-     <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Total: ${fmtMinor(order.totalMinor)}</p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Items total: ${display(order.subtotalMinor)}</p>
+     <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Paid now: ${fmt(charged.minor, charged.currency)}</p>
+     ${conversionHtml}
      ${dueLaterHtml}
+     ${deliveryFeeHtml}
      <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Paid with ${gateway}${order.paymentReference ? ` · ${escapeHtml(order.paymentReference)}` : ""}</p>
-     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${escapeHtml(order.location.cityArea)}${order.location.region ? `, ${escapeHtml(order.location.region)}` : ""}, ${escapeHtml(order.location.country)}</p>
+     ${referenceHtml}
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${escapeHtml(order.location.cityArea)}${order.location.region ? `, ${escapeHtml(order.location.region)}` : ""}, ${escapeHtml(order.location.country)}${estimate ? ` · ${escapeHtml(estimate)}` : ""}</p>
      <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">Order ${escapeHtml(order.orderNumber)} · ${dateStr}</p>
      <a href="${orderUrl}" style="display:inline-block;background:#C9A24B;color:#211D19;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:999px;">Open in back office</a>
      <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:20px 0 0;">${TAGLINE}</p>`,

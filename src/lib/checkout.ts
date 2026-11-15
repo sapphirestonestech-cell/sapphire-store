@@ -73,10 +73,19 @@ export interface ComputedShipment {
 export interface OrderTotals {
   items: ComputedItem[];
   shipments: ComputedShipment[];
+  /** Goods only: the sum of every line. */
   subtotalMinor: number;
+  /**
+   * Delivery the admin's location rules would charge. Recorded for the back
+   * office only — customers are never shown or charged it online
+   * (DECISIONS 2026-11-16).
+   */
   deliveryTotalMinor: number;
+  /** Goods total = `subtotalMinor`; never includes delivery. */
   totalMinor: number;
+  /** Items due now (full price, or the pre-order deposit). No delivery. */
   amountDueNowMinor: number;
+  /** Remaining item balance for deposit pre-orders. No delivery. */
   amountDueLaterMinor: number;
 }
 
@@ -126,9 +135,13 @@ function latestArrival(items: ComputedItem[]): string | null {
 
 /**
  * Total an order for a chosen delivery location. In-stock and pre-order
- * items form separate shipments, each charged the location's fee once —
+ * items form separate shipments, each carrying the location's fee once —
  * unless **every** ring in that shipment is free-delivery for the location
  * (Phase 2 decision).
+ *
+ * The fee is **recorded, never charged online**: customers pay for the items
+ * only (DECISIONS 2026-11-16). `deliveryTotalMinor` remains available to the
+ * back office; `totalMinor` and both due amounts are goods only.
  */
 export function computeOrderTotals(
   items: CheckoutItemInput[],
@@ -167,9 +180,10 @@ export function computeOrderTotals(
     (s, sh) => s + sh.deliveryFeeMinor,
     0,
   );
-  const totalMinor = subtotalMinor + deliveryTotalMinor;
-  const amountDueNowMinor =
-    computed.reduce((s, i) => s + i.dueNowMinor, 0) + deliveryTotalMinor;
+  // Items only. Delivery is recorded above for the store owner but is not
+  // part of what the customer is charged online (DECISIONS 2026-11-16).
+  const totalMinor = subtotalMinor;
+  const amountDueNowMinor = computed.reduce((s, i) => s + i.dueNowMinor, 0);
   const amountDueLaterMinor = computed.reduce((s, i) => s + i.dueLaterMinor, 0);
 
   return {

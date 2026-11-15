@@ -499,3 +499,20 @@ sign in with Google.
 | — | Alternative rejected | Removing `AUTH_URL` so Auth.js follows the request host. It would depend on every hostname being registered in the Google OAuth client, and would leave the storefront reachable on several hostnames (duplicate SEO, split sessions). |
 | — | Verification | Unit tests for the redirect rules; `next build` reports the proxy; `next start` with `AUTH_URL=https://sapphirestones.online` returns 308 to the canonical URL for www/helicarrier page loads and 200 for API calls and canonical-host page loads. |
 
+
+## 2026-11-16 — Items-only checkout, accurate emails, WhatsApp support
+
+The client asked that the order email match what the gateway actually charged,
+that delivery no longer be collected at checkout (details still required), and
+that customers be able to reach support on WhatsApp.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Is delivery collected at checkout? | **No.** Customers pay for the rings only (full price, or the pre-order deposit). The item balance for deposits stays due later. |
+| — | How is the delivery fee shown to customers? | **Not at all.** No fee appears in checkout, the order page, emails or the product delivery estimator. The admin-defined fee is still computed and stored on the order for the back office only. |
+| — | Do pre-order deposits stay? | **Yes.** The deposit is charged now and the remaining item balance later; only delivery was removed from the amount collected. |
+| — | What amount must the email show? | **The exact gateway charge:** `paymentAmountMinor` in `paymentCurrency`, as recorded at initialize. The email never recomputes the paid figure from `totalMinor`. |
+| — | Why were emails wrong before? | Order `*Minor` fields are stored in the store's **base** currency, but the email printed them with the display currency's symbol and never applied the frozen exchange rate. Emails now convert with `priceIn(base → display @ order.exchangeRate)` before formatting. |
+| — | Which WhatsApp number and message? | **+234 907 546 6201** (`wa.me/2349075466201`), prefilled "Hi Sapphire Stones, I'd like help with my order." |
+| — | Where does WhatsApp appear? | An inline "Chat with support on WhatsApp" link in checkout (before payment) and on the order-confirmation page, plus a right-side floating button on every storefront page. |
+| — | Where is the number configured? | `NEXT_PUBLIC_WHATSAPP_NUMBER` (local `0907…` or international `+234…`; a leading 0 is converted to 234). It is public by design. Unset hides both links rather than rendering a dead link. |

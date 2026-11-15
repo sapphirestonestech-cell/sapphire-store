@@ -50,7 +50,7 @@ export default async function AccountAddressesPage() {
         Addresses
       </h2>
       <p className="mt-1 mb-6 text-body text-muted">
-        Save the places you deliver to most. Delivery fees are set per location.
+        Save the places you deliver to most, so checkout is quicker next time.
       </p>
       <AddressesManager
         initialAddresses={addresses}

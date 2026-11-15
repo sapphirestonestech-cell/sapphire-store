@@ -288,19 +288,19 @@ export default async function AdminOrderDetailPage({
             <SectionHeading id="totals-heading">Totals</SectionHeading>
             <dl className="space-y-2 rounded-md bg-card p-5 text-body shadow-card">
               <div className="flex justify-between">
-                <dt className="text-muted">Subtotal</dt>
+                <dt className="text-muted">Items subtotal</dt>
                 <dd className="tabular">{orderMoney(order.subtotalMinor, order)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted">Delivery</dt>
+                <dt className="text-muted">Delivery fee (not charged online)</dt>
                 <dd className="tabular">
                   {order.deliveryTotalMinor === 0
-                    ? "Free"
+                    ? "None"
                     : orderMoney(order.deliveryTotalMinor, order)}
                 </dd>
               </div>
               <div className="flex justify-between border-t border-border-subtle pt-2 text-body-lg">
-                <dt className="font-medium">Total</dt>
+                <dt className="font-medium">Items total</dt>
                 <dd className="font-semibold tabular">
                   {orderMoney(order.totalMinor, order)}
                 </dd>

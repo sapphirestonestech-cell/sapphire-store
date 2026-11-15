@@ -159,7 +159,7 @@ export default async function AdminPaymentDetailPage({
               </p>
               <dl className="mt-4 space-y-2 border-t border-border-subtle pt-4 text-body">
                 <div className="flex justify-between">
-                  <dt className="text-muted">Order total</dt>
+                  <dt className="text-muted">Items total</dt>
                   <dd className="tabular">{orderMoney(order.totalMinor, order)}</dd>
                 </div>
                 <div className="flex justify-between">
