@@ -484,3 +484,18 @@ from that list, and (3) receive an email whenever a customer buys.
 | — | When is the alert sent? | **Only after server-side payment verification** (same once-only point as the customer confirmation email). Test-mode payments remain silent, matching the existing rule. |
 | — | Where is the order link in the email? | Deep link to `/admin/orders/<id>` using `APP_URL`, the same public-origin rule as the payment redirects. |
 
+## 2026-11-15 — One canonical origin for the whole site (Google sign-in fix)
+
+Production logs showed `[auth][error] InvalidCheck: pkceCodeVerifier value
+could not be parsed` on `/api/auth/callback/google`, so customers could not
+sign in with Google.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Cause | Auth.js pins every OAuth URL to `AUTH_URL` (`https://sapphirestones.online`) and stores the PKCE verifier in a **host-only** cookie on whichever host started the sign-in. Visitors on `www.sapphirestones.online` or `sapphirestone.on.helicarrier.xyz` had the cookie set on that host, but Google returned them to the `AUTH_URL` host, where the cookie does not exist. Auth.js wraps "cookie was missing" into exactly that error. |
+| — | Fix | **All page navigations are redirected (308) to the canonical origin**, taken from `AUTH_URL` then `APP_URL`. Cookie, OAuth redirect URI and page host are then always the same host. |
+| — | Scope | Only GET/HEAD requests that accept `text/html` move. API calls, gateway webhooks and platform probes (which send `Accept: */*`) are served on whatever host they were sent to. |
+| — | Safety | Redirects only apply when the canonical origin is `https` with a dotted host, so local dev (`http://localhost:3000`) and LAN/tunnel addresses are never bounced. |
+| — | Alternative rejected | Removing `AUTH_URL` so Auth.js follows the request host. It would depend on every hostname being registered in the Google OAuth client, and would leave the storefront reachable on several hostnames (duplicate SEO, split sessions). |
+| — | Verification | Unit tests for the redirect rules; `next build` reports the proxy; `next start` with `AUTH_URL=https://sapphirestones.online` returns 308 to the canonical URL for www/helicarrier page loads and 200 for API calls and canonical-host page loads. |
+

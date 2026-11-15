@@ -1439,3 +1439,41 @@ clean on all three files.
   `/api/admin/customers` 401 unauthenticated, and `/admin/customers` carries the
   same server redirect to `/admin/login` as the existing Orders page.
 
+---
+
+## 2026-11-15 — Google sign-in fix: one canonical origin
+
+### Fixed
+
+- **Google sign-in failing with `InvalidCheck: pkceCodeVerifier value could not
+  be parsed`.** Auth.js builds the OAuth callback from `AUTH_URL`
+  (`https://sapphirestones.online`) but stores the PKCE verifier in a host-only
+  cookie on whichever host started the sign-in. Visitors on
+  `www.sapphirestones.online` or `sapphirestone.on.helicarrier.xyz` were sent
+  back to the canonical host without that cookie, so the check failed and the
+  login was refused.
+- Added `src/proxy.ts` + `src/lib/canonical-host.ts`: page navigations (GET/HEAD
+  with `Accept: text/html`) on any other host now 308 to the canonical origin,
+  keeping page host, cookie host and OAuth redirect URI identical. API calls,
+  gateway webhooks and platform probes are untouched, and redirects only apply
+  to an `https` canonical origin, so local dev is unaffected.
+- Tests: `src/lib/canonical-host.test.ts` (9 cases: canonical selection,
+  forwarded-host parsing, www/helicarrier redirects, API/webhook passthrough,
+  localhost and canonical-host no-ops).
+
+### Verified
+
+- `npm run typecheck` clean, `npm test` 106/106, `npm run build` succeeds and
+  lists `ƒ Proxy (Middleware)`.
+- `next start` with the production `AUTH_URL`: www and helicarrier page loads →
+  308 to `https://sapphirestones.online/...`; `/api/auth/providers` on www → 200
+  (not redirected); canonical-host page load → 200.
+
+### Noted
+
+- Production logs also repeat `ENOENT: mkdir '/app/.next/cache'` because the
+  Helicarrier service runs with a read-only root filesystem. Image optimisation
+  still serves images but cannot cache them, and each miss logs an unhandled
+  rejection. Not the login cause; fixing it needs a service config change
+  (writable rootfs) or self-hosted image CDN settings — raised for a decision.
+
