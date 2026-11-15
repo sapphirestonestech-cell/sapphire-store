@@ -468,3 +468,19 @@ failing on Helicarrier. Root causes, all from the email-marketing WIP commit
 | — | Cause 3 | With types fixed, the build's static generation failed on `/unsubscribe`: the page awaits `searchParams` (URL token) at top level, so Next.js 16 refuses to prerender it ("uncached or runtime data during prerendering"). |
 | — | Fix 3 | `export const instant = false` on the unsubscribe page — the codebase's established convention for inherently dynamic pages (checkout/return, sign-in, account, admin panel). The page now renders on demand (ƒ), correct for a token page. |
 | — | Verification | `npm run build` passes fully: compiled successfully, all 71 routes generated. `tsc --noEmit` and `eslint` clean on all three changed files. |
+
+## 2026-11-15 — Customer back-office access and new-order alerts
+
+The client asked to (1) see the list of users, (2) grant or revoke admin access
+from that list, and (3) receive an email whenever a customer buys.
+
+| # | Question | Decision |
+|---|----------|----------|
+| — | Which "users" does the list show? | **Registered storefront customers only.** Guest checkouts have no account to grant access to, so they stay out of the list. |
+| — | How does a promoted customer sign in to the back office? | **Reuse their storefront login.** Granting creates a linked `AdminUser` row with the customer's email and current password hash; the same password works at `/admin/login` and Google-only accounts use Continue with Google. No second password. |
+| — | What happens on revoke? | **Delete the linked admin row only.** The customer account, orders and addresses are untouched. The existing guards still apply: no self-revocation and never the last admin. |
+| — | What if the customer changes their storefront password? | The linked admin row is updated after a password reset, so the two never drift apart. |
+| — | Who receives new-order email? | **Every admin account gets a copy.** This includes customers promoted from the Customers page. |
+| — | When is the alert sent? | **Only after server-side payment verification** (same once-only point as the customer confirmation email). Test-mode payments remain silent, matching the existing rule. |
+| — | Where is the order link in the email? | Deep link to `/admin/orders/<id>` using `APP_URL`, the same public-origin rule as the payment redirects. |
+

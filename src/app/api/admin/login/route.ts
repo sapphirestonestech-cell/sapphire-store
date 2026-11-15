@@ -45,6 +45,19 @@ export async function POST(request: Request) {
   try {
     await connectDb();
     const user = await AdminUserModel.findOne({ email }).lean();
+
+    // A promoted Google-only customer has no password to compare. Say so
+    // rather than a bare "incorrect" so they take the Google route.
+    if (user && !user.passwordHash) {
+      return NextResponse.json(
+        {
+          error:
+            "This account signs in with Google. Choose Continue with Google.",
+        },
+        { status: 401 },
+      );
+    }
+
     const hash = user?.passwordHash;
     const ok =
       hash != null &&

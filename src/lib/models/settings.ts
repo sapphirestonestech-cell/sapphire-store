@@ -35,12 +35,19 @@ export const ExchangeRateModel: Model<ExchangeRateDoc> =
   (mongoose.models.ExchangeRate as Model<ExchangeRateDoc>) ??
   mongoose.model<ExchangeRateDoc>("ExchangeRate", ExchangeRateSchema);
 
-/** Admin user — §6.1, §12.1. Password hash only; never the password. */
+/**
+ * Admin user — §6.1, §12.1. Password hash only; never the password.
+ *
+ * `passwordHash` is optional because a storefront customer promoted to admin
+ * may have a Google-only account. `customerId` links a promoted customer back
+ * to the storefront identity so their password stays in sync.
+ */
 export interface AdminUserDoc extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   role: "admin" | "staff";
+  customerId?: string;
   lastLoginAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
@@ -49,8 +56,9 @@ export interface AdminUserDoc extends mongoose.Document {
 const AdminUserSchema = new Schema<AdminUserDoc>(
   {
     email: { type: String, required: true, unique: true, lowercase: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String },
     role: { type: String, enum: ["admin", "staff"], default: "admin" },
+    customerId: { type: String, index: true },
     lastLoginAt: Date,
   },
   { timestamps: true },

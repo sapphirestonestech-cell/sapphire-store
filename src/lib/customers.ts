@@ -6,6 +6,7 @@ import {
   PasswordResetTokenModel,
   type CustomerDoc,
 } from "@/lib/models/customer";
+import { syncLinkedAdminPassword } from "@/lib/admin/customer-access";
 import { sendPasswordResetEmail } from "@/lib/email";
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -154,6 +155,8 @@ export async function resetPassword(input: {
     { _id: record.customerId },
     { $set: { passwordHash } },
   );
+  // A promoted customer's back-office row mirrors the storefront password.
+  await syncLinkedAdminPassword(String(record.customerId), passwordHash);
   record.usedAt = new Date();
   await record.save();
   // Drop any other outstanding tokens for this account.

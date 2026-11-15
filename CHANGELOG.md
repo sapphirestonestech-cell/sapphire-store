@@ -1383,3 +1383,52 @@ clean on all three files.
   an earlier attempt died to a transient builder-connection EOF, retried
   clean). Live HTML verified: one-line hero lockup, mobile scrim, and
   section spacing all serving from sapphirestone.on.helicarrier.xyz.
+
+---
+
+## 2026-11-15 — Customers admin page and new-order alerts
+
+### Added
+
+- **Admin → Customers** (`/admin/customers`): every registered storefront
+  account with name, email, phone, join date, last sign-in, order count and
+  back-office status. Search by name, email or phone; desktop table and mobile
+  cards; loading, empty, no-match and error states.
+- **Grant / revoke back-office access** from the Customers page. Granting
+  creates a linked `AdminUser` row that reuses the customer's email and
+  password hash, so their existing storefront password (or Google sign-in)
+  opens `/admin/login`. Revocation deletes only that linked row. The existing
+  guards remain: no self-revocation and never the last admin.
+- **Password mirroring** — when a promoted customer resets their storefront
+  password, the linked admin row is updated so the two stay in sync.
+- **New paid-order alert email** — after a payment is verified, every admin
+  account receives an email with the customer, items, total, gateway reference,
+  delivery destination and a deep link to the order in the back office.
+  Test-mode payments remain silent, matching the existing fulfilment rule.
+- `GET /api/admin/customers` and `PATCH /api/admin/customers/:id`.
+- **Customers** entry in the admin sidebar.
+
+### Changed
+
+- `AdminUser.passwordHash` is now optional (Google-only promoted customers have
+  no password) and `AdminUser` gained an optional `customerId` link.
+- Admin login explains the Google route when a promoted account has no
+  password, instead of a generic incorrect-password error.
+
+### Verified
+
+- `npm run typecheck` clean, `npm test` 97/97, `npx eslint src` clean apart
+  from the pre-existing `email/queue.ts` warning.
+- Manual check: sign in to `/admin`, open **Customers**, search, grant access
+  to a real customer, sign in to `/admin/login` with that customer's email and
+  storefront password, revoke from the Customers page, confirm the back office
+  session is refused on the next request, and confirm a live paid order sends
+  one alert per admin.
+
+### Not done / noted
+
+- Guest buyers (no account) are not listed, per the decision above; they still
+  receive order confirmations.
+- New-order alerts are **skipped in test mode**, so use a live-mode order (or a
+  direct unit check) when verifying the email.
+

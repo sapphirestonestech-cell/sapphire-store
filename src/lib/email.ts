@@ -103,6 +103,15 @@ export async function sendWelcomeEmail(
   }
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendPasswordResetEmail(
   email: string,
   resetUrl: string,
@@ -201,6 +210,126 @@ export async function sendOrderConfirmationEmail(
     console.error(
       `[email] order confirmation to ${email} failed: ${err instanceof Error ? err.message : err}`,
     );
+  }
+}
+
+/**
+ * New paid-order alert for the store admins — ProductReq.md §11.3. Sent after
+ * a payment is verified, once per admin. Delivery failure is logged per
+ * recipient and never thrown: fulfilment must not depend on email.
+ */
+export async function sendAdminNewOrderEmail(
+  recipients: string[],
+  order: {
+    id: string;
+    orderNumber: string;
+    customer: { name: string; email: string; phone: string };
+    currency: "USD" | "NGN";
+    items: {
+      name: string;
+      sizeLabel: string;
+      quantity: number;
+      availability: "in_stock" | "pre_order";
+    }[];
+    location: { cityArea: string; region?: string; country: string };
+    totalMinor: number;
+    amountDueLaterMinor: number;
+    paymentGateway?: "paystack" | "bachs";
+    paymentReference?: string;
+    createdAt: Date;
+  },
+): Promise<void> {
+  if (recipients.length === 0) return;
+
+  const fmtMinor = (minor: number): string => {
+    const symbol = order.currency === "NGN" ? "₦" : "$";
+    const major = minor / 100;
+    if (order.currency === "NGN") {
+      return `${symbol}${major.toLocaleString("en-NG", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    }
+    return `${symbol}${major.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const base = (process.env.APP_URL ?? "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
+  const orderUrl = `${base}/admin/orders/${order.id}`;
+  const gateway = order.paymentGateway
+    ? order.paymentGateway === "paystack"
+      ? "Paystack"
+      : "BACHS"
+    : "Gateway";
+  const dateStr = order.createdAt.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const itemRows = order.items
+    .map(
+      (item) =>
+        `<li style="padding:8px 0;border-bottom:1px solid #EEE6DA;">
+          <span style="font-weight:600;">${escapeHtml(item.name)}</span>
+          <span style="color:#8A8178;"> · Size ${escapeHtml(item.sizeLabel)} · Qty ${item.quantity}${item.availability === "pre_order" ? " · Pre-order" : ""}</span>
+        </li>`,
+    )
+    .join("");
+
+  const textLines = order.items
+    .map(
+      (item) =>
+        `  ${item.name} — Size ${item.sizeLabel} × ${item.quantity}${item.availability === "pre_order" ? " (Pre-order)" : ""}`,
+    )
+    .join("\n");
+
+  const dueLater =
+    order.amountDueLaterMinor > 0
+      ? `\nDue later: ${fmtMinor(order.amountDueLaterMinor)}`
+      : "";
+  const reference = order.paymentReference
+    ? `\nReference: ${order.paymentReference}`
+    : "";
+
+  const text = `New paid order ${order.orderNumber}.\n\nCustomer: ${order.customer.name}\nEmail: ${order.customer.email}\nPhone: ${order.customer.phone}\n\nItems:\n${textLines}\n\nTotal: ${fmtMinor(order.totalMinor)}${dueLater}\nPaid with: ${gateway}${reference}\nDelivery to: ${order.location.cityArea}${order.location.region ? `, ${order.location.region}` : ""}, ${order.location.country}\nPlaced: ${dateStr}\n\nOpen the order: ${orderUrl}`;
+
+  const dueLaterHtml =
+    order.amountDueLaterMinor > 0
+      ? `<p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Due later: ${fmtMinor(order.amountDueLaterMinor)}</p>`
+      : "";
+
+  const html = shell(
+    `New paid order ${escapeHtml(order.orderNumber)}`,
+    `<p style="font-size:15px;line-height:1.6;margin:0 0 20px;">A customer has paid. Prepare the order.</p>
+     <p style="font-size:15px;line-height:1.6;margin:0 0 4px;"><strong>${escapeHtml(order.customer.name)}</strong></p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 2px;">${escapeHtml(order.customer.email)}</p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">${escapeHtml(order.customer.phone)}</p>
+     <ul style="list-style:none;padding:0;margin:0 0 20px;">${itemRows}</ul>
+     <p style="font-size:16px;font-weight:600;margin:0 0 4px;">Total: ${fmtMinor(order.totalMinor)}</p>
+     ${dueLaterHtml}
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Paid with ${gateway}${order.paymentReference ? ` · ${escapeHtml(order.paymentReference)}` : ""}</p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 4px;">Delivery to: ${escapeHtml(order.location.cityArea)}${order.location.region ? `, ${escapeHtml(order.location.region)}` : ""}, ${escapeHtml(order.location.country)}</p>
+     <p style="font-size:13px;color:#8A8178;margin:0 0 20px;">Order ${escapeHtml(order.orderNumber)} · ${dateStr}</p>
+     <a href="${orderUrl}" style="display:inline-block;background:#C9A24B;color:#211D19;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:999px;">Open in back office</a>
+     <p style="font-size:13px;color:#8A8178;line-height:1.6;margin:20px 0 0;">${TAGLINE}</p>`,
+  );
+
+  const subject = `New paid order ${order.orderNumber} — ${BRAND_NAME}`;
+
+  for (const email of recipients) {
+    try {
+      await send(
+        email,
+        subject,
+        text,
+        html,
+        `new-order alert ${order.orderNumber}`,
+      );
+    } catch (err) {
+      console.error(
+        `[email] new-order alert to ${email} failed: ${err instanceof Error ? err.message : err}`,
+      );
+    }
   }
 }
 

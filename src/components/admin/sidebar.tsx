@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/products", label: "Products", icon: "products" },
   { href: "/admin/categories", label: "Categories", icon: "categories" },
   { href: "/admin/orders", label: "Orders", icon: "orders" },
+  { href: "/admin/customers", label: "Customers", icon: "customers" },
   { href: "/admin/payments", label: "Payments", icon: "payments" },
   { href: "/admin/delivery", label: "Delivery", icon: "delivery" },
   { href: "/admin/settings", label: "Settings", icon: "settings" },
@@ -63,6 +64,17 @@ function NavIcon({ name }: { name: string }) {
         <svg {...common}>
           <rect x="3" y="6" width="18" height="12" rx="2" />
           <path d="M3 10h18M7 15h3" strokeLinecap="round" />
+        </svg>
+      );
+    case "customers":
+      return (
+        <svg {...common}>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3.5 20a5.5 5.5 0 0111 0" strokeLinecap="round" />
+          <path
+            d="M16 5.5a3 3 0 010 5.8M17.5 14.5a5.5 5.5 0 013 5"
+            strokeLinecap="round"
+          />
         </svg>
       );
     case "delivery":

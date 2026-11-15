@@ -15,6 +15,8 @@ export interface CustomerDoc extends mongoose.Document {
   image?: string;
   preferredCurrency: Currency;
   lastLoginAt?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const CustomerSchema = new Schema<CustomerDoc>(

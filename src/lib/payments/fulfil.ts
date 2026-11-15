@@ -1,6 +1,10 @@
 import type { OrderDoc } from "@/lib/models/order";
 import { ProductModel } from "@/lib/models/product";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { listAdminNotificationEmails } from "@/lib/admin/notifications";
+import {
+  sendAdminNewOrderEmail,
+  sendOrderConfirmationEmail,
+} from "@/lib/email";
 
 /**
  * Convert a BACHS decimal-money string ("45200.00") to whole minor units.
@@ -65,4 +69,21 @@ export async function fulfilPaidOrder(
   }
 
   await sendOrderConfirmationEmail(order.customer.email, order).catch(() => {});
+
+  const admins = await listAdminNotificationEmails();
+  if (admins.length > 0) {
+    await sendAdminNewOrderEmail(admins, {
+      id: String(order._id),
+      orderNumber: order.orderNumber,
+      customer: order.customer,
+      currency: order.currency,
+      items: order.items,
+      location: order.location,
+      totalMinor: order.totalMinor,
+      amountDueLaterMinor: order.amountDueLaterMinor,
+      paymentGateway: order.paymentGateway,
+      paymentReference: order.paymentReference,
+      createdAt: order.createdAt,
+    }).catch(() => {});
+  }
 }
