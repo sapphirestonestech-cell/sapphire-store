@@ -1432,3 +1432,10 @@ clean on all three files.
 - New-order alerts are **skipped in test mode**, so use a live-mode order (or a
   direct unit check) when verifying the email.
 
+### Deployed
+
+- Pushed to `main` and `devbranch` and deployed on Helicarrier. Live checks on
+  sapphirestone.on.helicarrier.xyz: home 200, `/admin/login` 200,
+  `/api/admin/customers` 401 unauthenticated, and `/admin/customers` carries the
+  same server redirect to `/admin/login` as the existing Orders page.
+
