@@ -47,24 +47,32 @@ export async function fulfilPaidOrder(
   await order.save();
 
   // Test-mode payments exist to exercise the flow, not to sell rings: never
-  // touch stock and never email the customer (DECISIONS 2026-10-29).
-  if (isTest) return;
+  // touch stock and, by default, never email (DECISIONS 2026-10-29).
+  //
+  // `EMAIL_TEST_PAYMENTS=true` is a temporary diagnostic switch: it lets a
+  // test payment send the real customer/admin emails so the message content
+  // can be verified without taking money. Stock is still never touched. Leave
+  // it unset in normal operation.
+  const emailTestPayments = process.env.EMAIL_TEST_PAYMENTS === "true";
+  if (isTest && !emailTestPayments) return;
 
-  for (const item of order.items) {
-    if (item.availability !== "in_stock") continue;
-    try {
-      // $gte guard so a racing checkout can never drive stock negative;
-      // shortfalls stay for admin reconciliation instead of going below zero.
-      await ProductModel.updateOne(
-        {
-          _id: item.productId,
-          "sizes.sizeLabel": item.sizeLabel,
-          "sizes.stockQuantity": { $gte: item.quantity },
-        },
-        { $inc: { "sizes.$.stockQuantity": -Math.max(0, item.quantity) } },
-      );
-    } catch {
-      // Stock reconciliation is an admin concern; never block fulfilment.
+  if (!isTest) {
+    for (const item of order.items) {
+      if (item.availability !== "in_stock") continue;
+      try {
+        // $gte guard so a racing checkout can never drive stock negative;
+        // shortfalls stay for admin reconciliation instead of going below zero.
+        await ProductModel.updateOne(
+          {
+            _id: item.productId,
+            "sizes.sizeLabel": item.sizeLabel,
+            "sizes.stockQuantity": { $gte: item.quantity },
+          },
+          { $inc: { "sizes.$.stockQuantity": -Math.max(0, item.quantity) } },
+        );
+      } catch {
+        // Stock reconciliation is an admin concern; never block fulfilment.
+      }
     }
   }
 

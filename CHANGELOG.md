@@ -1514,3 +1514,9 @@ clean on all three files.
   formatting tests, new "never adds delivery" regression test); `npx eslint src`
   clean apart from the pre-existing `email/queue.ts` warning; `npm run build`
   succeeds.
+
+### Diagnostic (temporary)
+
+- Added `EMAIL_TEST_PAYMENTS=true` to let a test-mode payment send the real
+  order emails so the content can be checked without money; stock is still
+  never touched. Unset in normal operation, and removed after the check.
